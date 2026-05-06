@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>테리스 주간평가</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f4f1;color:#1a1a1a;min-height:100vh}
+
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ── 메인 화면 ── */
+.main-header{background:#1a7350;padding:3rem 1.5rem 2.5rem;text-align:center;color:#fff}
+.main-header .academy{font-size:13px;opacity:.7;letter-spacing:.08em;margin-bottom:10px}
+.main-header h1{font-size:32px;font-weight:700;letter-spacing:-.5px;line-height:1.2}
+.main-header .subtitle{font-size:14px;opacity:.7;margin-top:10px}
+
+.main-body{flex:1;padding:1.5rem 1rem 2rem;max-width:500px;margin:0 auto;width:100%}
+
+.cat-card{display:flex;align-items:center;gap:1rem;background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:14px;cursor:pointer;transition:all .18s;text-decoration:none;color:#1a1a1a}
+.cat-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,115,80,.13);border-color:#1a7350}
+.cat-card:active{transform:scale(.98)}
+.cat-num{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0}
+.n1{background:#1a7350}
+.n2{background:#2563eb}
+.n3{background:#d97706}
+.cat-info{flex:1}
+.cat-name{font-size:18px;font-weight:700;margin-bottom:3px}
+.cat-desc{font-size:13px;color:#6b7280}
+.cat-arrow{font-size:20px;color:#d1d5db;transition:transform .18s}
+.cat-card:hover .cat-arrow{color:#1a7350;transform:translateX(3px)}
+
+.main-footer{text-align:center;padding:1.5rem;font-size:12px;color:#9ca3af}
+
+/* ── 목록 화면 ── */
+.list-header{padding:1rem 1.25rem;display:flex;align-items:center;gap:12px;background:#fff;border-bottom:1px solid rgba(0,0,0,.07);position:sticky;top:0;z-index:10}
+.back-btn{width:36px;height:36px;border-radius:10px;background:#f3f4f6;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.back-btn:hover{background:#e5e7eb}
+.list-header-info{}
+.list-header-title{font-size:17px;font-weight:700}
+.list-header-sub{font-size:12px;color:#6b7280;margin-top:1px}
+
+.list-body{flex:1;padding:1rem;max-width:600px;margin:0 auto;width:100%}
+
+.test-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:14px;padding:1rem 1.25rem;margin-bottom:10px;text-decoration:none;color:#1a1a1a;transition:all .15s}
+.test-item:hover{border-color:#1a7350;box-shadow:0 3px 12px rgba(26,115,80,.1)}
+.test-item:active{transform:scale(.99)}
+.test-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.dot-vocab{background:#1a7350}
+.dot-grammar{background:#2563eb}
+.dot-reading{background:#d97706}
+.test-info{flex:1}
+.test-title{font-size:15px;font-weight:600;margin-bottom:3px;line-height:1.4}
+.test-meta{font-size:12px;color:#6b7280}
+.test-go{font-size:18px;color:#d1d5db}
+.test-item:hover .test-go{color:#1a7350}
+
+.empty-box{background:#fff;border:1.5px dashed #d1d5db;border-radius:14px;padding:2.5rem 1rem;text-align:center;color:#9ca3af}
+.empty-box .ei{font-size:32px;margin-bottom:10px}
+.empty-box p{font-size:14px}
+
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:6px}
+.badge-v{background:#e1f5ee;color:#0f6e56}
+.badge-g{background:#dbeafe;color:#1d4ed8}
+.badge-r{background:#fef3c7;color:#92400e}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     📋 테스트 목록 설정
+     새 테스트 추가할 때 여기만 수정!
+     {title:"제목", file:"파일명.html", info:"문항수 등 설명"}
+════════════════════════════ -->
+<script>
+const TESTS = {
+  vocab: [
+    // 예시: {title:"수능만만 기본독해 1회", file:"vocab_01.html", info:"50문항 · 영영풀이"},
+  ],
+  grammar: [
+    {title:"UNIT 01 — 주어와 동사의 수일치", file:"unit01.html", info:"25문항 · 5지선다"},
+    // 예시: {title:"UNIT 02 — 명사/대명사의 일치", file:"unit02.html", info:"25문항 · 5지선다"},
+  ],
+  reading: [
+    // 예시: {title:"주니어 리딩튜터 1회", file:"reading_01.html", info:"10문항 · 객관식"},
+  ]
+};
+</script>
+
+<!-- ── 메인 화면 ───────────────── -->
+<div id="s-main" class="screen active">
+  <div class="main-header">
+    <div class="academy">Terry's English Academy</div>
+    <h1>테리스<br>주간평가</h1>
+    <div class="subtitle">테스트 유형을 선택하세요</div>
+  </div>
+
+  <div class="main-body">
+    <div class="cat-card" onclick="openCat('vocab')">
+      <div class="cat-num n1">1</div>
+      <div class="cat-info">
+        <div class="cat-name">단어 테스트</div>
+        <div class="cat-desc" id="cnt-vocab">불러오는 중...</div>
+      </div>
+      <span class="cat-arrow">›</span>
+    </div>
+
+    <div class="cat-card" onclick="openCat('grammar')">
+      <div class="cat-num n2">2</div>
+      <div class="cat-info">
+        <div class="cat-name">문법 테스트</div>
+        <div class="cat-desc" id="cnt-grammar">불러오는 중...</div>
+      </div>
+      <span class="cat-arrow">›</span>
+    </div>
+
+    <div class="cat-card" onclick="openCat('reading')">
+      <div class="cat-num n3">3</div>
+      <div class="cat-info">
+        <div class="cat-name">리딩 테스트</div>
+        <div class="cat-desc" id="cnt-reading">불러오는 중...</div>
+      </div>
+      <span class="cat-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="main-footer">© 테리스 영어 · 동탄남광장 엠베스트</div>
+</div>
+
+<!-- ── 목록 화면 ───────────────── -->
+<div id="s-list" class="screen">
+  <div class="list-header">
+    <button class="back-btn" onclick="goBack()">‹</button>
+    <div class="list-header-info">
+      <div class="list-header-title" id="list-title"></div>
+      <div class="list-header-sub" id="list-sub"></div>
+    </div>
+  </div>
+  <div class="list-body" id="list-body"></div>
+</div>
+
+<script>
+const CAT_INFO = {
+  vocab:   {name:"단어 테스트",   badge:"badge-v", dot:"dot-vocab",   color:"#1a7350"},
+  grammar: {name:"문법 테스트",   badge:"badge-g", dot:"dot-grammar", color:"#2563eb"},
+  reading: {name:"리딩 테스트",   badge:"badge-r", dot:"dot-reading", color:"#d97706"},
+};
+
+// 카운트 초기화
+function initCounts(){
+  ['vocab','grammar','reading'].forEach(k=>{
+    const n = TESTS[k].length;
+    document.getElementById('cnt-'+k).textContent = n>0 ? `${n}개 테스트 등록됨` : '등록된 테스트 없음';
+  });
+}
+initCounts();
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function openCat(cat){
+  const info = CAT_INFO[cat];
+  const tests = TESTS[cat];
+  document.getElementById('list-title').textContent = info.name;
+  document.getElementById('list-sub').textContent = tests.length>0 ? `${tests.length}개 테스트` : '등록된 테스트 없음';
+
+  const body = document.getElementById('list-body');
+  if(tests.length === 0){
+    body.innerHTML = `<div class="empty-box"><div class="ei">📭</div><p>아직 등록된 테스트가 없어요</p></div>`;
+  } else {
+    body.innerHTML = tests.map(t=>`
+      <a href="${t.file}" class="test-item">
+        <div class="test-dot ${info.dot}"></div>
+        <div class="test-info">
+          <div class="test-title">${t.title}</div>
+          <div class="test-meta">${t.info}</div>
+        </div>
+        <span class="test-go">›</span>
+      </a>
+    `).join('');
+  }
+  show('s-list');
+}
+
+function goBack(){ show('s-main'); }
+</script>
+</body>
+</html>
