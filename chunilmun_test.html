@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>천일문 중등 GRAMMAR·WRITING Level 2 테스트</title>
+<style>
+:root{--purple:#7c3aed;--pl:#f3e8ff;--pd:#5b21b6;--green:#1a7350;--gl:#e1f5ee;--gd:#0f6e56;--red:#a32d2d;--rl:#faece7;--blue:#2563eb;--bl:#dbeafe;--bg:#f4f4f8;--card:#fff;--txt:#1a1a1a;--muted:#6b7280;--border:rgba(0,0,0,.1);--r:12px;--rs:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding:1rem}
+.wrap{max-width:700px;margin:0 auto}
+.screen{display:none}.screen.active{display:block}
+
+.hdr{background:var(--purple);color:#fff;border-radius:var(--r);padding:1.25rem 1.5rem;margin-bottom:1rem}
+.hdr-sub{font-size:12px;opacity:.75;margin-bottom:3px}
+.hdr-title{font-size:20px;font-weight:700}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:.75rem}
+
+/* Chapter list */
+.ch-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:10px;cursor:pointer;transition:all .18s}
+.ch-item:hover{border-color:var(--purple);box-shadow:0 4px 14px rgba(124,58,237,.12);transform:translateY(-2px)}
+.ch-num{width:44px;height:44px;border-radius:12px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0}
+.ch-info{flex:1}
+.ch-title{font-size:15px;font-weight:700;margin-bottom:2px}
+.ch-sub{font-size:12px;color:var(--muted)}
+.ch-arrow{font-size:20px;color:#d1d5db}
+
+label{font-size:14px;font-weight:500;display:block;margin-bottom:6px}
+input[type=text],input[type=password]{width:100%;padding:11px 14px;font-size:15px;border:1px solid var(--border);border-radius:var(--rs);background:#fff;color:var(--txt);margin-bottom:14px}
+input:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+
+.btn{display:block;width:100%;padding:12px;font-size:15px;font-weight:600;border-radius:var(--rs);border:none;cursor:pointer;transition:all .15s}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-purple:hover{background:var(--pd)}
+.btn-outline{background:#fff;color:var(--muted);border:1px solid var(--border);margin-top:8px;font-weight:500}
+.btn-outline:hover{background:#f9fafb}
+.btn-sm{padding:6px 13px;font-size:12px;width:auto;display:inline-block;border-radius:var(--rs);border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.info-box{background:var(--pl);border-radius:var(--rs);padding:.75rem;text-align:center}
+.info-n{font-size:20px;font-weight:700;color:var(--purple)}
+.info-l{font-size:11px;color:var(--pd);margin-top:2px}
+
+.prog-wrap{margin-bottom:1.25rem}
+.prog-bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin:5px 0 3px}
+.prog-fill{height:100%;background:var(--purple);border-radius:3px;transition:width .3s}
+.prog-fill.sa-fill{background:var(--blue)}
+.prog-info{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+
+.q-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+.badge-a{background:var(--pl);color:var(--pd)}
+.badge-b{background:var(--bl);color:#1d4ed8}
+.badge-c{background:#fef3c7;color:#92400e}
+.badge-sa{background:#fce7f3;color:#be185d}
+.q-point{font-size:11px;color:var(--muted);margin-bottom:8px}
+.q-pts{display:inline-block;font-size:11px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:20px;margin-left:6px}
+.q-text{font-size:15px;line-height:1.8;margin-bottom:1.25rem}
+.blank{display:inline-block;border-bottom:2.5px solid var(--purple);min-width:72px;text-align:center;color:var(--purple);font-weight:600;padding:0 4px}
+
+.choices{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.choice{text-align:left;padding:11px 14px;border:1px solid var(--border);border-radius:var(--rs);background:#fff;color:var(--txt);cursor:pointer;font-size:14px;line-height:1.6;transition:all .15s}
+.choice:hover{border-color:var(--purple);background:var(--pl)}
+.choice.sel{border-color:var(--purple);background:var(--pl);color:var(--pd);font-weight:500}
+
+.sa-input-wrap{margin-bottom:1.25rem}
+.sa-input-label{font-size:13px;color:var(--muted);margin-bottom:6px}
+.sa-input{width:100%;padding:12px 14px;font-size:15px;border:1.5px solid var(--border);border-radius:var(--rs);background:#fff;color:var(--txt)}
+.sa-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+
+.nav{display:flex;gap:8px}
+.nav-btn{flex:1;padding:11px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:#f9fafb;color:var(--muted);transition:all .15s}
+.nav-btn.primary{background:var(--purple);color:#fff;border-color:var(--purple)}
+.nav-btn:hover:not(:disabled){opacity:.85}
+.nav-btn:disabled{opacity:.35;cursor:not-allowed}
+
+.score-wrap{text-align:center;padding:1.5rem 0 1rem}
+.score-ring{width:130px;height:130px;border-radius:50%;background:var(--purple);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem;color:#fff}
+.score-num{font-size:42px;font-weight:700;line-height:1}
+.score-tot{font-size:14px;opacity:.75;margin-top:2px}
+.score-grade{font-size:22px;font-weight:700;color:var(--purple);margin-bottom:4px}
+.score-msg{font-size:13px;color:var(--muted)}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:.75rem 0}
+.stat{background:#f9fafb;border-radius:var(--rs);padding:.75rem;text-align:center;border:1px solid var(--border)}
+.stat-n{font-size:22px;font-weight:700;color:var(--purple)}
+.stat-n.red{color:var(--red)}
+.stat-n.blue{color:var(--blue)}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+
+.section-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:1.25rem 0 .5rem;padding-bottom:4px;border-bottom:1px solid #e5e7eb}
+.rv-item{display:flex;gap:10px;padding:12px;border-radius:var(--rs);border:1px solid transparent;margin-bottom:6px;font-size:13px;line-height:1.5;align-items:flex-start;cursor:pointer;transition:all .2s}
+.rv-item.ok{background:#f0fdf4;border-color:#bbf7d0}
+.rv-item.ng{background:#fef2f2;border-color:#fecaca}
+.rv-item:hover{opacity:.85}
+.rv-icon{font-size:15px;margin-top:1px;flex-shrink:0}
+.rv-body{flex:1}
+.rv-wrong{font-size:12px;color:var(--red);margin-top:3px}
+.detail-box{display:none;background:#fff;padding:12px;margin-top:10px;border-radius:var(--rs);border:1px solid var(--border);cursor:default;font-size:13px}
+.detail-box.active{display:block;animation:fadeIn .2s}
+.detail-q{line-height:1.7;margin-bottom:10px;color:var(--txt)}
+.detail-c{padding:7px 11px;border-radius:5px;border:1px solid var(--border);margin-bottom:5px;background:#f9fafb;color:var(--muted)}
+.detail-c.is-ans{border-color:#16a34a;background:#f0fdf4;color:#166534;font-weight:600}
+.detail-c.is-wrong{border-color:#fca5a5;background:#fef2f2;color:#991b1b;text-decoration:line-through;opacity:.8}
+.click-hint{font-size:11px;color:#9ca3af;font-weight:normal;margin-left:5px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+.adm-row-wrap{border-bottom:1px solid var(--border);padding:10px 0}
+.adm-row-wrap:last-child{border-bottom:none}
+.adm-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;cursor:pointer}
+.adm-details{display:none;background:#f9fafb;padding:12px;border-radius:var(--rs);margin-top:8px;border:1px solid var(--border)}
+.adm-details.active{display:block}
+.adm-wrong-item{padding:10px 8px;border-bottom:1px dashed #e5e7eb;font-size:13px;line-height:1.5;cursor:pointer;border-radius:5px;transition:background .2s}
+.adm-wrong-item:last-child{border-bottom:none}
+.adm-wrong-item:hover{background:#f0eeff}
+.adm-rank{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+.rank-s{background:var(--pl);color:var(--pd)}.rank-a{background:var(--bl);color:#1d4ed8}
+.rank-b{background:#fef3c7;color:#92400e}.rank-c{background:#fee2e2;color:#991b1b}
+.adm-name{font-weight:600;transition:color .2s}.adm-row:hover .adm-name{color:var(--purple)}
+.adm-date{font-size:11px;color:var(--muted);margin-top:2px}
+.adm-score{font-weight:700;color:var(--purple);font-size:15px;margin-right:8px}
+.empty{text-align:center;padding:2rem;color:var(--muted);font-size:14px}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem}
+.modal-box{background:#fff;border-radius:var(--r);padding:1.5rem;width:100%;max-width:340px;border:1px solid var(--border)}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:1rem}
+.modal-btns{display:flex;gap:8px;margin-top:1rem}
+.modal-btns button{flex:1;padding:10px;border-radius:var(--rs);font-size:14px;cursor:pointer;border:1px solid var(--border);background:#f9fafb;color:var(--txt)}
+.modal-btns button.ok{background:var(--purple);color:#fff;border-color:var(--purple);font-weight:600}
+.err-msg{font-size:12px;color:var(--red);margin-top:4px;min-height:16px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(124,58,237,.2);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sa-tag{background:#fce7f3;color:#be185d;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;margin-right:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ── 챕터 선택 ── -->
+<div id="s-chapters" class="screen active">
+  <div class="hdr">
+    <div class="hdr-sub">천일문 중등 GRAMMAR·WRITING Level 2</div>
+    <div class="hdr-title">챕터별 리뷰 테스트</div>
+  </div>
+  <div class="card" style="padding:1rem 1.25rem">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">각 챕터별로 문법 13문제 + 라이팅 12문제 = 25문제 · 100점</p>
+    <div id="ch-list"></div>
+  </div>
+  <div class="card" style="padding:1rem 1.25rem;margin-top:0">
+    <button class="btn btn-outline" style="margin-top:0" onclick="openAdminModal()">관리자 로그인</button>
+  </div>
+</div>
+
+<!-- ── 이름 입력 ── -->
+<div id="s-landing" class="screen">
+  <div class="hdr">
+    <div class="hdr-sub" id="land-sub"></div>
+    <div class="hdr-title" id="land-title"></div>
+  </div>
+  <div class="card">
+    <div class="info-grid">
+      <div class="info-box"><div class="info-n">25</div><div class="info-l">총 문항</div></div>
+      <div class="info-box"><div class="info-n">100</div><div class="info-l">총 배점</div></div>
+      <div class="info-box"><div class="info-n">4점</div><div class="info-l">문항당</div></div>
+    </div>
+    <div style="background:#f8fafb;border-radius:var(--rs);padding:.75rem 1rem;font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.7">📋 문법 13문항 (1~13번) + 라이팅 12문항 (14~25번)<br>객관식 20문항 + 주관식 5문항</div>
+    <label for="name-in">이름</label>
+    <input type="text" id="name-in" placeholder="예) 홍길동" autocomplete="off">
+    <button class="btn btn-purple" onclick="startQuiz()">테스트 시작 →</button>
+    <button class="btn btn-outline" onclick="show('s-chapters')">← 챕터 목록으로</button>
+  </div>
+</div>
+
+<!-- ── 퀴즈 ── -->
+<div id="s-quiz" class="screen">
+  <div class="hdr hdr-row">
+    <div>
+      <div class="hdr-sub" id="qz-name"></div>
+      <div class="hdr-title" style="font-size:16px" id="qz-title"></div>
+    </div>
+    <span id="qz-cnt" style="font-size:13px;opacity:.8"></span>
+  </div>
+  <div class="card">
+    <div class="prog-wrap">
+      <div class="prog-info"><span id="prog-txt"></span><span id="prog-pct"></span></div>
+      <div class="prog-bar"><div id="prog-fill" class="prog-fill" style="width:0%"></div></div>
+    </div>
+    <span id="q-badge" class="q-badge badge-a"></span>
+    <div class="q-point" id="q-point"></div>
+    <div class="q-text" id="q-text"></div>
+    <div id="q-choices"></div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="nav(-1)">← 이전</button>
+      <button class="nav-btn primary" id="btn-next" onclick="navNext()">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 결과 ── -->
+<div id="s-result" class="screen">
+  <div class="hdr">
+    <div class="hdr-sub">테스트 완료</div>
+    <div class="hdr-title" id="res-name"></div>
+  </div>
+  <div class="card">
+    <div class="score-wrap">
+      <div class="score-ring"><span class="score-num" id="res-score"></span><span class="score-tot">/ 100</span></div>
+      <div class="score-grade" id="res-grade"></div>
+      <div class="score-msg" id="res-msg"></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="st-ok"></div><div class="stat-l">정답</div></div>
+      <div class="stat"><div class="stat-n red" id="st-ng"></div><div class="stat-l">오답</div></div>
+      <div class="stat"><div class="stat-n blue" id="st-mc"></div><div class="stat-l">객관식</div></div>
+      <div class="stat"><div class="stat-n" id="st-sa"></div><div class="stat-l">주관식</div></div>
+    </div>
+    <div id="save-status" style="font-size:12px;color:var(--muted);text-align:center;margin:.5rem 0"></div>
+    <div class="section-lbl">문항별 결과 (클릭하면 원지문·정답 확인)</div>
+    <div id="review"></div>
+    <button class="btn btn-outline" style="margin-top:1rem" onclick="show('s-chapters')">챕터 목록으로</button>
+  </div>
+</div>
+
+<!-- ── 관리자 ── -->
+<div id="s-admin" class="screen">
+  <div class="hdr hdr-row">
+    <div><div class="hdr-sub">관리자 패널</div><div class="hdr-title" id="adm-title">학생 성적 현황</div></div>
+    <button class="btn-sm" onclick="confirmClear()">초기화</button>
+  </div>
+  <div class="card">
+    <div style="margin-bottom:1rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--muted)">챕터 선택</div>
+      <div id="adm-ch-btns" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr)" id="adm-stats"></div>
+    <div class="section-lbl">응시 학생 목록 (이름 클릭 → 오답 확인)</div>
+    <div id="adm-list"></div>
+    <button class="btn btn-outline" style="margin-top:1rem" onclick="show('s-chapters')">← 나가기</button>
+  </div>
+</div>
+</div>
+
+<div id="modal" class="modal-bg" style="display:none">
+  <div class="modal-box">
+    <h3>관리자 비밀번호</h3>
+    <input type="password" id="adm-pw" placeholder="비밀번호 입력"
+      style="width:100%;padding:10px 14px;font-size:15px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--txt)">
+    <div class="err-msg" id="pw-err"></div>
+    <div class="modal-btns">
+      <button onclick="closeModal()">취소</button>
+      <button class="ok" onclick="checkPw()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
+const ADMIN_PW = "terry2025";
+const TOTAL = 25, MC_COUNT = 20;
+
+// ═══════════════════════════════════════════════════
+//  챕터별 문제 데이터
+// ═══════════════════════════════════════════════════
+const CHAPTERS = {
+
+// ───────────────────────────────────────────────────
+1:{
+  title:"Chapter 01 — 문장의 주요 형식",
+  sub:"SVC · SVOO · SVOC",
+  db:"/results_chunilmun_ch01.json",
+  q:[
+/* G01 */{type:"mc",n:1,t:"A",p:"Grammar · SVC (감각동사+형용사)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>The potato pizza tastes really <span class="blank">_____</span>.',
+  c:["① good","② goodly","③ greatly","④ nicely","⑤ well"],a:0,pts:4},
+/* G02 */{type:"mc",n:2,t:"B",p:"Grammar · SVC (어법상 옳은 것)",
+  q:'다음 중 <strong>어법상 옳은</strong> 것을 고르시오.',
+  c:["① The blanket feels softly like silk.","② His voice on the phone sounded strangely.","③ The food in the fridge smells bad.","④ The painting on the wall looks greatly.","⑤ She felt happily after the test."],a:2,pts:4},
+/* G03 */{type:"mc",n:3,t:"A",p:"Grammar · SVOO (to 전치사)",
+  q:'다음 4형식 문장을 3형식으로 전환할 때 빈칸에 알맞은 전치사를 고르시오.<br><br>I sent him a text message. → I sent a text message <span class="blank">_____</span> him.',
+  c:["① for","② of","③ to","④ by","⑤ from"],a:2,pts:4},
+/* G04 */{type:"mc",n:4,t:"A",p:"Grammar · SVOO (for 전치사)",
+  q:'다음 4형식 문장을 3형식으로 전환할 때 빈칸에 알맞은 전치사를 고르시오.<br><br>She bought her son a new bicycle. → She bought a new bicycle <span class="blank">_____</span> her son.',
+  c:["① to","② for","③ of","④ from","⑤ by"],a:1,pts:4},
+/* G05 */{type:"mc",n:5,t:"C",p:"Grammar · SVOO (전치사 구별)",
+  q:'다음 중 빈칸에 들어갈 전치사가 <strong>나머지와 다른</strong> 것을 고르시오.',
+  c:["① He showed the photos _____ me.","② Please send a letter _____ her.","③ She made dinner _____ us.","④ Can you lend your pen _____ me?","⑤ Please pass the salt _____ me."],a:2,pts:4},
+/* G06 */{type:"mc",n:6,t:"A",p:"Grammar · SVOC (to부정사 목적격보어)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>I want you <span class="blank">_____</span> home by 10.',
+  c:["① come","② coming","③ came","④ to come","⑤ to coming"],a:3,pts:4},
+/* G07 */{type:"mc",n:7,t:"A",p:"Grammar · SVOC (사역동사)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>Mom made me <span class="blank">_____</span> the trash.',
+  c:["① take out","② to take out","③ taking out","④ took out","⑤ takes out"],a:0,pts:4},
+/* G08 */{type:"mc",n:8,t:"C",p:"Grammar · SVOC (어법상 틀린 것)",
+  q:'다음 중 <strong>어법상 틀린</strong> 것을 고르시오.',
+  c:["① I saw him wave from across the street.","② She heard me singing in the room.","③ I felt someone touch my arm.","④ I didn't expect him to arrive so early.","⑤ He made me to do homework."],a:4,pts:4},
+/* G09 */{type:"mc",n:9,t:"C",p:"Grammar · SVOO→SVO (전환)",
+  q:'다음 중 문장의 전환이 <strong>바른</strong> 것을 고르시오.',
+  c:["① She passed him the ball. → She passed the ball him.","② She showed us her photos. → She showed her photos to us.","③ She cooked us dinner. → She cooked dinner to us.","④ She bought him a gift. → She bought a gift to him.","⑤ She told us a story. → She told a story for us."],a:1,pts:4},
+/* G10 */{type:"mc",n:10,t:"C",p:"Grammar · 문장 형식 구별",
+  q:'다음 중 나머지와 <strong>문장 형식이 다른</strong> 것을 고르시오.',
+  c:["① Mom made me take out the trash.","② I want you to read more books.","③ They showed us their vacation photos.","④ She had my dog sit down.","⑤ The teacher let the students stand in a line."],a:2,pts:4},
+/* G11 */{type:"mc",n:11,t:"C",p:"Grammar · made 쓰임 구별",
+  q:'다음 밑줄 친 <strong>made</strong>의 쓰임이 <strong>나머지와 다른</strong> 것을 고르시오.',
+  c:["① He <u>made</u> her a cake.","② She <u>made</u> him laugh.","③ The coach <u>made</u> them run laps.","④ Mom <u>made</u> us clean our room.","⑤ His joke <u>made</u> her happy."],a:0,pts:4},
+/* G12 */{type:"mc",n:12,t:"B",p:"Grammar · SVOC (어법상 옳은 것)",
+  q:'다음 중 <strong>어법상 옳은</strong> 것을 고르시오.',
+  c:["① I had my wisdom tooth pulling.","② She let me to use her computer.","③ He made the girl cried.","④ I saw him crossed the street.","⑤ Yumi saw her friend waiting for the bus."],a:4,pts:4},
+/* G13 */{type:"mc",n:13,t:"C",p:"Grammar · 5형식 문장 찾기",
+  q:'다음 중 <strong>5형식</strong> 문장을 고르시오.',
+  c:["① The movie started at ten.","② My parents read me a book.","③ He heard us talking about him.","④ She bought her son a new bike.","⑤ The pizza tastes good."],a:2,pts:4},
+/* W14 */{type:"mc",n:14,t:"A",p:"Writing · SVOC (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>나의 부모님은 내가 더 많은 책을 읽기를 원하신다.</strong>',
+  c:["① My parents want me read more books.","② My parents want to me read more books.","③ My parents want me to read more books.","④ My parents want me reading more books.","⑤ My parents want reading more books."],a:2,pts:4},
+/* W15 */{type:"mc",n:15,t:"A",p:"Writing · SVOC (사역동사 우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>엄마는 내가 쓰레기를 내다 버리게 하셨다.</strong>',
+  c:["① Mom made me to take out the trash.","② Mom made me take out the trash.","③ Mom made me taking out the trash.","④ Mom let me to take out the trash.","⑤ Mom had me to take out the trash."],a:1,pts:4},
+/* W16 */{type:"mc",n:16,t:"A",p:"Writing · SVOO (4형식→3형식 빈칸)",
+  q:'다음 문장을 3형식으로 전환할 때 빈칸에 알맞은 것을 고르시오.<br><br>They showed us their vacation photos.<br>→ They showed their vacation photos <span class="blank">_____</span>.',
+  c:["① to we","② for us","③ to us","④ for we","⑤ of us"],a:2,pts:4},
+/* W17 */{type:"mc",n:17,t:"C",p:"Writing · SVOC (밑줄 교정)",
+  q:'다음 밑줄 친 부분 중 <strong>어법상 틀린</strong> 것을 고르시오.<br><br>I ① didn\'t ② expect him ③ arriving ④ so ⑤ early.',
+  c:["① didn't","② expect","③ arriving → to arrive","④ so","⑤ early"],a:2,pts:4},
+/* W18 */{type:"mc",n:18,t:"A",p:"Writing · SVOC (사역동사 빈칸)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>She had me <span class="blank">_____</span> the dishes after dinner.',
+  c:["① wash","② to wash","③ washing","④ washed","⑤ to washing"],a:0,pts:4},
+/* W19 */{type:"mc",n:19,t:"B",p:"Writing · 문장 전환 (바른 것)",
+  q:'다음 중 <strong>문장의 전환이 바른</strong> 것을 고르시오.',
+  c:["① She cooked dinner for her family. → She cooked her family dinner for.","② She made a cake for me. → She made me a cake.","③ She sent him a letter. → She sent a letter for him.","④ She showed us her smile. → She showed her smile for us.","⑤ She bought a bicycle for her son. → She bought her son a bicycle to."],a:1,pts:4},
+/* W20 */{type:"mc",n:20,t:"A",p:"Writing · 지각동사 빈칸",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>He let the students <span class="blank">_____</span> their phones.',
+  c:["① to use","② using","③ used","④ use","⑤ uses"],a:3,pts:4},
+/* SA21 */{type:"sa",n:21,t:"서술형",p:"Writing · 4형식→3형식 전환",
+  q:'다음 문장을 <strong>3형식</strong>으로 바꾸어 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">They showed us their vacation photos.</div>',
+  a:"They showed their vacation photos to us.",accepts:["they showed their vacation photos to us.", "they showed their vacation photos to us"],pts:4},
+/* SA22 */{type:"sa",n:22,t:"서술형",p:"Writing · 어법 교정",
+  q:'다음 문장에서 <strong>어법상 틀린 부분</strong>을 찾아 바르게 고쳐 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">Mom made me <u style="color:#991b1b;font-weight:600">to take out</u> the trash.</div>',
+  a:"take out",accepts:["take out"],pts:4},
+/* SA23 */{type:"sa",n:23,t:"서술형",p:"Writing · 문장 배열",
+  q:'주어진 단어를 알맞게 배열하여 문장을 완성하시오.<br><br><strong>선생님은 우리에게 최선을 다하도록 조언하셨다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:8px 12px;border-radius:6px;margin-top:8px;font-size:13px">[ advised / us / to do our best / the teacher ]</div>',
+  a:"The teacher advised us to do our best.",accepts:["the teacher advised us to do our best.", "the teacher advised us to do our best"],pts:4},
+/* SA24 */{type:"sa",n:24,t:"서술형",p:"Writing · 빈칸 채우기",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸을 채우시오.<br><br><strong>나는 그가 길을 건너는 것을 보았다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">I saw him <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px">&nbsp;</span> the street.</div>',
+  a:"cross",accepts:["cross","crossing"],pts:4},
+/* SA25 */{type:"sa",n:25,t:"서술형",p:"Writing · 전치사 빈칸",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸에 알맞은 전치사를 쓰시오.<br><br><strong>나의 아버지는 크리스마스에 아들에게 새 자전거를 사주셨다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">My father bought a new bicycle <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:50px">&nbsp;</span> his son.</div>',
+  a:"for",accepts:["for"],pts:4}
+]},
+
+// ───────────────────────────────────────────────────
+2:{
+  title:"Chapter 02 — 시제",
+  sub:"현재/과거/미래/진행형 · 현재완료",
+  db:"/results_chunilmun_ch02.json",
+  q:[
+/* G01 */{type:"mc",n:1,t:"A",p:"Grammar · 현재진행형",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>She <span class="blank">_____</span> dinner right now.',
+  c:["① cook","② cooks","③ is cooking","④ cooked","⑤ has cooked"],a:2,pts:4},
+/* G02 */{type:"mc",n:2,t:"A",p:"Grammar · 과거형",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>He <span class="blank">_____</span> one of his friends last night.',
+  c:["① meets","② is meeting","③ has met","④ met","⑤ will meet"],a:3,pts:4},
+/* G03 */{type:"mc",n:3,t:"A",p:"Grammar · 현재완료 (계속)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>He <span class="blank">_____</span> in Canada since 2020.',
+  c:["① lives","② lived","③ has lived","④ is living","⑤ was living"],a:2,pts:4},
+/* G04 */{type:"mc",n:4,t:"A",p:"Grammar · 현재완료 (경험)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>I have never <span class="blank">_____</span> a horse.',
+  c:["① ride","② rode","③ riding","④ ridden","⑤ rided"],a:3,pts:4},
+/* G05 */{type:"mc",n:5,t:"A",p:"Grammar · 현재완료 부정문",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>She <span class="blank">_____</span> the new restaurant yet.',
+  c:["① doesn't try","② didn't try","③ hasn't tried","④ won't try","⑤ hadn't tried"],a:2,pts:4},
+/* G06 */{type:"mc",n:6,t:"A",p:"Grammar · 현재완료 의문문",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br><span class="blank">_____</span> you <span class="blank">_____</span> your work?',
+  c:["① Did/finish","② Have/finished","③ Are/finishing","④ Do/finish","⑤ Were/finishing"],a:1,pts:4},
+/* G07 */{type:"mc",n:7,t:"C",p:"Grammar · 현재완료 vs 과거",
+  q:'다음 중 <strong>어법상 틀린</strong> 것을 고르시오.',
+  c:["① She has not tried the new restaurant yet.","② Have you finished your work?","③ He has lived in Canada since 2020.","④ My aunt has been in Paris two years ago.","⑤ I have never ridden a horse."],a:3,pts:4},
+/* G08 */{type:"mc",n:8,t:"A",p:"Grammar · 현재완료 (완료)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>The singer <span class="blank">_____</span> very popular recently.',
+  c:["① becomes","② became","③ is become","④ has become","⑤ had become"],a:3,pts:4},
+/* G09 */{type:"mc",n:9,t:"C",p:"Grammar · 현재완료 용법 구별",
+  q:'다음 중 &lt;보기&gt;와 <strong>같은 용법</strong>의 현재완료를 고르시오.<br><br><div style="background:var(--pl);border:1px solid #c4b5fd;padding:8px 12px;border-radius:6px;margin:8px 0;font-size:14px;color:var(--pd)">&lt;보기&gt; The restaurant has already closed.</div>',
+  c:["① He has lived in Canada since 2020. (계속)","② I have never ridden a horse. (경험)","③ I have kept my childhood toys in the box. (계속)","④ Someone has stolen my bag. (결과)","⑤ Have you finished your work? (완료)"],a:3,pts:4},
+/* G10 */{type:"mc",n:10,t:"A",p:"Grammar · 미래형",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>I <span class="blank">_____</span> go to the library tomorrow.',
+  c:["① am","② was","③ will","④ have","⑤ had"],a:2,pts:4},
+/* G11 */{type:"mc",n:11,t:"B",p:"Grammar · 진행형 (어법상 옳은 것)",
+  q:'다음 중 <strong>어법상 옳은</strong> 것을 고르시오.',
+  c:["① She was sleep when I called her.","② He is knowing my name.","③ I am studying Japanese three days.","④ We were having lunch when she arrived.","⑤ They are play soccer now."],a:3,pts:4},
+/* G12 */{type:"mc",n:12,t:"A",p:"Grammar · 과거진행형",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>The students <span class="blank">_____</span> when the teacher came in.',
+  c:["① fight","② fought","③ are fighting","④ were fighting","⑤ have fought"],a:3,pts:4},
+/* G13 */{type:"mc",n:13,t:"C",p:"Grammar · 현재완료 쓸 수 없는 것",
+  q:'다음 중 현재완료를 <strong>쓸 수 없는</strong> 것을 고르시오.',
+  c:["① I have never ridden a horse.","② She has already finished her work.","③ He met one of his friends last night.","④ They have lived here since 2020.","⑤ Have you ever visited Paris?"],a:2,pts:4},
+/* W14 */{type:"mc",n:14,t:"A",p:"Writing · 현재진행형 (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>나는 3일 동안 일본어를 공부하고 있다.</strong>',
+  c:["① I study Japanese for three days.","② I am study Japanese three days.","③ I am studying Japanese for three days.","④ I studied Japanese three days.","⑤ I have study Japanese three days."],a:2,pts:4},
+/* W15 */{type:"mc",n:15,t:"A",p:"Writing · 현재완료 부정문 (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>그녀는 아직 그 새 식당을 가보지 않았다.</strong>',
+  c:["① She didn't try the new restaurant yet.","② She has not tried the new restaurant yet.","③ She hasn't tried the new restaurant ago.","④ She hasn't been trying the new restaurant yet.","⑤ She was not trying the new restaurant yet."],a:1,pts:4},
+/* W16 */{type:"mc",n:16,t:"A",p:"Writing · 현재완료 계속 (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>그는 2020년부터 캐나다에 살아왔다.</strong>',
+  c:["① He lives in Canada since 2020.","② He lived in Canada since 2020.","③ He has lived in Canada since 2020.","④ He is living in Canada since 2020.","⑤ He was living in Canada since 2020."],a:2,pts:4},
+/* W17 */{type:"mc",n:17,t:"C",p:"Writing · 현재완료 어법 교정",
+  q:'다음 밑줄 친 부분 중 <strong>어법상 틀린</strong> 것을 고르시오.<br><br>My aunt ① has been ② in Paris ③ two years ④ ago, and she still ⑤ lives there.',
+  c:["① has been → was","② in Paris","③ two years","④ ago","⑤ lives"],a:0,pts:4},
+/* W18 */{type:"mc",n:18,t:"A",p:"Writing · 현재완료 (과거분사)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>Everyone has <span class="blank">_____</span> a good job in the team.',
+  c:["① do","② does","③ did","④ done","⑤ doing"],a:3,pts:4},
+/* W19 */{type:"mc",n:19,t:"B",p:"Writing · 시제 종합 (어법상 옳은 것)",
+  q:'다음 중 <strong>어법상 옳은</strong> 것을 고르시오.',
+  c:["① I have received your email yesterday.","② She has been in Tokyo two years ago.","③ He has met one of his friends last night.","④ I have cut my nails too short this morning.","⑤ The singer has become very popular recently."],a:4,pts:4},
+/* W20 */{type:"mc",n:20,t:"A",p:"Writing · 현재완료 계속 (문장 완성)",
+  q:'다음 우리말과 같은 뜻이 되도록 알맞은 것을 고르시오.<br><br><strong>나는 내 어린 시절 장난감들을 상자에 보관해 왔다.</strong>',
+  c:["① I have keeping my childhood toys in the box.","② I kept my childhood toys in the box since childhood.","③ I have kept my childhood toys in the box.","④ I am keeping my childhood toys in the box.","⑤ I had kept my childhood toys in the box."],a:2,pts:4},
+/* SA21 */{type:"sa",n:21,t:"서술형",p:"Writing · 현재완료 빈칸",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸을 채우시오.<br><br><strong>누군가가 내 가방을 훔쳐 갔다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">Someone <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:100px">&nbsp;</span> my bag.</div>',
+  a:"has stolen",accepts:["has stolen"],pts:4},
+/* SA22 */{type:"sa",n:22,t:"서술형",p:"Writing · 과거→현재완료 교정",
+  q:'다음 밑줄 친 부분을 <strong>어법에 맞게</strong> 고쳐 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">My aunt <u style="color:#991b1b;font-weight:600">has been</u> in Paris two years ago.</div>',
+  a:"was",accepts:["was"],pts:4},
+/* SA23 */{type:"sa",n:23,t:"서술형",p:"Writing · 현재완료 문장 배열",
+  q:'주어진 단어를 알맞게 배열하여 문장을 완성하시오.<br><br><strong>나는 내 손톱을 너무 짧게 깎았다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:8px 12px;border-radius:6px;margin-top:8px;font-size:13px">[ have / too short / I / cut / my nails ]</div>',
+  a:"I have cut my nails too short.",accepts:["i have cut my nails too short.", "i have cut my nails too short"],pts:4},
+/* SA24 */{type:"sa",n:24,t:"서술형",p:"Writing · 현재완료 (since)",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸을 채우시오.<br><br><strong>그는 2020년부터 캐나다에 살고 있다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">He has <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:70px">&nbsp;</span> in Canada <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:60px">&nbsp;</span> 2020.</div>',
+  a:"lived since",accepts:["lived since"],pts:4},
+/* SA25 */{type:"sa",n:25,t:"서술형",p:"Writing · 현재완료 결과 문장",
+  q:'다음 우리말을 영어로 쓰시오.<br><br><strong>누군가가 나의 가방을 훔쳐 갔다.</strong> (someone / steal / my bag)',
+  a:"Someone has stolen my bag.",accepts:["someone has stolen my bag.", "someone has stolen my bag"],pts:4}
+]},
+
+// ───────────────────────────────────────────────────
+3:{
+  title:"Chapter 03 — 조동사",
+  sub:"can · may · will · must · should · had better · used to",
+  db:"/results_chunilmun_ch03.json",
+  q:[
+/* G01 */{type:"mc",n:1,t:"A",p:"Grammar · can (능력)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>She <span class="blank">_____</span> speak three languages fluently.',
+  c:["① must","② should","③ can","④ had better","⑤ used to"],a:2,pts:4},
+/* G02 */{type:"mc",n:2,t:"A",p:"Grammar · may (추측)",
+  q:'다음 빈칸에 알맞은 말을 고르시오. (확신 없는 추측)<br><br>She <span class="blank">_____</span> be at home. I\'m not sure.',
+  c:["① must","② should","③ may","④ will","⑤ had better"],a:2,pts:4},
+/* G03 */{type:"mc",n:3,t:"A",p:"Grammar · must (의무)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>You <span class="blank">_____</span> return the library book by Friday.',
+  c:["① should","② must","③ may","④ can","⑤ would"],a:1,pts:4},
+/* G04 */{type:"mc",n:4,t:"A",p:"Grammar · don't have to (불필요)",
+  q:'다음 빈칸에 알맞은 말을 고르시오. (서두를 필요 없음)<br><br>We are not late. You <span class="blank">_____</span> hurry.',
+  c:["① must not","② should not","③ don't have to","④ cannot","⑤ had better not"],a:2,pts:4},
+/* G05 */{type:"mc",n:5,t:"A",p:"Grammar · should (충고·의무)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>We <span class="blank">_____</span> get enough sleep.',
+  c:["① must not","② can't","③ should","④ would","⑤ used to"],a:2,pts:4},
+/* G06 */{type:"mc",n:6,t:"A",p:"Grammar · had better (경고·충고)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>You <span class="blank">_____</span> apologize before it\'s too late.',
+  c:["① used to","② would like to","③ had better","④ may","⑤ must not"],a:2,pts:4},
+/* G07 */{type:"mc",n:7,t:"A",p:"Grammar · would like to (희망)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>I <span class="blank">_____</span> order a coffee, please.',
+  c:["① used to","② had better","③ would like to","④ should","⑤ must"],a:2,pts:4},
+/* G08 */{type:"mc",n:8,t:"A",p:"Grammar · used to (과거 습관)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>Dad <span class="blank">_____</span> smoke, but he quit years ago.',
+  c:["① is used to","② used to","③ would like to","④ had better","⑤ should"],a:1,pts:4},
+/* G09 */{type:"mc",n:9,t:"A",p:"Grammar · must not (금지)",
+  q:'다음 빈칸에 알맞은 말을 고르시오. (쓰레기를 버리면 안 됨)<br><br>You <span class="blank">_____</span> throw garbage on the streets.',
+  c:["① don't have to","② must not","③ should","④ would","⑤ could"],a:1,pts:4},
+/* G10 */{type:"mc",n:10,t:"B",p:"Grammar · 조동사 어법 (옳은 것)",
+  q:'다음 중 <strong>어법상 옳은</strong> 것을 고르시오.',
+  c:["① You had better to apologize.","② She is must be tired.","③ I used to being afraid of dogs.","④ You don't have to hurry.","⑤ He should gets enough sleep."],a:3,pts:4},
+/* G11 */{type:"mc",n:11,t:"A",p:"Grammar · must (강한 추측)",
+  q:'다음 빈칸에 알맞은 말을 고르시오. (강한 추측)<br><br>She is yawning. She <span class="blank">_____</span> be sleepy.',
+  c:["① should","② must","③ used to","④ would","⑤ had better"],a:1,pts:4},
+/* G12 */{type:"mc",n:12,t:"C",p:"Grammar · 조동사 어법 (틀린 것)",
+  q:'다음 중 <strong>어법상 틀린</strong> 것을 고르시오.',
+  c:["① You must return the book by Friday.","② You must not throw garbage on the streets.","③ She should not skip breakfast.","④ You had better not eat fast food.","⑤ I would liked to order a coffee."],a:4,pts:4},
+/* G13 */{type:"mc",n:13,t:"C",p:"Grammar · don't have to 의미",
+  q:'다음 중 &lt;보기&gt;와 <strong>의미가 같은</strong> 것을 고르시오.<br><br><div style="background:var(--pl);border:1px solid #c4b5fd;padding:8px 12px;border-radius:6px;margin:8px 0;font-size:14px;color:var(--pd)">&lt;보기&gt; You don\'t have to hurry.</div>',
+  c:["① You must not hurry.","② It is not necessary for you to hurry.","③ You should not hurry.","④ You cannot hurry.","⑤ You had better not hurry."],a:1,pts:4},
+/* W14 */{type:"mc",n:14,t:"A",p:"Writing · must (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>너는 금요일까지 도서관 책을 반납해야 한다.</strong>',
+  c:["① You should return the library book by Friday.","② You must return the library book by Friday.","③ You used to return the library book by Friday.","④ You don't have to return the library book by Friday.","⑤ You had better return the library book on Friday."],a:1,pts:4},
+/* W15 */{type:"mc",n:15,t:"A",p:"Writing · don't have to (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>서두를 필요 없어. 우린 늦지 않았어.</strong>',
+  c:["① You must not hurry. We are not late.","② You should not hurry. We are not late.","③ You don't have to hurry. We are not late.","④ You can't hurry. We are not late.","⑤ You had better not hurry. We are not late."],a:2,pts:4},
+/* W16 */{type:"mc",n:16,t:"A",p:"Writing · used to (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>아버지는 담배를 피우시곤 했지만, 몇 년 전에 끊으셨다.</strong>',
+  c:["① Dad would smoke, but he quit years ago.","② Dad used to smoke, but he quit years ago.","③ Dad is used to smoking, but he quit years ago.","④ Dad had better smoke, but he quit years ago.","⑤ Dad must smoke, but he quit years ago."],a:1,pts:4},
+/* W17 */{type:"mc",n:17,t:"C",p:"Writing · had better 어법 교정",
+  q:'다음 밑줄 친 부분 중 <strong>어법상 틀린</strong> 것을 고르시오.<br><br>You ① had ② better ③ to apologize ④ before ⑤ it\'s too late.',
+  c:["① had","② better","③ to apologize → apologize","④ before","⑤ it's too late"],a:2,pts:4},
+/* W18 */{type:"mc",n:18,t:"A",p:"Writing · used to (과거 상태)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>I <span class="blank">_____</span> be afraid of dogs. (예전엔 그랬지만 지금은 아님)',
+  c:["① used to","② would","③ had better","④ must","⑤ should"],a:0,pts:4},
+/* W19 */{type:"mc",n:19,t:"B",p:"Writing · 조동사 종합 (옳은 것)",
+  q:'다음 중 <strong>어법상 옳은</strong> 것을 고르시오.',
+  c:["① You must not to throw garbage.","② She may to be sleepy.","③ Would you like leaving a message?","④ You had better not eat fast food.","⑤ He used to being afraid of dogs."],a:3,pts:4},
+/* W20 */{type:"mc",n:20,t:"C",p:"Writing · 조동사 같은 의미",
+  q:'다음 중 두 문장이 <strong>같은 의미</strong>인 것을 고르시오.',
+  c:["① You must hurry. = You don't have to hurry.","② You must not go there. = You don't have to go there.","③ You don't have to hurry. = It is not necessary to hurry.","④ You had better go. = You must not go.","⑤ You should go. = You had better not go."],a:2,pts:4},
+/* SA21 */{type:"sa",n:21,t:"서술형",p:"Writing · had better not",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸을 채우시오.<br><br><strong>너는 패스트푸드를 먹지 않는 게 좋다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">You had better <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:50px">&nbsp;</span> eat fast food.</div>',
+  a:"not",accepts:["not"],pts:4},
+/* SA22 */{type:"sa",n:22,t:"서술형",p:"Writing · would like to 교정",
+  q:'다음 문장에서 <strong>어법상 틀린 부분</strong>을 찾아 바르게 고쳐 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">I <u style="color:#991b1b;font-weight:600">would liked to</u> order a coffee, please.</div>',
+  a:"would like to",accepts:["would like to"],pts:4},
+/* SA23 */{type:"sa",n:23,t:"서술형",p:"Writing · had better 문장 배열",
+  q:'주어진 단어를 알맞게 배열하여 문장을 완성하시오.<br><br><strong>너무 늦기 전에 네가 사과하는 게 낫겠다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:8px 12px;border-radius:6px;margin-top:8px;font-size:13px">[ apologize / had / you / better / before it\'s too late ]</div>',
+  a:"You had better apologize before it's too late.",accepts:["you had better apologize before it's too late.", "you had better apologize before it's too late"],pts:4},
+/* SA24 */{type:"sa",n:24,t:"서술형",p:"Writing · must (강한 추측)",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸에 알맞은 조동사를 쓰시오.<br><br><strong>그녀는 하품을 하고 있어. 그녀는 졸린 게 틀림없어.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">She is yawning. She <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:60px">&nbsp;</span> be sleepy.</div>',
+  a:"must",accepts:["must"],pts:4},
+/* SA25 */{type:"sa",n:25,t:"서술형",p:"Writing · don't have to (동의어)",
+  q:'두 문장이 같은 뜻이 되도록 빈칸을 채우시오.<br><br>It is not necessary for you to hurry.<br>= You <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:100px">&nbsp;</span> to hurry.',
+  a:"don't have",accepts:["don't have","don't have"],pts:4}
+]},
+
+// ───────────────────────────────────────────────────
+4:{
+  title:"Chapter 04 — 수동태",
+  sub:"be+p.p. · 조동사 수동태 · SVOO 수동태 · by 이외 전치사",
+  db:"/results_chunilmun_ch04.json",
+  q:[
+/* G01 */{type:"mc",n:1,t:"A",p:"Grammar · 수동태 기본 (be+p.p.)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>English is <span class="blank">_____</span> in many countries.',
+  c:["① speak","② speaking","③ spoken","④ spoke","⑤ speaks"],a:2,pts:4},
+/* G02 */{type:"mc",n:2,t:"A",p:"Grammar · 조동사 수동태 (부정)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>The product <span class="blank">_____</span> until Tuesday.',
+  c:["① cannot deliver","② can\'t be deliver","③ cannot be delivered","④ isn\'t delivering","⑤ doesn\'t deliver"],a:2,pts:4},
+/* G03 */{type:"mc",n:3,t:"A",p:"Grammar · 조동사 수동태 (의문문)",
+  q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> the report <span class="blank">_____</span> by Friday?',
+  c:["① Will/finish","② Should/be finished","③ Can/finishing","④ Is/finishing","⑤ Does/finish"],a:1,pts:4},
+/* G04 */{type:"mc",n:4,t:"A",p:"Grammar · 과거 수동태",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>The book <span class="blank">_____</span> by many students last year.',
+  c:["① read","② is read","③ was read","④ has read","⑤ reads"],a:2,pts:4},
+/* G05 */{type:"mc",n:5,t:"A",p:"Grammar · 미래 수동태",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>The bridge <span class="blank">_____</span> by next year.',
+  c:["① builds","② is built","③ was built","④ will be built","⑤ has been built"],a:3,pts:4},
+/* G06 */{type:"mc",n:6,t:"A",p:"Grammar · 조동사 수동태",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>The promise <span class="blank">_____</span>.',
+  c:["① should keep","② should be keeping","③ should be kept","④ should kept","⑤ should to be kept"],a:2,pts:4},
+/* G07 */{type:"mc",n:7,t:"A",p:"Grammar · SVOO 수동태 (간접목적어 주어)",
+  q:'다음 문장을 수동태로 바르게 전환한 것을 고르시오.<br><br>The book gives us useful information.',
+  c:["① We are given useful information by the book.","② Useful information is given we by the book.","③ We are giving useful information by the book.","④ We given useful information by the book.","⑤ We are given to useful information by the book."],a:0,pts:4},
+/* G08 */{type:"mc",n:8,t:"A",p:"Grammar · be covered with",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>His shoes <span class="blank">_____</span> dirt.',
+  c:["① were covered by","② were covered with","③ were covering with","④ covered with","⑤ are covering by"],a:1,pts:4},
+/* G09 */{type:"mc",n:9,t:"A",p:"Grammar · be known for",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>New Zealand <span class="blank">_____</span> its natural scenery.',
+  c:["① is known for","② is known as","③ is known to","④ is known by","⑤ is knowing for"],a:0,pts:4},
+/* G10 */{type:"mc",n:10,t:"A",p:"Grammar · be made of/from",
+  q:'다음 빈칸에 알맞은 말을 고르시오. (재료의 성질이 변하지 않음)<br><br>The vase <span class="blank">_____</span> glass.',
+  c:["① is made from","② is made of","③ is making of","④ was make of","⑤ made from"],a:1,pts:4},
+/* G11 */{type:"mc",n:11,t:"B",p:"Grammar · 수동태 어법 (옳은 것)",
+  q:'다음 중 <strong>어법상 옳은</strong> 것을 고르시오.',
+  c:["① The book is written by Shakespeare.","② English is speak in many countries.","③ The window was broke by the child.","④ The report should finished by Friday.","⑤ The product cannot delivered until Tuesday."],a:0,pts:4},
+/* G12 */{type:"mc",n:12,t:"C",p:"Grammar · 수동태 어법 (틀린 것)",
+  q:'다음 중 <strong>어법상 틀린</strong> 것을 고르시오.',
+  c:["① The promise should be kept.","② The product cannot be delivered until Tuesday.","③ Should the report be finished by Friday?","④ She is known as a talented singer.","⑤ His shoes were covered by dirt."],a:4,pts:4},
+/* G13 */{type:"mc",n:13,t:"A",p:"Grammar · 능동태→수동태 전환",
+  q:'다음 능동태를 수동태로 <strong>바르게</strong> 전환한 것을 고르시오.<br><br>Shakespeare wrote this play.',
+  c:["① This play wrote by Shakespeare.","② This play is written by Shakespeare.","③ This play was written by Shakespeare.","④ This play is writing by Shakespeare.","⑤ This play was write by Shakespeare."],a:2,pts:4},
+/* W14 */{type:"mc",n:14,t:"A",p:"Writing · 조동사 수동태 (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>그 약속은 지켜져야 한다.</strong>',
+  c:["① The promise should keep.","② The promise should be kept.","③ The promise should to be kept.","④ The promise should kept.","⑤ The promise should be keeping."],a:1,pts:4},
+/* W15 */{type:"mc",n:15,t:"A",p:"Writing · 조동사 수동태 (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>그 상품은 화요일까지 배송될 수 없습니다.</strong>',
+  c:["① The product can\'t deliver until Tuesday.","② The product can\'t be delivered until Tuesday.","③ The product cannot delivering until Tuesday.","④ The product is not delivered until Tuesday.","⑤ The product does not deliver until Tuesday."],a:1,pts:4},
+/* W16 */{type:"mc",n:16,t:"A",p:"Writing · SVOO 수동태 빈칸",
+  q:'다음 문장을 수동태로 전환할 때 빈칸에 알맞은 것을 고르시오.<br><br>The book gives us useful information.<br>→ <span class="blank">_____</span> are given useful information by the book.',
+  c:["① I","② We","③ Our","④ Us","⑤ Ourselves"],a:1,pts:4},
+/* W17 */{type:"mc",n:17,t:"A",p:"Writing · be made of/from 구별",
+  q:'다음 우리말과 같은 뜻이 되도록 알맞은 것을 고르시오.<br><br><strong>이 과자는 쌀로 만들어진다. (재료의 성질이 변함)</strong>',
+  c:["① This snack is made of rice.","② This snack is made from rice.","③ This snack was made of rice.","④ This snack is made by rice.","⑤ This snack makes from rice."],a:1,pts:4},
+/* W18 */{type:"mc",n:18,t:"B",p:"Writing · by 이외 전치사 (옳은 것)",
+  q:'다음 중 <strong>어법상 옳은</strong> 것을 고르시오.',
+  c:["① She is known as a talented singer.","② The vase was made from glass.","③ His shoes were covered by dirt.","④ New Zealand is knowing for its natural scenery.","⑤ She is know as a talented singer."],a:0,pts:4},
+/* W19 */{type:"mc",n:19,t:"C",p:"Writing · be known for/by 교정",
+  q:'다음 밑줄 친 부분 중 <strong>어법상 틀린</strong> 것을 고르시오.<br><br>New Zealand ① is ② known ③ by ④ its natural ⑤ scenery.',
+  c:["① is","② known","③ by → for","④ its natural","⑤ scenery"],a:2,pts:4},
+/* W20 */{type:"mc",n:20,t:"A",p:"Writing · 능동태→수동태 빈칸",
+  q:'다음 문장을 수동태로 전환할 때 빈칸에 알맞은 것을 고르시오.<br><br>They speak English in many countries.<br>→ English <span class="blank">_____</span> in many countries.',
+  c:["① is spoken","② was spoken","③ are spoke","④ is speak","⑤ are spoken"],a:0,pts:4},
+/* SA21 */{type:"sa",n:21,t:"서술형",p:"Writing · 능동→수동 전환",
+  q:'다음 문장을 <strong>수동태</strong>로 바꾸어 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">Shakespeare wrote this play.</div>',
+  a:"This play was written by Shakespeare.",accepts:["this play was written by shakespeare.", "this play was written by shakespeare"],pts:4},
+/* SA22 */{type:"sa",n:22,t:"서술형",p:"Writing · 조동사 수동태 빈칸",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸을 채우시오.<br><br><strong>그 약속은 지켜져야 한다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">The promise <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:110px">&nbsp;</span> kept.</div>',
+  a:"should be",accepts:["should be"],pts:4},
+/* SA23 */{type:"sa",n:23,t:"서술형",p:"Writing · covered with 교정",
+  q:'다음 밑줄 친 부분을 <strong>어법에 맞게</strong> 고쳐 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">His shoes were covered <u style="color:#991b1b;font-weight:600">by</u> dirt.</div>',
+  a:"with",accepts:["with"],pts:4},
+/* SA24 */{type:"sa",n:24,t:"서술형",p:"Writing · be known for 빈칸",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸에 알맞은 전치사를 쓰시오.<br><br><strong>뉴질랜드는 자연경관으로 유명하다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">New Zealand is known <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:50px">&nbsp;</span> its natural scenery.</div>',
+  a:"for",accepts:["for"],pts:4},
+/* SA25 */{type:"sa",n:25,t:"서술형",p:"Writing · 수동태 문장 배열",
+  q:'주어진 단어를 알맞게 배열하여 문장을 완성하시오.<br><br><strong>그 보고서는 금요일까지 완료되어야 하나요?</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:8px 12px;border-radius:6px;margin-top:8px;font-size:13px">[ the report / be finished / should / by Friday ]</div>',
+  a:"Should the report be finished by Friday?",accepts:["should the report be finished by friday?","should the report be finished by friday"],pts:4}
+]},
+
+// ───────────────────────────────────────────────────
+5:{
+  title:"Chapter 05 — to부정사",
+  sub:"명사적·형용사적·부사적 쓰임 · too~to · enough to",
+  db:"/results_chunilmun_ch05.json",
+  q:[
+/* G01 */{type:"mc",n:1,t:"A",p:"Grammar · to부정사 주어",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br><span class="blank">_____</span> read books is interesting.',
+  c:["① Read","② Reading","③ To read","④ Reads","⑤ Readed"],a:2,pts:4},
+/* G02 */{type:"mc",n:2,t:"A",p:"Grammar · 가주어 it (진주어 to부정사)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br><span class="blank">_____</span> is easy to make new friends.',
+  c:["① That","② What","③ It","④ This","⑤ There"],a:2,pts:4},
+/* G03 */{type:"mc",n:3,t:"A",p:"Grammar · to부정사 목적어",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>I want <span class="blank">_____</span> home now.',
+  c:["① go","② going","③ to go","④ gone","⑤ goes"],a:2,pts:4},
+/* G04 */{type:"mc",n:4,t:"A",p:"Grammar · to부정사 보어",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>My dream is <span class="blank">_____</span> a doctor.',
+  c:["① become","② becoming","③ became","④ to become","⑤ to becoming"],a:3,pts:4},
+/* G05 */{type:"mc",n:5,t:"A",p:"Grammar · to부정사 형용사적 쓰임 (명사 수식)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>He doesn\'t have friends <span class="blank">_____</span>.',
+  c:["① talk to","② to talk to","③ talking to","④ talked to","⑤ talks to"],a:1,pts:4},
+/* G06 */{type:"mc",n:6,t:"A",p:"Grammar · to부정사 형용사적 쓰임 (전치사)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>I don\'t have a pen to write <span class="blank">_____</span>.',
+  c:["① to","② for","③ by","④ with","⑤ of"],a:3,pts:4},
+/* G07 */{type:"mc",n:7,t:"A",p:"Grammar · to부정사 부사적 쓰임 (목적)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>He turned off his phone <span class="blank">_____</span> focus on studying.',
+  c:["① for","② to","③ so","④ because","⑤ that"],a:1,pts:4},
+/* G08 */{type:"mc",n:8,t:"A",p:"Grammar · to부정사 부사적 쓰임 (감정의 원인)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>She was sad <span class="blank">_____</span> goodbye to her best friend.',
+  c:["① say","② saying","③ to say","④ said","⑤ for say"],a:2,pts:4},
+/* G09 */{type:"mc",n:9,t:"A",p:"Grammar · too ~ to",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>She is <span class="blank">_____</span> young <span class="blank">_____</span> drive a car.',
+  c:["① so/to","② too/to","③ very/to","④ too/for","⑤ so/for"],a:1,pts:4},
+/* G10 */{type:"mc",n:10,t:"A",p:"Grammar · ~ enough to",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>She is smart <span class="blank">_____</span> <span class="blank">_____</span> the question.',
+  c:["① very/to solve","② enough/to solve","③ enough/solving","④ too/to solve","⑤ so/to solve"],a:1,pts:4},
+/* G11 */{type:"mc",n:11,t:"A",p:"Grammar · seem to",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>They <span class="blank">_____</span> each other very well.',
+  c:["① seem know","② seems knowing","③ seem to know","④ seems to knowing","⑤ seem known"],a:2,pts:4},
+/* G12 */{type:"mc",n:12,t:"C",p:"Grammar · to부정사 어법 (틀린 것)",
+  q:'다음 중 <strong>어법상 틀린</strong> 것을 고르시오.',
+  c:["① To read books is interesting.","② It is easy to make new friends.","③ I want to go home now.","④ She is too young to driving a car.","⑤ He seems to know the answer."],a:3,pts:4},
+/* G13 */{type:"mc",n:13,t:"C",p:"Grammar · to부정사 쓰임 구별 (형용사적)",
+  q:'다음 밑줄 친 to부정사의 쓰임이 <strong>나머지와 다른</strong> 것을 고르시오.',
+  c:["① She was sad <u>to say</u> goodbye.","② I have a lot of homework <u>to do</u>.","③ He turned off his phone <u>to focus</u>.","④ <u>To become</u> a doctor is my dream.","⑤ I want <u>to travel</u> abroad."],a:1,pts:4},
+/* W14 */{type:"mc",n:14,t:"A",p:"Writing · to부정사 목적 (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>그는 공부에 집중하기 위해 자신의 전화를 껐다.</strong>',
+  c:["① He turned off his phone focus on studying.","② He turned off his phone for focus on studying.","③ He turned off his phone to focus on studying.","④ He turned off his phone focusing on studying.","⑤ He turned off his phone for focusing on studying."],a:2,pts:4},
+/* W15 */{type:"mc",n:15,t:"A",p:"Writing · too ~ to (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>그녀는 너무 어려서 차를 운전할 수 없다.</strong>',
+  c:["① She is so young to drive a car.","② She is too young to drive a car.","③ She is very young to drive a car.","④ She is too young for drive a car.","⑤ She is too young driving a car."],a:1,pts:4},
+/* W16 */{type:"mc",n:16,t:"A",p:"Writing · to부정사 형용사 수식 (우리말→영어)",
+  q:'다음 우리말을 <strong>바르게</strong> 옮긴 것을 고르시오.<br><br><strong>그 질문은 설명하기가 쉽다.</strong>',
+  c:["① The question is easy to explain.","② The question is easy for explain.","③ The question is easy explaining.","④ The question is easy to explaining.","⑤ The question is easy explained."],a:0,pts:4},
+/* W17 */{type:"mc",n:17,t:"C",p:"Writing · too ~ to 어법 교정",
+  q:'다음 밑줄 친 부분 중 <strong>어법상 틀린</strong> 것을 고르시오.<br><br>She ① is ② too ③ young ④ to driving ⑤ a car.',
+  c:["① is","② too","③ young","④ to driving → to drive","⑤ a car"],a:3,pts:4},
+/* W18 */{type:"mc",n:18,t:"A",p:"Writing · to부정사 형용사적 (전치사 포함)",
+  q:'다음 빈칸에 알맞은 말을 고르시오.<br><br>I don\'t have friends <span class="blank">_____</span> talk to.',
+  c:["① for","② to","③ in order","④ so","⑤ because"],a:1,pts:4},
+/* W19 */{type:"mc",n:19,t:"B",p:"Writing · to부정사 종합 (옳은 것)",
+  q:'다음 중 <strong>어법상 옳은</strong> 것을 고르시오.',
+  c:["① My family is looking for a hotel to stay.","② I have a lot of homework doing.","③ She turned off her phone to focus on studying.","④ He seems knowing the answer.","⑤ It is easy making new friends."],a:2,pts:4},
+/* W20 */{type:"mc",n:20,t:"A",p:"Writing · too~to → so~that 전환",
+  q:'다음 문장을 &lt;so ~ that&gt; 구문으로 전환할 때 빈칸에 알맞은 것을 고르시오.<br><br>She is too young to drive a car.<br>→ She is <span class="blank">_____</span> young <span class="blank">_____</span> she <span class="blank">_____</span> drive a car.',
+  c:["① so/that/cannot","② too/that/can","③ very/that/cannot","④ so/that/can","⑤ too/that/cannot"],a:0,pts:4},
+/* SA21 */{type:"sa",n:21,t:"서술형",p:"Writing · to부정사 부사적 빈칸",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸을 채우시오.<br><br><strong>그는 공부에 집중하기 위해 전화를 껐다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">He turned off his phone <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px">&nbsp;</span> on studying.</div>',
+  a:"to focus",accepts:["to focus"],pts:4},
+/* SA22 */{type:"sa",n:22,t:"서술형",p:"Writing · enough to 어법 교정",
+  q:'다음 문장에서 <strong>어법상 틀린 부분</strong>을 찾아 바르게 고쳐 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">She is smart enough <u style="color:#991b1b;font-weight:600">solving</u> the question.</div>',
+  a:"to solve",accepts:["to solve"],pts:4},
+/* SA23 */{type:"sa",n:23,t:"서술형",p:"Writing · too~to → so~that 전환",
+  q:'두 문장이 같은 뜻이 되도록 빈칸을 채우시오.<br><br>She is too young to drive.<br>= She is so young that she <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px">&nbsp;</span> drive.',
+  a:"can't",accepts:["can't","cannot","can not"],pts:4},
+/* SA24 */{type:"sa",n:24,t:"서술형",p:"Writing · to부정사 보어 배열",
+  q:'주어진 단어를 알맞게 배열하여 문장을 완성하시오.<br><br><strong>나의 꿈은 의사가 되는 것이다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:8px 12px;border-radius:6px;margin-top:8px;font-size:13px">[ a doctor / is / to become / my dream ]</div>',
+  a:"My dream is to become a doctor.",accepts:["my dream is to become a doctor.", "my dream is to become a doctor"],pts:4},
+/* SA25 */{type:"sa",n:25,t:"서술형",p:"Writing · to부정사 감정의 원인",
+  q:'다음 우리말과 같은 뜻이 되도록 빈칸을 채우시오.<br><br><strong>그녀는 자신의 가장 친한 친구와 작별하게 되어 슬펐다.</strong><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">She was sad <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px">&nbsp;</span> goodbye to her best friend.</div>',
+  a:"to say",accepts:["to say"],pts:4}
+]}
+};// end CHAPTERS
+
+// ═══════════════════════════════════════════════════
+//  등급 / 상태
+// ═══════════════════════════════════════════════════
+const GRADES=[{min:90,g:"S",label:"S — 최우수",msg:"완벽에 가까운 실력입니다! 🎉"},{min:80,g:"A",label:"A — 우수",msg:"핵심 문법을 잘 이해했습니다!"},{min:60,g:"B",label:"B — 양호",msg:"조금 더 복습이 필요해요."},{min:40,g:"C",label:"C — 보통",msg:"교재를 다시 꼼꼼히 읽어보세요."},{min:0,g:"D",label:"D — 부족",msg:"Point별로 처음부터 다시 학습하세요."}];
+
+let curCh=1, studentName='', mcAns=[], saAns=[], cur=0;
+let adminCurCh=1;
+
+// ── 화면 전환 ────────────────────────────────────────
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ── 챕터 목록 렌더링 ─────────────────────────────────
+function renderChapters(){
+  const el=document.getElementById('ch-list');
+  el.innerHTML='';
+  Object.keys(CHAPTERS).forEach(k=>{
+    const ch=CHAPTERS[k];
+    const d=document.createElement('div');d.className='ch-item';
+    d.onclick=()=>openChapter(parseInt(k));
+    d.innerHTML=`<div class="ch-num">0${k}</div><div class="ch-info"><div class="ch-title">${ch.title}</div><div class="ch-sub">${ch.sub}</div></div><span class="ch-arrow">›</span>`;
+    el.appendChild(d);
+  });
+}
+
+function openChapter(n){
+  curCh=n;
+  const ch=CHAPTERS[n];
+  document.getElementById('land-sub').textContent='천일문 중등 GRAMMAR·WRITING Level 2';
+  document.getElementById('land-title').textContent=ch.title;
+  document.getElementById('name-in').value='';
+  show('s-landing');
+}
+
+// ── 퀴즈 시작 ───────────────────────────────────────
+function startQuiz(){
+  studentName=document.getElementById('name-in').value.trim();
+  if(!studentName){alert('이름을 입력해주세요.');return;}
+  mcAns=new Array(MC_COUNT).fill(-1);
+  saAns=new Array(5).fill('');
+  cur=0;
+  document.getElementById('qz-name').textContent=studentName;
+  document.getElementById('qz-title').textContent=CHAPTERS[curCh].title;
+  render(0);show('s-quiz');
+}
+
+// ── 렌더링 ──────────────────────────────────────────
+function render(i){
+  const Q=CHAPTERS[curCh].q;
+  const q=Q[i];
+  const pct=Math.round(i/TOTAL*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  const pf=document.getElementById('prog-fill');
+  pf.className='prog-fill'+(q.type==='sa'?' sa-fill':'');
+  document.getElementById('prog-txt').textContent=(i+1)+' / '+TOTAL;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('qz-cnt').textContent=(i+1)+'/'+TOTAL;
+  const badge=document.getElementById('q-badge');
+  if(q.type==='sa'){badge.textContent='[서술형]';badge.className='q-badge badge-sa';}
+  else{const map={A:'[A형] 빈칸 채우기',B:'[B형] 어법상 옳은 것',C:'[C형] 어법상 틀린 것 / 구별'};badge.textContent=map[q.t]||'';badge.className='q-badge badge-'+q.t.toLowerCase();}
+  document.getElementById('q-point').innerHTML=q.p+'<span class="q-pts">'+q.pts+'점</span>';
+  document.getElementById('q-text').innerHTML=q.q;
+  const el=document.getElementById('q-choices');el.innerHTML='';
+  if(q.type==='mc'){
+    const div=document.createElement('div');div.className='choices';
+    q.c.forEach((c,ci)=>{
+      const b=document.createElement('button');b.className='choice'+(mcAns[i]===ci?' sel':'');
+      b.innerHTML=c;b.onclick=()=>pickMC(i,ci);div.appendChild(b);});
+    el.appendChild(div);
+  }else{
+    const si=i-MC_COUNT;
+    const wrap=document.createElement('div');wrap.className='sa-input-wrap';
+    const lbl=document.createElement('div');lbl.className='sa-input-label';lbl.textContent='답을 쓰세요:';
+    const inp=document.createElement('input');inp.type='text';inp.className='sa-input';
+    inp.placeholder='영어로 답을 입력하세요';inp.value=saAns[si]||'';
+    inp.oninput=e=>{saAns[si]=e.target.value;};
+    wrap.appendChild(lbl);wrap.appendChild(inp);el.appendChild(wrap);
+    setTimeout(()=>inp.focus(),50);
+  }
+  document.getElementById('btn-prev').disabled=i===0;
+  document.getElementById('btn-next').textContent=i===TOTAL-1?'제출 →':'다음 →';
+}
+
+function pickMC(qi,ci){
+  mcAns[qi]=ci;
+  document.getElementById('q-choices').querySelectorAll('.choice').forEach((b,j)=>b.classList.toggle('sel',j===ci));
+}
+function nav(d){cur=Math.max(0,Math.min(TOTAL-1,cur+d));render(cur);}
+function navNext(){
+  if(cur===TOTAL-1){
+    const emp=mcAns.filter(a=>a===-1).length+saAns.filter(a=>!a.trim()).length;
+    if(emp>0&&!confirm(`${emp}문항을 아직 풀지 않았습니다. 제출하시겠습니까?`))return;
+    submit();
+  }else nav(1);
+}
+
+function checkSA(s,q){const n=x=>x.toLowerCase().trim().replace(/\.+$/,'');const sn=n(s);return q.accepts.some(a=>n(a)===sn);}
+
+async function submit(){
+  const Q=CHAPTERS[curCh].q;
+  let mcScore=0,saScore=0;
+  mcAns.forEach((a,i)=>{if(a===Q[i].a)mcScore+=Q[i].pts;});
+  saAns.forEach((a,i)=>{if(checkSA(a,Q[MC_COUNT+i]))saScore+=Q[MC_COUNT+i].pts;});
+  const total=mcScore+saScore;
+  const grade=GRADES.find(g=>total>=g.min);
+  document.getElementById('res-name').textContent=studentName+'님의 결과 · '+CHAPTERS[curCh].title;
+  document.getElementById('res-score').textContent=total;
+  document.getElementById('res-grade').textContent=grade.label;
+  document.getElementById('res-msg').textContent=grade.msg;
+  const okCnt=mcAns.filter((a,i)=>a===Q[i].a).length+saAns.filter((a,i)=>checkSA(a,Q[MC_COUNT+i])).length;
+  document.getElementById('st-ok').textContent=okCnt;
+  document.getElementById('st-ng').textContent=TOTAL-okCnt;
+  document.getElementById('st-mc').textContent=mcScore+'점';
+  document.getElementById('st-sa').textContent=saScore+'점';
+  const rv=document.getElementById('review');rv.innerHTML='';
+  Q.forEach((q,i)=>{
+    const ok=q.type==='mc'?mcAns[i]===q.a:checkSA(saAns[i-MC_COUNT],q);
+    let choicesHtml='';
+    if(q.type==='mc'){const stuAns=mcAns[i];choicesHtml=q.c.map((c,ci)=>{let cls='detail-c';if(ci===q.a)cls+=' is-ans';else if(ci===stuAns)cls+=' is-wrong';return`<div class="${cls}">${c}</div>`;}).join('');}
+    else{const si=i-MC_COUNT;choicesHtml=`<div style="font-size:13px;margin-top:6px"><div style="padding:7px 11px;border-radius:5px;border:1px solid ${ok?'#16a34a':'#fca5a5'};background:${ok?'#f0fdf4':'#fef2f2'};color:${ok?'#166534':'#991b1b'};margin-bottom:5px">내 답: ${saAns[si]||'(미응답)'}</div><div class="detail-c is-ans">정답: ${q.a}</div></div>`;}
+    const d=document.createElement('div');
+    d.className='rv-item '+(ok?'ok':'ng');
+    d.setAttribute('onclick',`document.getElementById('rv-det-${i}').classList.toggle('active')`);
+    d.innerHTML=`<span class="rv-icon">${ok?'✓':'✗'}</span><div class="rv-body"><div style="font-size:14px;margin-bottom:3px">${q.type==='sa'?'<span class="sa-tag">서술형</span>':''}<strong>${i+1}번</strong> ${q.p} · ${q.pts}점<span class="click-hint">(클릭 ▾)</span></div>${!ok&&q.type==='mc'?`<div class="rv-wrong">내 답: ${mcAns[i]>=0?q.c[mcAns[i]].split(' ')[0]:'미응답'} → 정답: ${q.c[q.a].split(' ')[0]}</div>`:''}${!ok&&q.type==='sa'?`<div class="rv-wrong">내 답: ${saAns[i-MC_COUNT]||'미응답'} → 정답: ${q.a}</div>`:''}
+    <div class="detail-box" id="rv-det-${i}" onclick="event.stopPropagation()"><div class="detail-q">${q.q}</div>${choicesHtml}</div></div>`;
+    rv.appendChild(d);
+  });
+  show('s-result');
+  const statusEl=document.getElementById('save-status');
+  statusEl.innerHTML='<span class="spinner"></span>점수 저장 중...';
+  try{
+    const payload={name:studentName,chapter:curCh,score:total,total:100,grade:grade.g,mcScore,saScore,mcAnswers:mcAns,saAnswers:saAns,date:new Date().toLocaleString('ko-KR'),ts:Date.now()};
+    const r=await fetch(FIREBASE_URL+CHAPTERS[curCh].db,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    statusEl.innerHTML=r.ok?'<span style="color:var(--green)">✓ 점수가 저장되었습니다</span>':'저장 실패 ('+r.status+')';
+  }catch(e){statusEl.textContent='저장 실패: '+e.message;}
+}
+
+// ── 관리자 ──────────────────────────────────────────
+function openAdminModal(){document.getElementById('adm-pw').value='';document.getElementById('pw-err').textContent='';document.getElementById('modal').style.display='flex';setTimeout(()=>document.getElementById('adm-pw').focus(),100);}
+function closeModal(){document.getElementById('modal').style.display='none';}
+document.getElementById('adm-pw').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
+function checkPw(){if(document.getElementById('adm-pw').value===ADMIN_PW){closeModal();initAdmin();}else document.getElementById('pw-err').textContent='비밀번호가 올바르지 않습니다.';}
+
+function initAdmin(){
+  show('s-admin');
+  const btns=document.getElementById('adm-ch-btns');btns.innerHTML='';
+  Object.keys(CHAPTERS).forEach(k=>{
+    const b=document.createElement('button');
+    b.style.cssText=`padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:#f9fafb;cursor:pointer;font-size:13px;transition:all .15s;font-weight:${adminCurCh==k?'700':'400'};background:${adminCurCh==k?'var(--purple)':'#f9fafb'};color:${adminCurCh==k?'#fff':'var(--txt)'}`;
+    b.textContent='Ch.0'+k;b.onclick=()=>{adminCurCh=parseInt(k);initAdmin();};
+    btns.appendChild(b);
+  });
+  loadAdmin(adminCurCh);
+}
+
+async function loadAdmin(n){
+  const listEl=document.getElementById('adm-list');const statsEl=document.getElementById('adm-stats');
+  document.getElementById('adm-title').textContent='Chapter 0'+n+' 성적 현황';
+  listEl.innerHTML='<div class="empty"><span class="spinner"></span>불러오는 중...</div>';
+  try{
+    const r=await fetch(FIREBASE_URL+CHAPTERS[n].db);const data=await r.json();
+    if(!data){listEl.innerHTML='<div class="empty">아직 응시한 학생이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const results=Object.values(data).filter(r=>r&&r.name&&r.score!==undefined).sort((a,b)=>b.score-a.score);
+    if(!results.length){listEl.innerHTML='<div class="empty">유효한 응시 기록이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const avg=(results.reduce((s,r)=>s+(Number(r.score)||0),0)/results.length).toFixed(1);
+    statsEl.innerHTML=`<div class="stat"><div class="stat-n">${results.length}</div><div class="stat-l">응시 인원</div></div><div class="stat"><div class="stat-n">${avg}</div><div class="stat-l">평균 점수</div></div><div class="stat"><div class="stat-n">${results[0].score||0}</div><div class="stat-l">최고 점수</div></div>`;
+    listEl.innerHTML='';
+    const Q=CHAPTERS[n].q;
+    results.forEach((r,i)=>{
+      const gc=r.score>=90?'s':r.score>=80?'a':r.score>=60?'b':'c';const gl=r.score>=90?'S':r.score>=80?'A':r.score>=60?'B':'C';
+      let wrongs=[];
+      if(r.mcAnswers&&Array.isArray(r.mcAnswers)){
+        r.mcAnswers.forEach((ansIdx,idx)=>{if(!Q[idx])return;if(ansIdx!==Q[idx].a){let chHtml=Q[idx].c.map((c,ci)=>{let cls='detail-c';if(ci===Q[idx].a)cls+=' is-ans';else if(ci===ansIdx)cls+=' is-wrong';return`<div class="${cls}">${c}</div>`;}).join('');wrongs.push(`<div class="adm-wrong-item" onclick="document.getElementById('adm-det-${i}-${idx}').classList.toggle('active');event.stopPropagation()"><div style="display:flex;gap:8px"><span style="font-weight:700;flex-shrink:0;min-width:32px">${idx+1}번</span><div style="flex:1"><div style="margin-bottom:3px;font-weight:600">${Q[idx].p} <span class="click-hint">(클릭 ▾)</span></div>학생: <span style="color:var(--red);font-weight:600">${ansIdx>=0?Q[idx].c[ansIdx].split(' ')[0]:'미응답'}</span> → 정답: <span style="color:var(--green);font-weight:600">${Q[idx].c[Q[idx].a].split(' ')[0]}</span><div class="detail-box" id="adm-det-${i}-${idx}" onclick="event.stopPropagation()"><div class="detail-q">${Q[idx].q}</div>${chHtml}</div></div></div></div>`);}});
+        if(r.saAnswers&&Array.isArray(r.saAnswers)){r.saAnswers.forEach((sa,si)=>{const qi=MC_COUNT+si;if(!Q[qi])return;if(!checkSA(sa,Q[qi])){wrongs.push(`<div class="adm-wrong-item"><div style="display:flex;gap:8px"><span class="sa-tag">서술형</span><span style="font-weight:700;flex-shrink:0;min-width:28px">${qi+1}번</span><div><div style="font-weight:600;margin-bottom:3px">${Q[qi].p}</div>학생: <span style="color:var(--red);font-weight:600">${sa||'미응답'}</span><br>정답: <span style="color:var(--green);font-weight:600">${Q[qi].a}</span></div></div></div>`);}}); }
+      }
+      const wrongHtml=`<div class="adm-details" id="detail-${i}"><div style="font-size:12px;font-weight:700;margin-bottom:10px">[틀린 문항]</div>${wrongs.length>0?wrongs.join(''):'<div style="color:var(--green);font-weight:600;text-align:center">모든 문제 정답! 🎉</div>'}</div>`;
+      const rowWrap=document.createElement('div');rowWrap.className='adm-row-wrap';
+      rowWrap.innerHTML=`<div class="adm-row" onclick="document.getElementById('detail-${i}').classList.toggle('active')"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--muted);min-width:20px">${i+1}</span><div><div class="adm-name">${r.name} <span style="font-size:11px;color:#9ca3af;font-weight:normal">(클릭)</span></div><div class="adm-date">${r.date||''}</div></div></div><div style="display:flex;align-items:center"><span class="adm-score">${r.score}점</span><span class="adm-rank rank-${gc}">${gl}</span><span style="color:#d1d5db;margin-left:8px;font-size:18px">▾</span></div></div>${wrongHtml}`;
+      listEl.appendChild(rowWrap);
+    });
+  }catch(e){listEl.innerHTML='<div class="empty">불러오기 실패: '+e.message+'</div>';}
+}
+
+async function confirmClear(){
+  if(!confirm('Chapter 0'+adminCurCh+' 기록을 모두 삭제하시겠습니까?'))return;
+  try{await fetch(FIREBASE_URL+CHAPTERS[adminCurCh].db,{method:'DELETE'});initAdmin();}catch(e){alert('삭제 실패: '+e.message);}
+}
+
+// 초기화
+renderChapters();
+</script>
+</body>
+</html>
