@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>어법끝 START — UNIT 01 리뷰 테스트</title>
+<title>NE Tutor — 문법 기출 리뷰 테스트</title>
 <style>
 /* ── 설정 방법 ──────────────────────────────────────────────
    1. https://console.firebase.google.com 접속
@@ -170,18 +170,17 @@ input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(26,
 <body>
 <div class="wrap">
 
-<!-- ── LANDING ───────────────────────────────────────────── -->
 <div id="s-landing" class="screen active">
   <div class="hdr">
-    <div class="hdr-sub">어법끝 START — UNIT 01</div>
-    <div class="hdr-title">주어와 동사의 수일치 리뷰 테스트</div>
+    <div class="hdr-sub">NE Tutor 기출문제</div>
+    <div class="hdr-title">문장의 형식과 구조 리뷰 테스트</div>
   </div>
   <div id="config-warn" class="config-banner" style="display:none">
     <strong>⚠️ Firebase 미설정 — 점수가 저장되지 않습니다</strong>
     파일 상단 주석의 설정 방법을 따라 <code>FIREBASE_URL</code> 값을 교체해주세요.
   </div>
   <div class="card">
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">25문항 · 5지선다 · 수능 어법 유형</p>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">10문항 · 5지선다 · 문법 유형</p>
     <label for="name-in">이름</label>
     <input type="text" id="name-in" placeholder="예) 홍길동" autocomplete="off">
     <button class="btn btn-green" onclick="startQuiz()">테스트 시작 →</button>
@@ -189,12 +188,11 @@ input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(26,
   </div>
 </div>
 
-<!-- ── QUIZ ──────────────────────────────────────────────── -->
 <div id="s-quiz" class="screen">
   <div class="hdr hdr-row">
     <div>
       <div class="hdr-sub" id="qz-name"></div>
-      <div class="hdr-title" style="font-size:16px">UNIT 01 수일치 테스트</div>
+      <div class="hdr-title" style="font-size:16px">기출문제 테스트</div>
     </div>
     <span id="qz-counter" style="font-size:13px;opacity:.8"></span>
   </div>
@@ -214,7 +212,6 @@ input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(26,
   </div>
 </div>
 
-<!-- ── RESULT ────────────────────────────────────────────── -->
 <div id="s-result" class="screen">
   <div class="hdr">
     <div class="hdr-sub">테스트 완료</div>
@@ -238,7 +235,6 @@ input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(26,
   </div>
 </div>
 
-<!-- ── ADMIN ─────────────────────────────────────────────── -->
 <div id="s-admin" class="screen">
   <div class="hdr hdr-row">
     <div><div class="hdr-sub">관리자 패널</div><div class="hdr-title">학생 성적 현황</div></div>
@@ -252,9 +248,8 @@ input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(26,
   </div>
 </div>
 
-</div><!-- /wrap -->
+</div>
 
-<!-- Admin Modal -->
 <div id="modal" class="modal-overlay" style="display:none">
   <div class="modal-box">
     <h3>관리자 비밀번호</h3>
@@ -271,129 +266,155 @@ input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(26,
 <script>
 // ════════════════════════════════════════════════
 //  ⚠️  여기에 Firebase URL을 입력하세요
-//  예: "https://terry-english-quiz-default-rtdb.firebaseio.com"
 const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
 // ════════════════════════════════════════════════
 const ADMIN_PW = "terry2025";
-const TOTAL = 25;
+const TOTAL = 10;
+
+// ⭐ 테스트마다 고유한 저장소 경로를 지정해야 데이터가 섞이지 않습니다.
+const DB_PATH = "/results_grammar_review01.json"; 
 
 // Firebase 설정 여부 확인
 if(!FIREBASE_URL.startsWith("http")){
   document.getElementById('config-warn').style.display='block';
 }
 
-// ── 문제 데이터 ──────────────────────────────────
+// ── 기출문제 데이터 ──────────────────────────────────
 const Q = [
-  {t:"A",p:"Point 01 Case 1",
-   q:'The price of the tickets for the three concerts <span class="blank">_____</span> surprisingly low this season.',
-   c:["① are","② were","③ is","④ have been","⑤ have"],a:2},
-  {t:"A",p:"Point 01 Case 1",
-   q:'The researchers from the university <span class="blank">_____</span> conducted a series of experiments on memory.',
-   c:["① has","② is","③ have","④ was","⑤ does"],a:2},
-  {t:"A",p:"Point 01 Case 2",
-   q:'The bird singing in the trees along the river <span class="blank">_____</span> known for its beautiful melody.',
-   c:["① are","② were","③ is","④ have","⑤ do"],a:2},
-  {t:"A",p:"Point 01 Case 2",
-   q:'The first athletes to finish the marathon in under two hours <span class="blank">_____</span> given gold medals.',
-   c:["① was","② is","③ has","④ were","⑤ does"],a:3},
-  {t:"A",p:"Point 01 Case 3",
-   q:'The paintings created by the famous artist during his final years <span class="blank">_____</span> priceless.',
-   c:["① is","② was","③ does","④ are","⑤ has"],a:3},
-  {t:"A",p:"Point 01 Case 3",
-   q:'The information provided by all the witnesses <span class="blank">_____</span> consistent with the official report.',
-   c:["① are","② were","③ is","④ have","⑤ do"],a:2},
-  {t:"A",p:"Point 01 Case 4",
-   q:'The rules that the school board adopted last semester <span class="blank">_____</span> stricter than expected.',
-   c:["① is","② was","③ are","④ has","⑤ does"],a:2},
-  {t:"A",p:"Point 01 Case 4",
-   q:'The student responsible for organizing the annual school festival <span class="blank">_____</span> praised by all the teachers.',
-   c:["① are","② were","③ is","④ have","⑤ do"],a:2},
-  {t:"A",p:"Point 01 Case 5",
-   q:'The professor, together with all her graduate students, <span class="blank">_____</span> working on a new research paper.',
-   c:["① are","② were","③ is","④ have","⑤ do"],a:2},
-  {t:"A",p:"Point 02 Case 1",
-   q:'She admires the musicians who <span class="blank">_____</span> dedicated their lives to preserving traditional folk music.',
-   c:["① has","② is","③ was","④ have","⑤ does"],a:3},
-  {t:"A",p:"Point 02 Case 1",
-   q:'The laboratory that <span class="blank">_____</span> recently built in this area attracted many talented scientists.',
-   c:["① were","② are","③ was","④ have","⑤ do"],a:2},
-  {t:"A",p:"Point 02 Case 2",
-   q:'Please throw away all the papers in the folder that <span class="blank">_____</span> no longer relevant to the project.',
-   c:["① are","② is","③ was","④ has","⑤ does"],a:0},
-  {t:"A",p:"Point 03 Case 1",
-   q:'On the walls of the ancient cave <span class="blank">_____</span> remarkable drawings made thousands of years ago.',
-   c:["① is","② was","③ were","④ are","⑤ has"],a:2},
-  {t:"A",p:"Point 03 Case 2",
-   q:'Not only <span class="blank">_____</span> the new policy cause financial problems, but it also discouraged foreign investment.',
-   c:["① did","② do","③ does","④ has","⑤ is"],a:0},
-  {t:"A",p:"Point 03 Case 3",
-   q:'There <span class="blank">_____</span> a number of reasons why the renovation project has been delayed.',
-   c:["① is","② was","③ were","④ are","⑤ has been"],a:3},
-  {t:"A",p:"Point 04 Case 1",
-   q:'To stay up late and skip meals regularly <span class="blank">_____</span> seriously damaging to your long-term health.',
-   c:["① are","② were","③ is","④ have","⑤ do"],a:2},
-  {t:"A",p:"Point 04 Case 1",
-   q:'Whether the proposed changes will have a positive effect on student performance <span class="blank">_____</span> still unclear.',
-   c:["① are","② were","③ is","④ have","⑤ do"],a:2},
-  {t:"A",p:"Point 04 Case 2",
-   q:'Each of the participants in the training program <span class="blank">_____</span> required to submit a final report.',
-   c:["① are","② were","③ is","④ have","⑤ do"],a:2},
-  {t:"A",p:"Point 04 Case 2",
-   q:'Both the teacher and her students <span class="blank">_____</span> excited about the upcoming science fair.',
-   c:["① is","② was","③ are","④ has","⑤ does"],a:2},
-  {t:"A",p:"Point 04 Case 3",
-   q:'The homeless in this city <span class="blank">_____</span> in desperate need of better shelter and social support.',
-   c:["① is","② was","③ are","④ has","⑤ does"],a:2},
-  {t:"B",p:"어법상 옳은 것",
-   q:'다음 ①~⑤ 중 <strong>어법상 옳은</strong> 문장을 고르시오.',
-   c:["① The number of students in this class are twenty.",
-      "② A number of complaints has been received about the new system.",
-      "③ Knowledge gained through experience make us wiser over time.",
-      "④ Both the captain and the crew was rescued from the sinking ship.",
-      "⑤ The equipment used in this experiment is checked and recorded regularly."],a:4},
-  {t:"B",p:"어법상 옳은 것",
-   q:'다음 ①~⑤ 중 <strong>어법상 옳은</strong> 문장을 고르시오.',
-   c:["① The children raised in bilingual households speaks two languages fluently.",
-      "② In front of the historic city hall stand a bronze statue of the founder.",
-      "③ Not only does the manager work long hours, but her team also stays late.",
-      "④ Whether the new policies are fair or not remain to be discussed.",
-      "⑤ Each of the volunteers are expected to attend the two-day training session."],a:2},
-  {t:"C",p:"어법상 틀린 것",
-   q:'다음 ①~⑤의 밑줄 친 부분 중, <strong>어법상 틀린</strong> 것을 고르시오.',
-   c:['① The cost of all the materials needed for construction <span class="uline">is</span> higher than expected.',
-      '② We finally met the scientist who <span class="uline">has</span> dedicated her entire life to cancer research.',
-      '③ There <span class="uline">were</span> a great deal of excitement among the fans gathered at the stadium.',
-      '④ Not until recently <span class="uline">did</span> people start to fully understand the risks of social media.',
-      '⑤ Both the manager and his assistant <span class="uline">were</span> surprised by the quarterly results.'],a:2},
-  {t:"C",p:"어법상 틀린 것",
-   q:'다음 ①~⑤의 밑줄 친 부분 중, <strong>어법상 틀린</strong> 것을 고르시오.',
-   c:['① Getting enough sleep and eating well <span class="uline">are</span> equally important for maintaining good health.',
-      '② The girl sitting quietly next to the two tall boys <span class="uline">is</span> my cousin.',
-      '③ All of the money collected at the charity event <span class="uline">were</span> donated to local hospitals.',
-      '④ The athletes who train at this facility <span class="uline">have</span> won several national championships.',
-      '⑤ Behind the old wooden door <span class="uline">was</span> a secret passage leading to the garden.'],a:2},
-  {t:"C",p:"어법상 틀린 것",
-   q:'다음 ①~⑤의 밑줄 친 부분 중, <strong>어법상 틀린</strong> 것을 고르시오.',
-   c:['① Whether learning a foreign language is difficult or easy <span class="uline">depends</span> on the individual learner.',
-      '② One of the most fascinating aspects of the entire trip <span class="uline">was</span> the local cuisine.',
-      '③ The policies introduced by the new administration <span class="uline">has</span> faced strong public opposition.',
-      '④ Nowhere in the world <span class="uline">is</span> there a natural landscape quite like that of Iceland.',
-      '⑤ The majority of the participants in the online survey <span class="uline">were</span> satisfied with the results.'],a:2},
+  {
+    t: "C", p: "문장의 형식",
+    q: '다음 밑줄 친 부분의 쓰임이 나머지와 다른 것을 고르시오.',
+    c: [
+      "① Cats keep themselves clean.",
+      "② People considered him a genius.",
+      "③ I saw the traffic light turn green.",
+      "④ Give me a call when you get there.",
+      "⑤ He encouraged me to run in the race."
+    ],
+    a: 3
+  },
+  {
+    t: "A", p: "감각동사",
+    q: '다음 우리말을 영어로 바르게 옮긴 것을 고르시오.<br><br>A: How did you feel after finishing the project?<br>B: 나는 자랑스럽고 행복한 기분이었어.',
+    c: [
+      "① I feel proudly and happy.",
+      "② I felt proud and happy.",
+      "③ I felt proud and happily.",
+      "④ I felt proudly and happily.",
+      "⑤ I will feel proud and happy."
+    ],
+    a: 1
+  },
+  {
+    t: "C", p: "수여동사",
+    q: '다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',
+    c: [
+      "① I'm going to the library.",
+      "② Will you buy a cookie me?",
+      "③ We all had fun at the beach.",
+      "④ The thought made him sick.",
+      "⑤ The weather got better the next day."
+    ],
+    a: 1
+  },
+  {
+    t: "A", p: "감각동사",
+    q: '다음 빈칸에 알맞은 말을 고르시오.<br><br>Your plan <span class="blank">_____</span> interesting to me.',
+    c: [
+      "① hears",
+      "② sounds",
+      "③ tells",
+      "④ listens",
+      "⑤ looks"
+    ],
+    a: 1
+  },
+  {
+    t: "C", p: "부사의 쓰임",
+    q: '다음 빈칸에 들어갈 수 <strong>없는</strong> 것을 고르시오.<br><br>Tim works <span class="blank">_____</span>.',
+    c: [
+      "① slowly",
+      "② office",
+      "③ fast",
+      "④ hard",
+      "⑤ carefully"
+    ],
+    a: 1
+  },
+  {
+    t: "C", p: "문장의 형식",
+    q: '다음 문장의 형식이 나머지와 다른 것을 고르시오.',
+    c: [
+      "① He stood next to Laura.",
+      "② George doesn't like cakes.",
+      "③ Can you open the window?",
+      "④ Students must follow these rules.",
+      "⑤ David baked a cake for his family."
+    ],
+    a: 0
+  },
+  {
+    t: "A", p: "동사의 목적어",
+    q: '다음 빈칸에 알맞은 말을 고르시오.<br><br>I <span class="blank">_____</span> a terrible mistake.',
+    c: [
+      "① was",
+      "② let",
+      "③ made",
+      "④ brought",
+      "⑤ did"
+    ],
+    a: 2
+  },
+  {
+    t: "B", p: "문장 구조 분석",
+    q: '다음 문장이 어떤 구조로 이루어져 있는지 고르시오.<br><br>My baby brother cries a lot.',
+    c: [
+      "① 주어 + 동사",
+      "② 주어 + 동사 + 보어",
+      "③ 주어 + 동사 + 목적어",
+      "④ 주어 + 동사 + 간접목적어 + 직접목적어",
+      "⑤ 주어 + 동사 + 목적어 + 보어"
+    ],
+    a: 0
+  },
+  {
+    t: "B", p: "문장 구조 분석",
+    q: '다음 문장이 어떤 구조로 이루어져 있는지 고르시오.<br><br>My brother sometimes makes me crazy.',
+    c: [
+      "① 주어 + 동사",
+      "② 주어 + 동사 + 보어",
+      "③ 주어 + 동사 + 목적어",
+      "④ 주어 + 동사 + 간접목적어 + 직접목적어",
+      "⑤ 주어 + 동사 + 목적어 + 보어"
+    ],
+    a: 4
+  },
+  {
+    t: "A", p: "목적격 보어",
+    q: '다음 빈칸에 알맞은 말을 고르시오.<br><br>Lots of practice made her <span class="blank">_____</span>.',
+    c: [
+      "① clean",
+      "② happy",
+      "③ an angel",
+      "④ interesting",
+      "⑤ a great tennis player"
+    ],
+    a: 4
+  }
 ];
 
-const GRADES=[{min:23,g:"S",label:"S — 매우 우수",msg:"거의 완벽한 이해도입니다! 🎉"},
-              {min:20,g:"A",label:"A — 우수",msg:"핵심 개념을 잘 이해했습니다."},
-              {min:15,g:"B",label:"B — 양호",msg:"조금 더 복습이 필요해요."},
-              {min:10,g:"C",label:"C — 보통",msg:"교재를 다시 꼼꼼히 읽어보세요."},
-              {min:0,g:"D",label:"D — 부족",msg:"Point별로 처음부터 다시 학습하세요."}];
+// 10문항 기준 등급 로직
+const GRADES=[{min:9,g:"S",label:"S — 매우 우수",msg:"거의 완벽한 이해도입니다! 🎉"},
+              {min:8,g:"A",label:"A — 우수",msg:"핵심 개념을 잘 이해했습니다."},
+              {min:6,g:"B",label:"B — 양호",msg:"조금 더 복습이 필요해요."},
+              {min:4,g:"C",label:"C — 보통",msg:"문장 구조를 다시 복습해보세요."},
+              {min:0,g:"D",label:"D — 부족",msg:"기본 개념부터 차근차근 다시 학습하세요."}];
 
 let studentName='', ans=new Array(TOTAL).fill(-1), cur=0;
 
-// ── Navigation helpers ───────────────────────────────
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active')}
 function goHome(){document.getElementById('name-in').value='';show('landing')}
 
-// ── Quiz ────────────────────────────────────────────
 function startQuiz(){
   studentName=document.getElementById('name-in').value.trim();
   if(!studentName){alert('이름을 입력해주세요.');return;}
@@ -410,7 +431,7 @@ function render(i){
   document.getElementById('prog-pct').textContent=pct+'%';
   document.getElementById('qz-counter').textContent=(i+1)+'/'+TOTAL;
   const badge=document.getElementById('q-badge');
-  badge.textContent=q.t==='A'?'[A형] 빈칸 채우기':q.t==='B'?'[B형] 어법상 옳은 것':'[C형] 어법상 틀린 것';
+  badge.textContent=q.t==='A'?'[A형] 알맞은 말 고르기':q.t==='B'?'[B형] 문장 구조 찾기':'[C형] 쓰임이 다른 것 찾기';
   badge.className='q-badge badge-'+q.t.toLowerCase();
   document.getElementById('q-point').textContent=q.p;
   document.getElementById('q-text').innerHTML=q.q;
@@ -445,7 +466,6 @@ function navNext(){
   }else{nav(1);}
 }
 
-// ── Submit & Result ──────────────────────────────────
 async function submit(){
   const score=ans.filter((a,i)=>a===Q[i].a).length;
   const pct=Math.round(score/TOTAL*100);
@@ -462,16 +482,14 @@ async function submit(){
 
   const rv=document.getElementById('review');rv.innerHTML='';
   
-  // 학생용 상세 리뷰 렌더링
   Q.forEach((q,i)=>{
     const ok=ans[i]===q.a;
     const stuAns = ans[i];
     
-    // 보기별 정답/오답 하이라이트 박스 생성
     let choicesHtml = q.c.map((cText, cIdx) => {
        let cClass = 'detail-c';
-       if(cIdx === q.a) cClass += ' is-ans'; // 진짜 정답
-       else if(cIdx === stuAns) cClass += ' is-wrong'; // 학생이 고른 오답
+       if(cIdx === q.a) cClass += ' is-ans'; 
+       else if(cIdx === stuAns) cClass += ' is-wrong'; 
        return `<div class="${cClass}">${cText}</div>`;
     }).join('');
 
@@ -487,7 +505,6 @@ async function submit(){
         </div>
         ${!ok?`<div class="review-wrong">내 답: ${ans[i]>=0?q.c[ans[i]].split(' ')[0]:'미응답'} → 정답: ${q.c[q.a].split(' ')[0]}</div>`:''}
         
-        <!-- 토글되는 원문 및 정답 상세 영역 -->
         <div class="detail-box" id="rev-det-${i}" onclick="event.stopPropagation()">
           <div class="detail-q">${q.q}</div>
           <div style="display:flex; flex-direction:column; gap:4px;">${choicesHtml}</div>
@@ -498,7 +515,6 @@ async function submit(){
 
   show('result');
 
-  // Firebase 저장
   const statusEl=document.getElementById('save-status');
   if(!FIREBASE_URL.startsWith("http")){
     statusEl.textContent='⚠️ Firebase 미설정 — 점수가 저장되지 않았습니다';
@@ -507,13 +523,13 @@ async function submit(){
   statusEl.innerHTML='<span class="spinner"></span>점수 저장 중...';
   try{
     const payload={name:studentName,score:score,total:TOTAL,pct,grade:grade.g,answers:ans,date:new Date().toLocaleString('ko-KR'),ts:Date.now()};
-    const r=await fetch(FIREBASE_URL+'/results.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    // ⭐ DB_PATH 적용
+    const r=await fetch(FIREBASE_URL+DB_PATH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(r.ok){statusEl.innerHTML='<span style="color:var(--green)">✓ 점수가 저장되었습니다</span>';}
     else{statusEl.textContent='저장 실패 ('+r.status+')';}
   }catch(e){statusEl.textContent='저장 실패: '+e.message;}
 }
 
-// ── Admin (상세 확인 추가 적용) ──────────────────────────
 function openAdminModal(){
   document.getElementById('adm-pw').value='';
   document.getElementById('pw-err').textContent='';
@@ -540,13 +556,14 @@ async function loadAdmin(){
   }
 
   try{
-    const r=await fetch(FIREBASE_URL+'/results.json');
+    // ⭐ DB_PATH 적용
+    const r=await fetch(FIREBASE_URL+DB_PATH);
     const data=await r.json();
     if(!data){listEl.innerHTML='<div class="empty">아직 응시한 학생이 없습니다.</div>';statsEl.innerHTML='';return;}
 
     const raw=Object.values(data);
     const results=raw.filter(r=>r&&r.name&&r.score!==undefined).sort((a,b)=>b.score-a.score);
-    if(results.length===0){listEl.innerHTML='<div class="empty">유효한 응시 기록이 없습니다.<br><small style="color:#999">Firebase DB에서 results 노드를 확인해주세요.</small></div>';statsEl.innerHTML='';return;}
+    if(results.length===0){listEl.innerHTML='<div class="empty">유효한 응시 기록이 없습니다.</div>';statsEl.innerHTML='';return;}
     const avg=(results.reduce((s,r)=>s+(Number(r.score)||0),0)/results.length).toFixed(1);
     statsEl.innerHTML=`
       <div class="stat"><div class="stat-n">${results.length}</div><div class="stat-l">응시 인원</div></div>
@@ -555,20 +572,21 @@ async function loadAdmin(){
 
     listEl.innerHTML='';
     results.forEach((r,i)=>{
-      const gc=r.pct>=92?'s':r.pct>=80?'a':r.pct>=60?'b':'c';
-      const gl=r.pct>=92?'S':r.pct>=80?'A':r.pct>=60?'B':'C';
+      const gc=r.pct>=90?'s':r.pct>=80?'a':r.pct>=60?'b':'c';
+      const gl=r.pct>=90?'S':r.pct>=80?'A':r.pct>=60?'B':'C';
       
-      // 관리자용 오답 상세 데이터 및 원문 렌더링 로직
       let wrongHtml = '';
       if(r.answers && Array.isArray(r.answers)) {
           let wrongs = [];
           r.answers.forEach((ansIdx, idx) => {
-              if(ansIdx !== Q[idx].a) { // 틀린 문제 필터링
+              // ⭐ 문항 수가 다를 경우를 대비한 안전 장치 추가
+              if(!Q[idx]) return; 
+
+              if(ansIdx !== Q[idx].a) { 
                   let stuAns = ansIdx;
                   let corAnsStr = Q[idx].c[Q[idx].a].split(' ')[0];
                   let stuAnsStr = ansIdx >= 0 ? Q[idx].c[ansIdx].split(' ')[0] : '미응답';
                   
-                  // 보기별 정답/오답 하이라이트 박스 생성
                   let choicesHtml = Q[idx].c.map((cText, cIdx) => {
                      let cClass = 'detail-c';
                      if(cIdx === Q[idx].a) cClass += ' is-ans';
@@ -587,7 +605,6 @@ async function loadAdmin(){
                           </div>
                           학생: <span class="admin-wrong-ans">${stuAnsStr}</span> → 정답: <span class="admin-correct-ans">${corAnsStr}</span>
                           
-                          <!-- 토글되는 원문 및 정답 상세 영역 -->
                           <div class="detail-box" id="adm-det-${i}-${idx}" onclick="event.stopPropagation()">
                             <div class="detail-q">${Q[idx].q}</div>
                             <div style="display:flex; flex-direction:column; gap:4px;">${choicesHtml}</div>
@@ -607,10 +624,9 @@ async function loadAdmin(){
               wrongHtml = `<div class="admin-details" id="detail-${i}"><div style="color:var(--green);font-weight:600;text-align:center;">모든 문제를 완벽하게 맞혔습니다! 🎉</div></div>`;
           }
       } else {
-          wrongHtml = `<div class="admin-details" id="detail-${i}"><div style="color:var(--text-muted);text-align:center;font-size:12px">업데이트 이전의 기록이라 상세 데이터가 없습니다.</div></div>`;
+          wrongHtml = `<div class="admin-details" id="detail-${i}"><div style="color:var(--text-muted);text-align:center;font-size:12px">상세 데이터가 없습니다.</div></div>`;
       }
 
-      // 관리자 리스트에 행(Row) 추가
       const rowWrap = document.createElement('div');
       rowWrap.className = 'admin-row-wrap';
       rowWrap.innerHTML = `
@@ -638,7 +654,8 @@ async function loadAdmin(){
 async function confirmClear(){
   if(!confirm('모든 응시 기록을 삭제하시겠습니까?'))return;
   try{
-    await fetch(FIREBASE_URL+'/results.json',{method:'DELETE'});
+    // ⭐ DB_PATH 적용
+    await fetch(FIREBASE_URL+DB_PATH,{method:'DELETE'});
     loadAdmin();
   }catch(e){alert('삭제 실패: '+e.message);}
 }
