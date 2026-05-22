@@ -44,6 +44,9 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
 .book-go{font-size:18px;color:#d1d5db}
 .book-card:hover .book-go{color:var(--c)}
 
+/* Level 카드 — 숫자 배지 스타일 */
+.level-card .book-icon{font-weight:700;font-size:18px;font-family:'Apple SD Gothic Neo',sans-serif}
+
 .test-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:14px;padding:1rem 1.25rem;margin-bottom:10px;text-decoration:none;color:#1a1a1a;transition:all .15s}
 .test-item:hover{border-color:var(--c);box-shadow:0 3px 12px rgba(0,0,0,.06)}
 .test-item:active{transform:scale(.99)}
@@ -143,18 +146,51 @@ const STRUCTURE = {
       {
         id: "munmajung",
         icon: "📙",
-        title: "문마중 Level 2 (2025 개정)",
-        desc: "Ch.01~14 · 챕터별 25문항",
+        title: "문마중 (2025 개정)",
+        desc: "Level 1 · Level 2 · Level 3",
         themeColor: "#ea580c",
         themeColorLight: "#ffedd5",
         themeColorDark: "#9a3412",
-        cumulative: {
-          title: "📝 누적 테스트 (챕터 선택)",
-          file: "munmajung_cumulative.html",
-          info: "원하는 챕터 선택 · 균등 30문항"
-        },
-        tests: [
-          {title:"전체 챕터별 테스트", file:"munmajung.html", info:"Ch.01~14 · 챕터별 25문항 · 100점"},
+        levels: [
+          {
+            icon: "1",
+            title: "Level 1",
+            desc: "Ch.01~13 · 챕터별 25문항",
+            cumulative: {
+              title: "📝 누적 테스트 (챕터 선택)",
+              file: "munmajung_lv1_cumulative.html",
+              info: "원하는 챕터 선택 · 균등 30문항"
+            },
+            tests: [
+              {title:"전체 챕터별 테스트", file:"munmajung_lv1.html", info:"Ch.01~13 · 챕터별 25문항 · 100점"},
+            ]
+          },
+          {
+            icon: "2",
+            title: "Level 2",
+            desc: "Ch.01~14 · 챕터별 25문항",
+            cumulative: {
+              title: "📝 누적 테스트 (챕터 선택)",
+              file: "munmajung_cumulative.html",
+              info: "원하는 챕터 선택 · 균등 30문항"
+            },
+            tests: [
+              {title:"전체 챕터별 테스트", file:"munmajung.html", info:"Ch.01~14 · 챕터별 25문항 · 100점"},
+            ]
+          },
+          {
+            icon: "3",
+            title: "Level 3",
+            desc: "Ch.01~16 · 챕터별 25문항",
+            cumulative: {
+              title: "📝 누적 테스트 (챕터 선택)",
+              file: "munmajung_lv3_cumulative.html",
+              info: "원하는 챕터 선택 · 균등 30문항"
+            },
+            tests: [
+              {title:"전체 챕터별 테스트", file:"munmajung_lv3.html", info:"Ch.01~16 · 챕터별 25문항 · 100점"},
+            ]
+          }
         ]
       }
     ]
@@ -169,6 +205,7 @@ const STRUCTURE = {
 };
 </script>
 
+<!-- ── 메인 (카테고리 선택) ── -->
 <div id="s-main" class="screen active">
   <div class="main-header">
     <div class="academy">Terry's English Academy</div>
@@ -195,6 +232,7 @@ const STRUCTURE = {
   <div class="main-footer">© 테리스 영어 · 동탄남광장 엠베스트</div>
 </div>
 
+<!-- ── 교재 폴더 목록 ── -->
 <div id="s-books" class="screen">
   <div class="list-header">
     <button class="back-btn" onclick="show('s-main')">‹</button>
@@ -206,9 +244,22 @@ const STRUCTURE = {
   <div class="list-body" id="books-body"></div>
 </div>
 
+<!-- ── Level 선택 (문마중 같은 levels 폴더 진입 시) ── -->
+<div id="s-levels" class="screen">
+  <div class="list-header">
+    <button class="back-btn" onclick="openCat(curCat)">‹</button>
+    <div>
+      <div class="list-header-title" id="levels-title"></div>
+      <div class="list-header-sub" id="levels-sub"></div>
+    </div>
+  </div>
+  <div class="list-body" id="levels-body"></div>
+</div>
+
+<!-- ── 테스트 목록 ── -->
 <div id="s-tests" class="screen">
   <div class="list-header">
-    <button class="back-btn" onclick="goBackToBooks()">‹</button>
+    <button class="back-btn" onclick="goBackFromTests()">‹</button>
     <div>
       <div class="list-header-title" id="tests-title"></div>
       <div class="list-header-sub" id="tests-sub"></div>
@@ -218,7 +269,7 @@ const STRUCTURE = {
 </div>
 
 <script>
-let curCat = null;
+let curCat = null, curBookIdx = null, curLevelIdx = null;
 
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -233,8 +284,11 @@ function initCounts(){
 }
 initCounts();
 
+// ── 카테고리 → 교재 폴더 목록 ──
 function openCat(catKey){
   curCat = catKey;
+  curBookIdx = null;
+  curLevelIdx = null;
   const cat = STRUCTURE[catKey];
   document.getElementById('books-title').textContent = cat.name;
   document.getElementById('books-sub').textContent = cat.books.length>0 ? cat.books.length+'개 교재' : '등록된 교재 없음';
@@ -255,9 +309,57 @@ function openCat(catKey){
   show('s-books');
 }
 
+// ── 교재 폴더 클릭 → Level 목록 OR 테스트 목록 ──
 function openBook(bookIdx){
   const cat = STRUCTURE[curCat];
   const book = cat.books[bookIdx];
+  curBookIdx = bookIdx;
+  curLevelIdx = null;
+
+  // levels가 있는 폴더 (문마중 등) → Level 선택 화면
+  if(book.levels && book.levels.length){
+    const c = book.themeColor || cat.color;
+    const cl = book.themeColorLight || cat.colorLight;
+    document.getElementById('levels-title').textContent = book.title;
+    document.getElementById('levels-sub').textContent = book.desc;
+
+    const body = document.getElementById('levels-body');
+    body.innerHTML = book.levels.map((lv,idx)=>
+      '<div class="book-card level-card" style="--c:'+c+';--c-l:'+cl+'" onclick="openLevel('+idx+')">' +
+      '<div class="book-icon">'+(lv.icon||book.icon)+'</div>' +
+      '<div class="book-info"><div class="book-title">'+lv.title+'</div><div class="book-desc">'+lv.desc+'</div></div>' +
+      '<span class="book-go">›</span></div>'
+    ).join('');
+    show('s-levels');
+    return;
+  }
+
+  // levels가 없는 폴더 → 바로 테스트 목록
+  renderTests(book);
+}
+
+// ── Level 클릭 → 해당 Level의 테스트 목록 ──
+function openLevel(lvIdx){
+  const cat = STRUCTURE[curCat];
+  const book = cat.books[curBookIdx];
+  const level = book.levels[lvIdx];
+  curLevelIdx = lvIdx;
+
+  // Level을 book처럼 다루되, theme color는 부모 book에서 상속
+  renderTests({
+    title: book.title + ' — ' + level.title,
+    desc: level.desc,
+    cumulative: level.cumulative,
+    tests: level.tests,
+    themeColor: book.themeColor,
+    themeColorLight: book.themeColorLight,
+    themeColorDark: book.themeColorDark
+  });
+}
+
+// ── 테스트 목록 렌더링 (book 또는 level에서 공용) ──
+function renderTests(book){
+  const cat = STRUCTURE[curCat];
   const c = book.themeColor || cat.color;
   const cl = book.themeColorLight || cat.colorLight;
   const cd = book.themeColorDark || cat.colorDark;
@@ -291,9 +393,13 @@ function openBook(bookIdx){
   show('s-tests');
 }
 
-function goBackToBooks(){
-  if(curCat) openCat(curCat);
-  else show('s-main');
+// ── 테스트 화면 뒤로가기: Level에서 왔으면 Level 목록으로, 아니면 책 목록으로 ──
+function goBackFromTests(){
+  if(curLevelIdx !== null){
+    openBook(curBookIdx);
+  } else {
+    openCat(curCat);
+  }
 }
 </script>
 </body>

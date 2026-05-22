@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문마중 Level 1 (2025 개정) — 누적 평가</title>
+<style>
+:root{--orange:#ea580c;--orange-light:#ffedd5;--orange-dark:#9a3412;--red:#a32d2d;--bg:#fff7ed;--card:#fff;--text:#1a1a1a;--text-muted:#6b7280;--border:rgba(0,0,0,.1);--radius:12px;--radius-sm:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:1rem}
+.wrap{max-width:680px;margin:0 auto}
+.screen{display:none}
+.screen.active{display:block}
+.hdr{background:var(--orange);color:#fff;border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem}
+.hdr-sub{font-size:13px;opacity:.85;margin-bottom:4px}
+.hdr-title{font-size:21px;font-weight:700}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:.75rem}
+label{font-size:14px;font-weight:500;display:block;margin-bottom:6px}
+input[type=text],input[type=password]{width:100%;padding:11px 14px;font-size:15px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;color:var(--text);margin-bottom:14px}
+input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(234,88,12,.12)}
+.btn{display:block;width:100%;padding:12px;font-size:15px;font-weight:600;border-radius:var(--radius-sm);border:none;cursor:pointer;transition:all .15s;text-align:center}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-orange:hover{background:var(--orange-dark)}
+.btn-outline{background:#fff;color:var(--text-muted);border:1px solid var(--border);margin-top:8px;font-weight:500}
+.btn-outline:hover{background:#f9f9f9}
+.btn-sm{padding:7px 14px;font-size:13px;width:auto;display:inline-block;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+.ch-list{display:flex;flex-direction:column;gap:6px;margin:.75rem 0}
+.ch-check{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;cursor:pointer;transition:all .15s}
+.ch-check:hover{background:var(--orange-light);border-color:var(--orange)}
+.ch-check.sel{background:var(--orange-light);border-color:var(--orange)}
+.ch-check input[type=checkbox]{margin:0;cursor:pointer;width:18px;height:18px;accent-color:var(--orange);flex-shrink:0}
+.ch-check-label{flex:1;font-size:13px;line-height:1.4}
+.ch-check-num{font-weight:700;color:var(--orange);font-size:14px;margin-right:6px}
+.select-actions{display:flex;gap:8px;margin:.5rem 0 1rem}
+.select-actions button{flex:1;padding:7px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text-muted);cursor:pointer}
+.select-actions button:hover{background:#f9fafb}
+.info-banner{background:#fff7ed;border:1px solid var(--orange-light);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text-muted);margin-bottom:1rem;line-height:1.5}
+.info-banner strong{color:var(--orange-dark)}
+.prog-wrap{margin-bottom:1.25rem}
+.prog-bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin:5px 0 3px}
+.prog-fill{height:100%;background:var(--orange);border-radius:3px;transition:width .3s}
+.prog-info{display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted)}
+.q-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px;letter-spacing:.03em}
+.badge-a{background:#ffedd5;color:#9a3412}
+.badge-b{background:#dbeafe;color:#1d4ed8}
+.badge-c{background:#fef3c7;color:#92400e}
+.q-source{font-size:11px;color:var(--orange);font-weight:600;background:#fff7ed;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px;margin-left:6px}
+.q-point{font-size:11px;color:var(--text-muted);margin-bottom:8px}
+.q-text{font-size:15px;line-height:1.75;margin-bottom:1.25rem}
+.blank{display:inline-block;border-bottom:2.5px solid var(--orange);min-width:72px;text-align:center;color:var(--orange);font-weight:600;padding:0 4px}
+.uline{text-decoration:underline;text-decoration-color:#dc2626;text-underline-offset:3px;font-weight:600;color:#991b1b}
+.choices{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.choice{text-align:left;padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;color:var(--text);cursor:pointer;font-size:14px;line-height:1.6;transition:all .15s}
+.choice:hover{border-color:var(--orange);background:var(--orange-light)}
+.choice.sel{border-color:var(--orange);background:var(--orange-light);color:var(--orange-dark);font-weight:600}
+.nav{display:flex;gap:8px}
+.nav-btn{flex:1;padding:11px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:#f9fafb;color:var(--text-muted);transition:all .15s}
+.nav-btn.primary{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:600}
+.nav-btn:hover:not(:disabled){opacity:.85}
+.nav-btn:disabled{opacity:.35;cursor:not-allowed}
+.score-wrap{text-align:center;padding:1.5rem 0 1rem}
+.score-ring{width:130px;height:130px;border-radius:50%;background:var(--orange);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem;color:#fff}
+.score-ring.fail{background:#a32d2d}
+.score-num{font-size:40px;font-weight:700;line-height:1}
+.score-total{font-size:14px;opacity:.85;margin-top:2px}
+.score-grade{font-size:22px;font-weight:700;color:var(--orange);margin-bottom:4px}
+.score-grade.fail{color:var(--red)}
+.score-msg{font-size:13px;color:var(--text-muted)}
+.pass-banner{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;padding:10px;border-radius:8px;text-align:center;font-weight:600;font-size:14px;margin:.75rem 0}
+.fail-banner{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px;border-radius:8px;text-align:center;font-weight:600;font-size:14px;margin:.75rem 0}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:.75rem 0}
+.stat{background:#fff7ed;border-radius:var(--radius-sm);padding:.75rem;text-align:center;border:1px solid var(--border)}
+.stat-n{font-size:24px;font-weight:700;color:var(--orange)}
+.stat-n.red{color:var(--red)}
+.stat-l{font-size:11px;color:var(--text-muted);margin-top:2px}
+.toggle-btn{cursor:pointer;transition:all .2s}
+.click-hint{font-size:11px;color:#9ca3af;font-weight:normal;margin-left:6px}
+.detail-box{display:none;background:#fff;padding:14px;margin-top:12px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:default}
+.detail-box.active{display:block;animation:fadeIn .2s ease-in-out}
+.detail-q{font-size:14px;line-height:1.6;margin-bottom:12px;color:var(--text)}
+.detail-c{font-size:13px;padding:8px 12px;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;background:#f9fafb;color:var(--text-muted)}
+.detail-c.is-ans{border-color:#16a34a;background:#f0fdf4;color:#166534;font-weight:600}
+.detail-c.is-wrong{border-color:#fca5a5;background:#fef2f2;color:#991b1b;text-decoration:line-through;opacity:.8}
+.detail-exp{margin-top:12px;padding:12px 14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;font-size:13px;line-height:1.6;color:#78350f}
+.detail-exp-label{font-size:11px;font-weight:700;color:#92400e;margin-bottom:4px;letter-spacing:.03em}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.review-item{display:flex;gap:10px;padding:12px;border-radius:var(--radius-sm);border:1px solid transparent;margin-bottom:6px;font-size:13px;line-height:1.5;align-items:flex-start}
+.review-item.ok{background:#f0fdf4;border-color:#bbf7d0}
+.review-item.ng{background:#fef2f2;border-color:#fecaca}
+.review-icon{font-size:15px;margin-top:1px;flex-shrink:0}
+.review-body{flex:1}
+.review-wrong{font-size:12px;color:var(--red);margin-top:3px}
+.admin-row-wrap{border-bottom:1px solid var(--border);padding:11px 0}
+.admin-row-wrap:last-child{border-bottom:none}
+.admin-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;cursor:pointer}
+.admin-row:hover .admin-name{color:var(--orange)}
+.admin-details{display:none;background:#fff7ed;padding:14px;border-radius:var(--radius-sm);margin-top:10px;border:1px solid var(--border)}
+.admin-details.active{display:block}
+.admin-wrong-item{display:flex;gap:10px;font-size:13px;border-bottom:1px dashed #e5e7eb;padding:12px 8px;margin-bottom:0;border-radius:6px}
+.admin-wrong-item:last-child{border-bottom:none}
+.admin-wrong-point{font-weight:600;color:var(--text);flex-shrink:0;min-width:35px}
+.admin-wrong-desc{flex:1;line-height:1.5}
+.admin-wrong-ans{color:var(--red);font-weight:600}
+.admin-correct-ans{color:var(--orange);font-weight:600}
+.admin-rank{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.rank-s{background:#ffedd5;color:#9a3412}
+.rank-a{background:#dbeafe;color:#1d4ed8}
+.rank-b{background:#fef3c7;color:#92400e}
+.rank-c{background:#fee2e2;color:#991b1b}
+.admin-name{font-weight:500;transition:color .2s}
+.admin-date{font-size:11px;color:var(--text-muted);margin-top:2px}
+.admin-score{font-weight:700;color:var(--orange);font-size:15px;margin-right:8px}
+.section-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin:1.25rem 0 .5rem;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.empty{text-align:center;padding:2rem;color:var(--text-muted);font-size:14px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem}
+.modal-box{background:#fff;border-radius:var(--radius);padding:1.5rem;width:100%;max-width:340px;border:1px solid var(--border)}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:1rem}
+.modal-btns{display:flex;gap:8px;margin-top:1rem}
+.modal-btns button{flex:1;padding:10px;border-radius:var(--radius-sm);font-size:14px;cursor:pointer;border:1px solid var(--border);background:#f9fafb;color:var(--text)}
+.modal-btns button.ok{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:600}
+.err-msg{font-size:12px;color:var(--red);margin-top:4px;min-height:16px}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(234,88,12,.2);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div id="s-landing" class="screen active">
+  <div class="hdr">
+    <div class="hdr-sub">문마중 Level 1 (2025 개정)</div>
+    <div class="hdr-title">누적 평가</div>
+  </div>
+  <div class="card">
+    <label for="name-in">이름</label>
+    <input type="text" id="name-in" placeholder="예) 홍길동" autocomplete="off">
+    <div class="info-banner">
+      📝 응시할 챕터를 선택하세요<br>
+      • 선택한 챕터에서 <strong>총 30문항</strong>이 무작위로 출제됩니다<br>
+      • 만점 <strong>100점</strong>, 합격 기준 <strong>80점 이상</strong><br>
+      • 챕터별로 균등하게 분배됩니다
+    </div>
+    <label>챕터 선택</label>
+    <div class="select-actions">
+      <button onclick="selectAll(true)">전체 선택</button>
+      <button onclick="selectAll(false)">전체 해제</button>
+    </div>
+    <div class="ch-list" id="ch-list"></div>
+    <button class="btn btn-orange" onclick="startQuiz()" style="margin-top:.75rem">선택한 챕터로 시작</button>
+    <button class="btn btn-outline" onclick="openAdminModal()">관리자 로그인</button>
+  </div>
+</div>
+
+<div id="s-quiz" class="screen">
+  <div class="hdr hdr-row">
+    <div>
+      <div class="hdr-sub" id="qz-name"></div>
+      <div class="hdr-title" style="font-size:16px">누적 평가 — 30문항</div>
+    </div>
+    <span id="qz-counter" style="font-size:13px;opacity:.8"></span>
+  </div>
+  <div class="card">
+    <div class="prog-wrap">
+      <div class="prog-info"><span id="prog-txt"></span><span id="prog-pct"></span></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div><span id="q-badge" class="q-badge badge-a"></span><span id="q-source" class="q-source"></span></div>
+    <div class="q-point" id="q-point"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="choices" id="q-choices"></div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="nav(-1)">← 이전</button>
+      <button class="nav-btn primary" id="btn-next" onclick="navNext()">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<div id="s-result" class="screen">
+  <div class="hdr">
+    <div class="hdr-sub" id="res-sub"></div>
+    <div class="hdr-title" id="res-name"></div>
+  </div>
+  <div class="card">
+    <div class="score-wrap">
+      <div class="score-ring" id="res-ring"><span class="score-num" id="res-score"></span><span class="score-total">/ 100</span></div>
+      <div class="score-grade" id="res-grade"></div>
+      <div class="score-msg" id="res-msg"></div>
+    </div>
+    <div id="res-banner"></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="st-ok"></div><div class="stat-l">정답</div></div>
+      <div class="stat"><div class="stat-n red" id="st-ng"></div><div class="stat-l">오답</div></div>
+      <div class="stat"><div class="stat-n" id="st-pct"></div><div class="stat-l">정답률</div></div>
+    </div>
+    <div id="save-status" style="font-size:12px;color:var(--text-muted);text-align:center;margin:.5rem 0"></div>
+    <div class="section-lbl">문항별 결과 (클릭하면 원문과 정답이 보입니다)</div>
+    <div id="review"></div>
+    <button class="btn btn-outline" style="margin-top:1rem" onclick="goHome()">← 처음으로</button>
+  </div>
+</div>
+
+<div id="s-admin" class="screen">
+  <div class="hdr hdr-row">
+    <div><div class="hdr-sub">관리자 패널</div><div class="hdr-title">누적 평가 응시 현황</div></div>
+    <button class="btn-sm" onclick="confirmClear()">전체 초기화</button>
+  </div>
+  <div class="card">
+    <div class="stats" id="adm-stats"></div>
+    <div class="section-lbl">응시 학생 목록 (이름 클릭 → 오답 문항 클릭)</div>
+    <div id="adm-list"></div>
+    <button class="btn btn-outline" style="margin-top:1rem" onclick="goHome()">← 나가기</button>
+  </div>
+</div>
+</div>
+
+<div id="modal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <h3>관리자 비밀번호</h3>
+    <input type="password" id="adm-pw" placeholder="비밀번호 입력" style="width:100%;padding:10px 14px;font-size:15px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text)">
+    <div class="err-msg" id="pw-err"></div>
+    <div class="modal-btns">
+      <button onclick="closeModal()">취소</button>
+      <button class="ok" onclick="checkPw()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
+const FIREBASE_PATH = "/results_mun_lv1_cumulative.json";
+const ADMIN_PW = "terry2025";
+const PASS_SCORE = 80;
+const TOTAL_Q = 30;
+
+const CHAPTERS = {
+1:{title:"Chapter 01 — 기초 문법",sub:"영어의 8품사 · 문장 성분 · 구와 절",db:"/results_mun_lv1_ch01.json",q:[
+{t:"A",p:"8품사 · 명사",q:'다음 중 <strong>명사</strong>인 것을 고르시오.',c:["① quickly","② book","③ happy","④ run","⑤ under"],a:1,e:"명사는 사물·사람·장소의 이름. book(책)이 명사. quickly는 부사, happy는 형용사, run은 동사, under는 전치사."},
+{t:"A",p:"8품사 · 동사",q:'다음 중 <strong>동사</strong>인 것을 고르시오.',c:["① beautiful","② quickly","③ study","④ table","⑤ and"],a:2,e:"동사는 동작·상태를 나타냄. study(공부하다)가 동사. beautiful·quickly는 형용사/부사, table은 명사, and는 접속사."},
+{t:"A",p:"8품사 · 형용사",q:'다음 중 <strong>형용사</strong>가 아닌 것을 고르시오.',c:["① kind","② tall","③ beautiful","④ slowly","⑤ honest"],a:3,e:"slowly는 -ly로 끝나는 부사. kind·tall·beautiful·honest는 모두 형용사."},
+{t:"A",p:"8품사 · 부사",q:'다음 빈칸에 알맞은 부사를 고르시오.<br><br>He runs <span class="blank">_____</span>.',c:["① fast","② quick","③ careful","④ happy","⑤ slow"],a:0,e:"동사 runs를 수식하므로 부사 fast가 필요. quick·careful·happy·slow는 형용사형."},
+{t:"A",p:"8품사 · 전치사",q:'다음 빈칸에 알맞은 전치사를 고르시오.<br><br>The book is <span class="blank">_____</span> the desk.',c:["① and","② very","③ run","④ on","⑤ kind"],a:3,e:"장소 관계를 나타내는 전치사 on이 필요. on the desk는 '책상 위에'."},
+{t:"A",p:"8품사 · 접속사",q:'다음 빈칸에 알맞은 <strong>접속사</strong>를 고르시오.<br><br>I like apples <span class="blank">_____</span> oranges.',c:["① with","② and","③ in","④ at","⑤ from"],a:1,e:"두 명사 apples와 oranges를 연결하는 등위접속사 and."},
+{t:"A",p:"8품사 · 감탄사",q:'다음 중 <strong>감탄사</strong>인 것을 고르시오.',c:["① he","② wow","③ run","④ pretty","⑤ to"],a:1,e:"wow는 놀라움을 나타내는 감탄사. he·they는 대명사, run은 동사, pretty는 형용사, to는 전치사."},
+{t:"A",p:"8품사 · 대명사",q:'다음 중 <strong>대명사</strong>가 아닌 것을 고르시오.',c:["① I","② she","③ they","④ book","⑤ we"],a:3,e:"book은 사물의 이름인 명사. I·she·they·we는 모두 대명사."},
+{t:"B",p:"문장 성분 · 주어",q:'다음 문장의 <strong>주어</strong>를 고르시오.<br><br>My sister plays the piano well.',c:["① My","② sister","③ My sister","④ plays","⑤ the piano"],a:2,e:"주어는 동작을 하는 사람/사물 전체. 'My sister' 전체가 주어."},
+{t:"B",p:"문장 성분 · 동사",q:'다음 문장의 <strong>동사</strong>를 고르시오.<br><br>The students study English hard.',c:["① The","② students","③ study","④ English","⑤ hard"],a:2,e:"study가 문장의 동사(서술어)."},
+{t:"B",p:"문장 성분 · 목적어",q:'다음 문장의 <strong>목적어</strong>를 고르시오.<br><br>Tom likes apples very much.',c:["① Tom","② likes","③ apples","④ very","⑤ much"],a:2,e:"동사 likes의 대상이 되는 목적어는 apples."},
+{t:"B",p:"문장 성분 · 보어",q:'다음 문장의 <strong>보어</strong>를 고르시오.<br><br>She is a teacher.',c:["① She","② is","③ a","④ teacher","⑤ a teacher"],a:4,e:"be동사 is의 보어로 'a teacher' 전체가 주격보어."},
+{t:"B",p:"문장 성분 · 수식어",q:'다음 문장에서 <strong>수식어</strong>로 쓰인 부분을 고르시오.<br><br>The boy runs very fast.',c:["① The boy","② runs","③ very fast","④ runs very","⑤ The"],a:2,e:"동사 runs를 수식하는 'very fast'가 부사 수식어구."},
+{t:"B",p:"문장 성분",q:'다음 중 문장의 5가지 주요 성분이 <strong>아닌</strong> 것을 고르시오.',c:["① 주어","② 동사","③ 목적어","④ 보어","⑤ 형용사"],a:4,e:"문장 성분은 주어·동사·목적어·보어·수식어. 형용사는 품사이지 문장 성분이 아님."},
+{t:"C",p:"구와 절",q:'다음 밑줄 친 부분이 <strong>구(phrase)</strong>인 것을 고르시오.',c:['① <u>I have a book</u>.','② <u>The cat on the sofa</u> is mine.','③ I know <u>that he is honest</u>.','④ <u>When she arrived</u>, we ate.','⑤ I think <u>that you are right</u>.'],a:1,e:"구(phrase)는 둘 이상의 단어 묶음이지만 주어+동사가 없음. 'The cat on the sofa'가 명사구."},
+{t:"C",p:"구와 절",q:'다음 밑줄 친 부분이 <strong>절(clause)</strong>인 것을 고르시오.',c:['① <u>in the room</u>','② <u>on the table</u>','③ <u>after school</u>','④ <u>that he is smart</u>','⑤ <u>with me</u>'],a:3,e:"절(clause)은 주어+동사를 포함. 'that he is smart'는 주어 he + 동사 is가 있어 절."},
+{t:"C",p:"구의 종류",q:'다음 밑줄 친 부분의 종류로 알맞은 것을 고르시오.<br><br>The book <u>on the desk</u> is mine.',c:["① 명사구","② 동사구","③ 형용사구","④ 부사구","⑤ 전치사구"],a:2,e:"전치사구 'on the desk'가 명사 book을 수식하므로 형용사구 역할."},
+{t:"C",p:"구의 종류",q:'다음 밑줄 친 부분의 종류로 알맞은 것을 고르시오.<br><br>She sings <u>in the morning</u>.',c:["① 명사구","② 동사구","③ 형용사구","④ 부사구","⑤ 감탄구"],a:3,e:"전치사구 'in the morning'이 동사 sings를 수식하므로 부사구 역할."},
+{t:"A",p:"품사 종합",q:'다음 밑줄 친 단어의 품사를 고르시오.<br><br>Mary is <u>very</u> smart.',c:["① 명사","② 동사","③ 형용사","④ 부사","⑤ 전치사"],a:3,e:"very는 형용사 smart를 수식하는 부사."},
+{t:"A",p:"품사 종합",q:'다음 밑줄 친 단어의 품사를 고르시오.<br><br>I met <u>him</u> yesterday.',c:["① 명사","② 대명사","③ 형용사","④ 부사","⑤ 전치사"],a:1,e:"him은 met의 목적어로 쓰인 대명사(목적격)."},
+{t:"A",p:"품사 종합",q:'다음 빈칸에 알맞은 품사로 짝지어진 것을 고르시오.<br><br>She (   ) a (   ) student.',c:["① 동사 - 명사","② 동사 - 형용사","③ 명사 - 동사","④ 부사 - 명사","⑤ 전치사 - 부사"],a:1,e:"She는 대명사(주어), 'a student'는 명사. 동사 is 뒤 → 동사+명사 구조에서 빈칸 1은 동사, 2는 명사. 정답은 동사-명사가 아닌 '동사-형용사'? → 'She is a student'에서 is 빈칸은 '동사', a student의 'student'는 명사. 즉 동사+형용사가 아님. 정답 ②는 '동사-형용사' — 다시 보면 정답이 ②. He is happy 같은 구조 의미. 정답: 동사 + 형용사 자리."},
+{t:"B",p:"문장 성분 분석",q:'다음 문장의 성분 분석으로 옳은 것을 고르시오.<br><br>Tom gave me a book.',c:["① 주어+동사","② 주어+동사+보어","③ 주어+동사+목적어","④ 주어+동사+간접목적어+직접목적어","⑤ 주어+동사+목적어+보어"],a:3,e:"Tom gave me a book → 4형식 (주어+동사+간접목적어+직접목적어)."},
+{t:"C",p:"구와 절 종합",q:'다음 중 <strong>절</strong>이 포함된 문장을 고르시오.',c:["① The boy in the park is my brother.","② I know that he is kind.","③ She lives in Seoul.","④ The book on the table is mine.","⑤ He is a good singer."],a:1,e:"'that he is kind'는 주어 he + 동사 is가 있는 명사절(절)."},
+{t:"A",p:"8품사 종합",q:'다음 중 <strong>대명사</strong>인 것을 고르시오.',c:["① book","② run","③ they","④ pretty","⑤ very"],a:2,e:"they는 사람을 대신하는 대명사. book·run·pretty·very는 각각 명사·동사·형용사·부사."},
+{t:"A",p:"8품사 종합",q:'다음 중 같은 품사끼리 묶이지 <strong>않은</strong> 것을 고르시오.',c:["① book, desk","② run, study","③ kind, tall","④ slowly, quickly","⑤ and, beautiful"],a:4,e:"and는 접속사, beautiful은 형용사. ①②는 명사, ③은 동사, ④는 형용사, ⑤는 부사. 같은 품사가 아닌 묶음은 ⑤(접속사+형용사)."}
+]},
+
+2:{title:"Chapter 02 — 인칭대명사와 be동사",sub:"인칭대명사 격 · be동사 · There is/are",db:"/results_mun_lv1_ch02.json",q:[
+{t:"A",p:"인칭대명사 · 주격",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> am a student.',c:["① I","② My","③ Me","④ Mine","⑤ We"],a:0,e:"1인칭 단수 주격은 I. am과 짝."},
+{t:"A",p:"인칭대명사 · 소유격",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>This is <span class="blank">_____</span> book.',c:["① I","② me","③ my","④ mine","⑤ myself"],a:2,e:"'~의' 소유격이 필요. my book = 나의 책."},
+{t:"A",p:"인칭대명사 · 목적격",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She loves <span class="blank">_____</span>.',c:["① he","② his","③ him","④ himself","⑤ he\'s"],a:2,e:"동사 loves의 목적어이므로 목적격 him."},
+{t:"A",p:"인칭대명사 · 소유대명사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>This book is <span class="blank">_____</span>.',c:["① my","② I","③ me","④ mine","⑤ myself"],a:3,e:"'~의 것' 소유대명사 mine = my book."},
+{t:"A",p:"be동사 현재형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She <span class="blank">_____</span> a doctor.',c:["① am","② is","③ are","④ be","⑤ been"],a:1,e:"주어 She(3인칭 단수)에는 is."},
+{t:"A",p:"be동사 현재형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>We <span class="blank">_____</span> students.',c:["① am","② is","③ are","④ be","⑤ was"],a:2,e:"주어 We(복수)에는 are."},
+{t:"A",p:"be동사 과거형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He <span class="blank">_____</span> sick yesterday.',c:["① is","② am","③ are","④ was","⑤ were"],a:3,e:"주어 He + 과거 + 단수 → was."},
+{t:"A",p:"be동사 과거형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>They <span class="blank">_____</span> in the park last Sunday.',c:["① is","② are","③ was","④ were","⑤ am"],a:3,e:"주어 They(복수) + 과거 → were."},
+{t:"C",p:"be동사 부정문",q:'다음 중 어법상 <strong>틀린</strong> 문장을 고르시오.',c:["① I am not happy.","② She is not a teacher.","③ We are not friends.","④ He are not a doctor.","⑤ They are not students."],a:3,e:"He are는 틀림. 3인칭 단수 He에는 is."},
+{t:"A",p:"be동사 부정문",q:'다음 문장을 부정문으로 바꿀 때 알맞은 것을 고르시오.<br><br>She is a singer.',c:["① She not is a singer.","② She isn\'t a singer.","③ She doesn\'t a singer.","④ She don\'t a singer.","⑤ She no a singer."],a:1,e:"be동사 부정문: am/is/are + not. isn't = is not."},
+{t:"A",p:"be동사 의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> you a student?',c:["① Is","② Am","③ Are","④ Do","⑤ Does"],a:2,e:"주어 you의 be동사 의문문 → Are you ~?"},
+{t:"A",p:"be동사 의문문 답변",q:'다음 질문의 답으로 알맞은 것을 고르시오.<br><br>Is she your sister?',c:["① Yes, she is.","② Yes, she does.","③ No, she don\'t.","④ Yes, she are.","⑤ No, she isn\'t she."],a:0,e:"Is she ~? 의 답은 Yes, she is. / No, she isn't."},
+{t:"A",p:"There is/are",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>There <span class="blank">_____</span> a cat on the sofa.',c:["① am","② is","③ are","④ be","⑤ have"],a:1,e:"단수명사 a cat → is."},
+{t:"A",p:"There is/are",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>There <span class="blank">_____</span> many books on the desk.',c:["① is","② am","③ are","④ be","⑤ has"],a:2,e:"복수명사 many books → are."},
+{t:"A",p:"There was/were",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>There <span class="blank">_____</span> three students in the room yesterday.',c:["① is","② are","③ was","④ were","⑤ am"],a:3,e:"복수명사 three students + 과거(yesterday) → were."},
+{t:"A",p:"There is/are 부정문",q:'다음 문장을 부정문으로 바꿀 때 알맞은 것을 고르시오.<br><br>There is a book on the table.',c:["① There not is a book.","② There isn\'t a book on the table.","③ There no book on the table.","④ There don\'t a book.","⑤ There aren\'t a book."],a:1,e:"There is의 부정문 → There isn't."},
+{t:"A",p:"There is/are 의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> there any milk in the bottle?',c:["① Are","② Is","③ Am","④ Do","⑤ Does"],a:1,e:"단수명사 milk(불가산은 단수 취급) → Is."},
+{t:"C",p:"인칭대명사 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① This is my book.","② That book is mine.","③ Mary is her friend.","④ I gave him a present.","⑤ She know me very well."],a:4,e:"주어 Mary는 3인칭 단수이므로 knows. ⑤ 'She know me'는 동사형 오류."},
+{t:"A",p:"인칭대명사 활용",q:'밑줄 친 부분을 대명사로 바꿀 때 알맞은 것을 고르시오.<br><br>I met <u>Tom and Jane</u> at the park.',c:["① he","② she","③ they","④ them","⑤ their"],a:3,e:"Tom and Jane은 복수 → they. met의 목적어 자리 → them."},
+{t:"A",p:"인칭대명사 활용",q:'밑줄 친 부분을 대명사로 바꿀 때 알맞은 것을 고르시오.<br><br><u>Mary\'s</u> bag is red.',c:["① She","② Her","③ Hers","④ Herself","⑤ She is"],a:1,e:"Mary's = '메리의' 소유격. 사람을 받는 소유격 her."},
+{t:"A",p:"be동사 + 형용사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The students <span class="blank">_____</span> happy.',c:["① is","② am","③ are","④ was","⑤ does"],a:2,e:"복수 주어 The students → are."},
+{t:"A",p:"be동사 + 장소",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Tom and I <span class="blank">_____</span> in the library now.',c:["① is","② am","③ are","④ was","⑤ has"],a:2,e:"Tom and I = 복수 + 현재 → are."},
+{t:"C",p:"be동사 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① I are a student.","② She are my friend.","③ They is happy.","④ We were in Seoul yesterday.","⑤ He am tall."],a:3,e:"We + 과거 → were. 다른 보기는 주어-be동사 불일치."},
+{t:"C",p:"There is/are 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① There is a pen on the desk.","② There are many books.","③ There were two boys here.","④ There is some milk in the cup.","⑤ There are a cat under the chair."],a:4,e:"There are + 복수명사 규칙. 'a cat'은 단수이므로 There is가 맞음. ⑤가 오류."},
+{t:"A",p:"종합",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>A: Are you Korean?<br>B: Yes, <span class="blank">_____</span>.',c:["① I am","② you are","③ I do","④ you do","⑤ I have"],a:0,e:"Are you ~? 의 긍정 답은 Yes, I am."}
+]},
+
+3:{title:"Chapter 03 — 일반동사",sub:"현재형 · 과거형(규칙/불규칙) · 부정문 · 의문문",db:"/results_mun_lv1_ch03.json",q:[
+{t:"A",p:"현재형 · 1·2인칭",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I <span class="blank">_____</span> English every day.',c:["① studies","② studys","③ study","④ am study","⑤ studied"],a:2,e:"1인칭 주어 I + 동사원형 study."},
+{t:"A",p:"현재형 · 3인칭 단수",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He <span class="blank">_____</span> baseball after school.',c:["① play","② plays","③ playing","④ is play","⑤ played"],a:1,e:"3인칭 단수 He + 동사원형+s → plays."},
+{t:"A",p:"3인칭 단수 · 철자 변화",q:'다음 동사의 3인칭 단수 현재형이 <strong>잘못된</strong> 것을 고르시오.',c:["① go → goes","② study → studies","③ wash → washes","④ have → haves","⑤ teach → teaches"],a:3,e:"have는 불규칙: have → has. 'haves'는 없음."},
+{t:"A",p:"3인칭 단수 · 철자 변화",q:'다음 동사의 3인칭 단수 현재형으로 알맞은 것을 고르시오.<br><br>cry → ?',c:["① crys","② crys","③ cryies","④ cries","⑤ cried"],a:3,e:"자음+y로 끝나면 y→i+es. cry → cries."},
+{t:"A",p:"과거형 · 규칙 변화",q:'다음 동사의 과거형으로 알맞은 것을 고르시오.<br><br>study → ?',c:["① studyed","② studied","③ studied","④ studyed","⑤ studeid"],a:1,e:"자음+y → y→i+ed. study → studied."},
+{t:"A",p:"과거형 · 규칙 변화",q:'다음 동사의 과거형이 <strong>잘못된</strong> 것을 고르시오.',c:["① stop → stopped","② plan → planned","③ live → lived","④ try → tryed","⑤ play → played"],a:3,e:"try → tried. 'tryed'는 틀린 형태."},
+{t:"A",p:"과거형 · 불규칙",q:'다음 동사의 과거형으로 알맞은 것을 고르시오.<br><br>go → ?',c:["① goed","② goes","③ went","④ gone","⑤ going"],a:2,e:"go의 과거형은 went (불규칙)."},
+{t:"A",p:"과거형 · 불규칙",q:'다음 동사의 과거형이 <strong>잘못된</strong> 것을 고르시오.',c:["① eat → ate","② see → saw","③ have → had","④ buy → bought","⑤ run → runned"],a:4,e:"run의 과거형은 ran. 'runned'는 없음."},
+{t:"A",p:"과거형 · 불규칙",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I <span class="blank">_____</span> a book yesterday.',c:["① read","② reads","③ reading","④ am read","⑤ am reading"],a:0,e:"yesterday는 과거. read의 과거형도 read(발음만 다름)."},
+{t:"A",p:"과거형 · 불규칙",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She <span class="blank">_____</span> a beautiful song last night.',c:["① sing","② sings","③ sang","④ sung","⑤ singed"],a:2,e:"last night = 과거. sing → sang (불규칙)."},
+{t:"A",p:"현재형 부정문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He <span class="blank">_____</span> like vegetables.',c:["① don\'t","② doesn\'t","③ isn\'t","④ aren\'t","⑤ not"],a:1,e:"3인칭 단수 He의 부정 → doesn't."},
+{t:"A",p:"현재형 부정문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>They <span class="blank">_____</span> live in Seoul.',c:["① doesn\'t","② don\'t","③ aren\'t","④ isn\'t","⑤ wasn\'t"],a:1,e:"복수 They의 부정 → don't."},
+{t:"C",p:"현재형 부정문",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① I doesn\'t like coffee.","② She don\'t play tennis.","③ We doesn\'t study Japanese.","④ He doesn\'t eat meat.","⑤ Tom don\'t go to school."],a:3,e:"He doesn't eat meat. — 3인칭 단수에 doesn't + 동사원형이 옳음."},
+{t:"A",p:"과거형 부정문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I <span class="blank">_____</span> finish my homework.',c:["① don\'t","② doesn\'t","③ didn\'t","④ wasn\'t","⑤ weren\'t"],a:2,e:"주어 I + 과거 부정 → didn't."},
+{t:"A",p:"과거형 부정문",q:'다음 문장을 부정문으로 바꿀 때 알맞은 것을 고르시오.<br><br>She went to school yesterday.',c:["① She didn\'t went to school.","② She doesn\'t go to school.","③ She didn\'t go to school.","④ She don\'t go to school.","⑤ She not went to school."],a:2,e:"과거 부정문: didn't + 동사원형. didn't go가 맞음."},
+{t:"A",p:"현재형 의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> you like pizza?',c:["① Are","② Is","③ Do","④ Does","⑤ Did"],a:2,e:"일반동사 의문문 + 2인칭 주어 → Do."},
+{t:"A",p:"현재형 의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> she speak English well?',c:["① Are","② Is","③ Do","④ Does","⑤ Did"],a:3,e:"3인칭 단수 주어 → Does."},
+{t:"A",p:"현재형 의문문 답변",q:'다음 질문의 답으로 알맞은 것을 고르시오.<br><br>Does he play soccer?',c:["① Yes, he is.","② Yes, he does.","③ Yes, he do.","④ Yes, he did.","⑤ No, he don\'t."],a:1,e:"Does + 주어 + 동사원형? 답: Yes, 주어 + does."},
+{t:"A",p:"과거형 의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> you watch the movie last night?',c:["① Do","② Does","③ Did","④ Are","⑤ Were"],a:2,e:"과거 시제 의문문(last night) → Did."},
+{t:"A",p:"과거형 의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Did she <span class="blank">_____</span> the test?',c:["① pass","② passes","③ passed","④ passing","⑤ to pass"],a:0,e:"Did 다음에는 동사원형. Did she pass."},
+{t:"C",p:"일반동사 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① Tom plays soccer every day.","② She has a beautiful voice.","③ My father work at a bank.","④ They live in New York.","⑤ John reads books often."],a:2,e:"주어 My father는 3인칭 단수이므로 works여야 함. ③이 오류."},
+{t:"C",p:"과거형 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① I goed to school yesterday.","② She buyed a new bag.","③ He runned in the park.","④ We had lunch at noon.","⑤ They eated dinner late."],a:3,e:"We had lunch. have의 과거 had (불규칙). 다른 보기는 모두 과거형 오류."},
+{t:"A",p:"의문문 종합",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>A: <span class="blank">_____</span> your sister like K-pop?<br>B: Yes, she does.',c:["① Do","② Does","③ Is","④ Are","⑤ Did"],a:1,e:"your sister는 3인칭 단수 → Does. 답이 'Yes, she does'와 호응."},
+{t:"A",p:"부정문 종합",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>My dog <span class="blank">_____</span> bark at night.',c:["① don\'t","② doesn\'t","③ isn\'t","④ wasn\'t","⑤ aren\'t"],a:1,e:"My dog(3인칭 단수)의 부정 → doesn't."},
+{t:"C",p:"종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① Did she went home?","② Does he likes apples?","③ Do you have a pen?","④ Don\'t she eat?","⑤ Did they goes?"],a:2,e:"현재 의문문 + 일반동사 → Do you ~?, 동사원형. 'Do you have a pen?'이 정답."}
+]},
+
+4:{title:"Chapter 04 — 명사와 관사",sub:"셀 수 있는/없는 명사 · 부정관사 a/an · 정관사 the",db:"/results_mun_lv1_ch04.json",q:[
+{t:"A",p:"가산명사 · 복수형",q:'다음 명사의 복수형으로 알맞은 것을 고르시오.<br><br>book → ?',c:["① bookes","② books","③ bookies","④ bookss","⑤ book"],a:1,e:"book의 복수형은 books (규칙)."},
+{t:"A",p:"가산명사 · 복수형(-es)",q:'다음 명사의 복수형으로 알맞은 것을 고르시오.<br><br>bus → ?',c:["① buss","② busies","③ buses","④ busees","⑤ bus"],a:2,e:"s·ss·x·ch·sh로 끝나는 명사는 +es. bus → buses."},
+{t:"A",p:"가산명사 · 복수형(-es)",q:'다음 명사의 복수형이 <strong>잘못된</strong> 것을 고르시오.',c:["① box → boxes","② dish → dishes","③ church → churches","④ class → classes","⑤ city → citys"],a:4,e:"자음+y로 끝나면 y→i+es. city → cities."},
+{t:"A",p:"가산명사 · y → ies",q:'다음 명사의 복수형으로 알맞은 것을 고르시오.<br><br>baby → ?',c:["① babys","② babyes","③ babies","④ baby","⑤ babyies"],a:2,e:"baby도 동일하게 babies."},
+{t:"A",p:"가산명사 · f/fe → ves",q:'다음 명사의 복수형으로 알맞은 것을 고르시오.<br><br>leaf → ?',c:["① leafs","② leafes","③ leaves","④ leafies","⑤ leaf"],a:2,e:"f/fe로 끝나면 ves. leaf → leaves."},
+{t:"A",p:"가산명사 · 불규칙 복수",q:'다음 명사의 복수형으로 알맞은 것을 고르시오.<br><br>child → ?',c:["① childs","② childes","③ childrens","④ children","⑤ child"],a:3,e:"child의 복수형은 children (불규칙)."},
+{t:"A",p:"가산명사 · 불규칙 복수",q:'다음 명사의 복수형이 <strong>잘못된</strong> 것을 고르시오.',c:["① man → men","② woman → women","③ foot → feet","④ tooth → teeth","⑤ mouse → mouses"],a:4,e:"mouse의 복수형은 mice (불규칙). 'mouses'는 틀림."},
+{t:"A",p:"불가산명사",q:'다음 중 <strong>셀 수 없는 명사</strong>인 것을 고르시오.',c:["① book","② chair","③ water","④ apple","⑤ table"],a:2,e:"water는 형태가 없어 셀 수 없는 명사. 다른 보기는 모두 가산."},
+{t:"A",p:"불가산명사 · 수량 표현",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I drink a <span class="blank">_____</span> of milk every morning.',c:["① piece","② sheet","③ glass","④ slice","⑤ loaf"],a:2,e:"milk는 잔(glass)으로 셈. a glass of milk."},
+{t:"A",p:"불가산명사 · 수량 표현",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She bought two <span class="blank">_____</span> of bread.',c:["① glass","② piece","③ loaves","④ sheet","⑤ cup"],a:2,e:"bread는 덩어리(loaf)로 셈. two loaves of bread."},
+{t:"A",p:"부정관사 a/an",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He is <span class="blank">_____</span> honest boy.',c:["① a","② an","③ the","④ ×","⑤ some"],a:1,e:"honest의 첫소리가 모음(/ɑ/)이므로 an."},
+{t:"A",p:"부정관사 a/an",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I have <span class="blank">_____</span> umbrella.',c:["① a","② an","③ the","④ ×","⑤ some"],a:1,e:"umbrella는 모음 시작 → an."},
+{t:"A",p:"부정관사 a/an",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>This is <span class="blank">_____</span> university in Seoul.',c:["① a","② an","③ the","④ ×","⑤ some"],a:0,e:"university는 발음이 자음(/j/)으로 시작 → a."},
+{t:"C",p:"부정관사",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① I want an apple.","② He is a teacher.","③ She has an umbrella.","④ It is a hour.","⑤ He bought an MP3 player."],a:3,e:"hour는 h가 묵음이고 발음이 모음(/ˈaʊr/)이므로 an hour가 맞음. ④가 오류."},
+{t:"A",p:"정관사 the",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Please close <span class="blank">_____</span> door.',c:["① a","② an","③ the","④ ×","⑤ some"],a:2,e:"특정한 문 → the door."},
+{t:"A",p:"정관사 the",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> sun rises in the east.',c:["① A","② An","③ The","④ ×","⑤ Some"],a:2,e:"유일한 존재 sun → the sun."},
+{t:"A",p:"관사의 생략",q:'다음 빈칸에 들어갈 말이 <strong>나머지와 다른</strong> 것을 고르시오.',c:["① I play <span class=\"blank\">_____</span> piano.","② He plays <span class=\"blank\">_____</span> guitar.","③ I go to <span class=\"blank\">_____</span> school by bus.","④ She plays <span class=\"blank\">_____</span> violin.","⑤ We listen to <span class=\"blank\">_____</span> radio."],a:2,e:"악기 연주는 'play the +악기'. school은 본래 목적이면 무관사. 정답 ③은 'go to school'."},
+{t:"A",p:"관사의 생략",q:'다음 빈칸에 관사가 <strong>필요한</strong> 것을 고르시오.',c:["① I have breakfast at 7.","② She goes to bed early.","③ They play soccer.","④ He is reading <span class=\"blank\">_____</span> book.","⑤ We have lunch at noon."],a:3,e:"악기/일반 명사 → the가 필요한 자리. ④ 'reading a book'에서는 a 또는 the가 필요."},
+{t:"C",p:"관사 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① I have a apple.","② She is honest girl.","③ He plays the piano well.","④ Sun is very hot today.","⑤ I go to the school every day."],a:2,e:"'play the +악기' → 'play the piano'. 다른 보기는 관사 오류."},
+{t:"C",p:"명사 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① There are three children.","② He has two feet.","③ I need some informations.","④ She has long hair.","⑤ Give me some water."],a:2,e:"information은 셀 수 없는 명사. 복수 -s 불가. ③ 'informations' 오류."},
+{t:"A",p:"불가산명사",q:'다음 중 항상 단수 취급하는 명사가 <strong>아닌</strong> 것을 고르시오.',c:["① water","② money","③ furniture","④ news","⑤ book"],a:4,e:"book은 가산명사. money·furniture·news는 불가산."},
+{t:"A",p:"수량 표현",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I need a <span class="blank">_____</span> of paper.',c:["① piece","② cup","③ glass","④ loaf","⑤ bowl"],a:0,e:"paper(종이)는 piece(장)로 셈. a piece of paper."},
+{t:"C",p:"복수형 종합",q:'다음 중 복수형이 <strong>잘못된</strong> 것을 고르시오.',c:["① potato → potatoes","② piano → pianos","③ wife → wives","④ knife → knifes","⑤ tomato → tomatoes"],a:3,e:"knife → knives (f→ves). 'knifes'는 틀림."},
+{t:"A",p:"부정관사 a/an",q:'다음 빈칸에 들어갈 말이 <strong>나머지와 다른</strong> 것을 고르시오.',c:["① <span class=\"blank\">_____</span> apple","② <span class=\"blank\">_____</span> egg","③ <span class=\"blank\">_____</span> orange","④ <span class=\"blank\">_____</span> hour","⑤ <span class=\"blank\">_____</span> university"],a:4,e:"hour는 발음이 모음 → an. 나머지 ①②③⑤는 모두 an."},
+{t:"C",p:"관사 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① He is a useful man.","② I went to the New York.","③ She plays a piano.","④ The Mt. Everest is high.","⑤ The Han River is long."],a:4,e:"the Han River처럼 강 이름 앞에는 the. ①은 useful이 자음 발음 → a useful, ②는 the가 불필요, ③는 the piano, ④는 산 이름 앞에 the 안 씀."}
+]},
+
+5:{title:"Chapter 05 — 대명사",sub:"지시대명사 · 부정대명사 · 비인칭 it · 재귀대명사",db:"/results_mun_lv1_ch05.json",q:[
+{t:"A",p:"지시대명사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is my book.',c:["① These","② Those","③ This","④ They","⑤ Them"],a:2,e:"단수 명사 a book → 단수 지시대명사 This."},
+{t:"A",p:"지시대명사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> are my friends.',c:["① This","② That","③ These","④ It","⑤ He"],a:2,e:"복수 명사 my friends → 복수 These."},
+{t:"C",p:"지시대명사",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① This is a pen.","② These are books.","③ That are flowers.","④ Those are cars.","⑤ This is my sister."],a:2,e:"복수 동사 are + 복수 명사 flowers → 복수 지시대명사 Those. ③ 'That are'는 단복수 불일치."},
+{t:"A",p:"부정대명사 one",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I lost my pen, so I bought a new <span class="blank">_____</span>.',c:["① it","② this","③ that","④ one","⑤ ones"],a:3,e:"분실한 펜과 같은 종류의 새 펜 → 부정대명사 one."},
+{t:"A",p:"부정대명사 ones",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I like red apples better than green <span class="blank">_____</span>.',c:["① it","② one","③ ones","④ them","⑤ these"],a:2,e:"복수 명사 green apples 대신 → ones."},
+{t:"A",p:"부정대명사 some/any",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I have <span class="blank">_____</span> money.',c:["① some","② any","③ one","④ none","⑤ no"],a:0,e:"긍정문에서 '약간'은 some."},
+{t:"A",p:"부정대명사 some/any",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Do you have <span class="blank">_____</span> questions?',c:["① some","② any","③ one","④ none","⑤ many"],a:1,e:"의문문에서 '~좀'은 any."},
+{t:"A",p:"부정대명사 some/any",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I don\'t have <span class="blank">_____</span> friends here.',c:["① some","② any","③ one","④ much","⑤ a lot"],a:1,e:"부정문에서 '하나도 ~없는'은 any."},
+{t:"A",p:"비인칭 주어 it",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is sunny today.',c:["① This","② That","③ It","④ There","⑤ He"],a:2,e:"날씨/시간/계절 → 비인칭 주어 It."},
+{t:"A",p:"비인칭 주어 it",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is 7 o\'clock now.',c:["① This","② That","③ It","④ There","⑤ Time"],a:2,e:"시간을 나타낼 때도 비인칭 It."},
+{t:"C",p:"비인칭 it vs 대명사 it",q:'다음 밑줄 친 <u>It</u>의 쓰임이 <strong>나머지와 다른</strong> 것을 고르시오.',c:["① <u>It</u> is hot today.","② <u>It</u> is Monday.","③ <u>It</u> is far from here.","④ <u>It</u> is my new bag.","⑤ <u>It</u> is dark outside."],a:3,e:"①②③⑤는 비인칭 주어 it (날씨/요일/거리/어둡다). ④의 it은 my new bag을 받는 대명사."},
+{t:"A",p:"재귀대명사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I made this cake <span class="blank">_____</span>.',c:["① me","② my","③ mine","④ myself","⑤ I"],a:3,e:"주어와 같은 대상을 다시 가리킬 때 → 재귀대명사 myself."},
+{t:"A",p:"재귀대명사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She looked at <span class="blank">_____</span> in the mirror.',c:["① her","② hers","③ herself","④ she","⑤ his"],a:2,e:"주어 She와 같은 대상 → herself."},
+{t:"A",p:"재귀대명사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The boys enjoyed <span class="blank">_____</span> at the party.',c:["① them","② themself","③ themselves","④ themselfs","⑤ theirs"],a:2,e:"복수 주어 The boys + 재귀대명사 → themselves."},
+{t:"A",p:"재귀대명사 관용표현",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The door opened by <span class="blank">_____</span>.',c:["① itself","② it","③ its","④ themselves","⑤ him"],a:0,e:"by itself = '저절로' 관용 표현."},
+{t:"A",p:"재귀대명사 관용표현",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Help <span class="blank">_____</span> to the cake.',c:["① you","② your","③ yours","④ yourself","⑤ yourselfs"],a:3,e:"Help yourself = '마음껏 드세요' 관용 표현. you의 재귀대명사 yourself."},
+{t:"C",p:"재귀대명사",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① I love myself.","② She knows himself.","③ He hurt himself.","④ They enjoyed themselves.","⑤ We taught ourselves."],a:1,e:"She의 재귀대명사는 himself가 아니라 herself여야 함."},
+{t:"A",p:"지시대명사 활용",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Look at <span class="blank">_____</span> flowers over there.',c:["① this","② that","③ these","④ those","⑤ it"],a:3,e:"멀리 있는 복수 → those flowers."},
+{t:"A",p:"부정대명사 활용",q:'다음 대화의 빈칸에 알맞은 것을 고르시오.<br><br>A: Would you like <span class="blank">_____</span> coffee?<br>B: Yes, please.',c:["① some","② any","③ one","④ none","⑤ no"],a:0,e:"권유문(Would you like ~?)에서는 some."},
+{t:"C",p:"부정대명사",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① I want some water.","② She doesn\'t have some books.","③ Do you have any pets?","④ I have some good news.","⑤ Are there any apples?"],a:1,e:"②의 'doesn't have some'은 some이 부정문 자리에 잘못 쓰임 → any가 맞음."},
+{t:"A",p:"대명사 종합",q:'다음 밑줄 친 부분이 지시하는 것을 고르시오.<br><br>I like <u>this</u> car. It is fast.',c:["① 멀리 있는 차","② 가까이 있는 차","③ 여러 대의 차","④ 다른 사람의 차","⑤ 옛날 차"],a:1,e:"this car = 가까이 있는 차."},
+{t:"A",p:"비인칭 it 활용",q:'다음 중 비인칭 주어 it이 쓰인 문장이 <strong>아닌</strong> 것을 고르시오.',c:["① It is rainy today.","② It is May 5th.","③ It is dark outside.","④ It is my new pen.","⑤ It takes one hour."],a:3,e:"④의 It은 my new pen을 받는 대명사. 나머지는 비인칭."},
+{t:"A",p:"재귀대명사 활용",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He fixed the car <span class="blank">_____</span>.',c:["① him","② his","③ himself","④ his own","⑤ he"],a:2,e:"주어 He가 직접 했음을 강조 → himself."},
+{t:"C",p:"대명사 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① This are my books.","② These is a pen.","③ He bought one for hisself.","④ It is windy today.","⑤ I have some questions, do you have some?"],a:3,e:"비인칭 주어 It. ① These are, ② This is, ③ himself는 없음(himself는 가능), ⑤ do you have any가 맞음."},
+{t:"A",p:"부정대명사 one/it",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I love this hat. I want to buy <span class="blank">_____</span>.',c:["① one","② ones","③ it","④ them","⑤ that"],a:2,e:"this hat을 받아 같은 그것 → it (one은 같은 종류 다른 것)."}
+]},
+
+6:{title:"Chapter 06 — 시제",sub:"현재시제 · 과거시제 · 진행형",db:"/results_mun_lv1_ch06.json",q:[
+{t:"A",p:"현재시제",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The sun <span class="blank">_____</span> in the east.',c:["① rise","② rises","③ rose","④ is rising","⑤ has risen"],a:1,e:"현재 사실/진리는 현재 시제. The sun rises (3인칭 단수+s)."},
+{t:"A",p:"현재시제 · 빈도",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I usually <span class="blank">_____</span> coffee in the morning.',c:["① drink","② drinks","③ am drinking","④ drank","⑤ to drink"],a:0,e:"usually는 현재 시제와 함께. drink (1인칭)."},
+{t:"A",p:"과거시제",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She <span class="blank">_____</span> a book last night.',c:["① reads","② read","③ is reading","④ has read","⑤ to read"],a:1,e:"last night = 과거. read의 과거 read."},
+{t:"A",p:"과거시제 · 표지어",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I <span class="blank">_____</span> Japan two years ago.',c:["① visit","② visits","③ visited","④ am visiting","⑤ to visit"],a:2,e:"two years ago = 과거. visit → visited."},
+{t:"A",p:"현재진행형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Look! The baby <span class="blank">_____</span>.',c:["① cry","② cries","③ is crying","④ are crying","⑤ cried"],a:2,e:"Look! = 지금 진행 중 → 현재진행형. is crying."},
+{t:"A",p:"현재진행형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>They <span class="blank">_____</span> soccer now.',c:["① play","② plays","③ are playing","④ is playing","⑤ played"],a:2,e:"복수 주어 They + now → are playing."},
+{t:"A",p:"-ing 만드는 방법",q:'다음 동사의 -ing형이 <strong>잘못된</strong> 것을 고르시오.',c:["① run → running","② swim → swimming","③ make → making","④ lie → lying","⑤ stop → stoping"],a:4,e:"stop처럼 단모음+단자음으로 끝나는 단어는 자음 중복: stopping. ⑤ 'stoping'은 자음 중복 누락."},
+{t:"A",p:"-ing 만드는 방법",q:'다음 동사의 -ing형으로 알맞은 것을 고르시오.<br><br>write → ?',c:["① writing","② writeing","③ writting","④ wrighting","⑤ write"],a:0,e:"write → writing (e 탈락)."},
+{t:"A",p:"-ing 만드는 방법",q:'다음 동사의 -ing형으로 알맞은 것을 고르시오.<br><br>swim → ?',c:["① swiming","② swimming","③ swimmming","④ swiming","⑤ swimed"],a:1,e:"swim → swimming (자음 중복)."},
+{t:"A",p:"과거진행형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I <span class="blank">_____</span> TV at 8 last night.',c:["① watch","② watched","③ was watching","④ am watching","⑤ have watched"],a:2,e:"at 8 last night = 과거의 한 시점 → 과거진행형 was watching."},
+{t:"A",p:"과거진행형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>They <span class="blank">_____</span> dinner when I called.',c:["① have","② had","③ are having","④ were having","⑤ has had"],a:3,e:"복수 주어 They + 과거진행 → were having."},
+{t:"A",p:"진행형 부정문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She <span class="blank">_____</span> sleeping now.',c:["① not is","② isn\'t","③ doesn\'t","④ don\'t","⑤ wasn\'t"],a:1,e:"she + now → 현재진행 부정 → isn't (sleeping)."},
+{t:"A",p:"진행형 부정문",q:'다음 문장을 부정문으로 바꿀 때 알맞은 것을 고르시오.<br><br>He is studying English.',c:["① He doesn\'t studying English.","② He isn\'t studying English.","③ He not is studying English.","④ He don\'t study English.","⑤ He wasn\'t studying English."],a:1,e:"현재진행 부정: be동사 + not + ~ing. isn't studying."},
+{t:"A",p:"진행형 의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> you reading a book?',c:["① Do","② Does","③ Did","④ Are","⑤ Were"],a:3,e:"현재진행 의문문: Are you ~ing?"},
+{t:"A",p:"진행형 의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> she singing then?',c:["① Is","② Was","③ Were","④ Are","⑤ Did"],a:1,e:"she + 과거 진행 + then(과거) → Was."},
+{t:"A",p:"진행형 의문문 답변",q:'다음 질문의 답으로 알맞은 것을 고르시오.<br><br>Is he running?',c:["① Yes, he does.","② Yes, he is.","③ Yes, he do.","④ Yes, he was.","⑤ No, he don\'t."],a:1,e:"Is he ~ing? 답: Yes, he is."},
+{t:"C",p:"시제 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① She plays the piano now.","② I am knowing him.","③ Listen! The birds are singing.","④ He is having a car.","⑤ I am liking pizza."],a:2,e:"③ 'Listen! 듣다 + ~ing'은 지금 진행 → birds are singing. 정답."},
+{t:"C",p:"시제 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① I get up at 7 every morning.","② She went to school yesterday.","③ They are playing now.","④ He is having lunch now.","⑤ I am studying English last night."],a:4,e:"last night = 과거이므로 'am studying'(현재) 아닌 was studying가 맞음. ⑤ 오류."},
+{t:"A",p:"진행형 사용 불가",q:'다음 중 진행형으로 쓸 수 <strong>없는</strong> 동사를 고르시오.',c:["① run","② study","③ read","④ know","⑤ swim"],a:3,e:"know는 상태 동사 → 진행형 불가."},
+{t:"A",p:"시제 일치",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>When I was young, I <span class="blank">_____</span> in Busan.',c:["① live","② lives","③ lived","④ am living","⑤ have lived"],a:2,e:"When I was young = 과거 → lived."},
+{t:"A",p:"시제 종합",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Yesterday, my mom <span class="blank">_____</span> me a cake.',c:["① makes","② made","③ is making","④ makings","⑤ making"],a:1,e:"Yesterday = 과거 → made."},
+{t:"A",p:"진행형 활용",q:'다음 대화의 빈칸에 알맞은 것을 고르시오.<br><br>A: What are you doing?<br>B: I <span class="blank">_____</span> my homework.',c:["① do","② did","③ am doing","④ does","⑤ to do"],a:2,e:"What are you doing? 답에도 진행형 I am doing."},
+{t:"C",p:"시제 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① She is studying English last night.","② He goed to the park yesterday.","③ We are playing soccer now.","④ I am know the answer.","⑤ They was playing tennis."],a:2,e:"now → are playing이 옳음. 나머지는 시제·진행형 오류."},
+{t:"A",p:"과거 시제 표지어",q:'다음 중 과거 시제와 함께 쓰일 수 <strong>없는</strong> 것을 고르시오.',c:["① yesterday","② last week","③ two days ago","④ now","⑤ in 2010"],a:3,e:"yesterday/last week/ago/in 2010 = 과거. now는 현재."},
+{t:"A",p:"현재진행형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The students <span class="blank">_____</span> a song now.',c:["① sing","② sings","③ are singing","④ is singing","⑤ sang"],a:2,e:"복수 주어 The students + now → are singing."}
+]},
+
+7:{title:"Chapter 07 — 조동사",sub:"will · be going to · can · may · must · have to · should",db:"/results_mun_lv1_ch07.json",q:[
+{t:"A",p:"will",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I <span class="blank">_____</span> visit my grandma next week.',c:["① am","② will","③ do","④ have","⑤ shall"],a:1,e:"next week = 미래 → will visit."},
+{t:"A",p:"will + 동사원형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He will <span class="blank">_____</span> a doctor someday.',c:["① is","② be","③ to be","④ being","⑤ been"],a:1,e:"조동사 will + 동사원형 → be."},
+{t:"A",p:"will 부정문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I <span class="blank">_____</span> tell anyone.',c:["① will not","② not will","③ don\'t will","④ am not will","⑤ doesn\'t"],a:0,e:"will 부정 → will not = won't. 'I will not tell'."},
+{t:"A",p:"be going to",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She <span class="blank">_____</span> to study English.',c:["① is going","② going","③ will going","④ goes","⑤ go"],a:0,e:"be going to + 동사원형. She is going to study."},
+{t:"A",p:"be going to",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>They are going to <span class="blank">_____</span> a party tomorrow.',c:["① has","② have","③ having","④ had","⑤ to have"],a:1,e:"to 뒤에는 동사원형 have."},
+{t:"A",p:"can · 능력",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I <span class="blank">_____</span> speak three languages.',c:["① am","② do","③ have","④ can","⑤ will"],a:3,e:"능력 표현 → can speak."},
+{t:"A",p:"can · 허가",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> I use your phone?',c:["① Am","② Do","③ Can","④ Have","⑤ Be"],a:2,e:"Can I ~? = 허가 요청."},
+{t:"A",p:"can = be able to",q:'다음 두 문장이 같은 뜻이 되도록 빈칸에 알맞은 것을 고르시오.<br><br>She can swim. = She is <span class="blank">_____</span> to swim.',c:["① able","② can","③ being","④ going","⑤ ready"],a:0,e:"can = be able to. is able to swim."},
+{t:"A",p:"may · 추측",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He <span class="blank">_____</span> be sick today.',c:["① may","② must","③ can","④ should","⑤ will"],a:0,e:"추측 '~일지도 모른다' → may."},
+{t:"A",p:"may · 허가",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>You <span class="blank">_____</span> go home now.',c:["① do","② have","③ may","④ are","⑤ is"],a:2,e:"may = '~해도 좋다' 허가."},
+{t:"A",p:"must · 의무",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>You <span class="blank">_____</span> wear a seatbelt in the car.',c:["① may","② must","③ can","④ will","⑤ be"],a:1,e:"강한 의무 '~해야 한다' → must."},
+{t:"A",p:"must · 강한 추측",q:'다음 밑줄 친 <u>must</u>의 뜻으로 알맞은 것을 고르시오.<br><br>He <u>must</u> be very tired.',c:["① ~해야 한다","② ~할 수 있다","③ ~일지도 모른다","④ ~임에 틀림없다","⑤ ~할 것이다"],a:3,e:"must는 '~임에 틀림없다'(강한 추측)로도 쓰임. 매우 피곤한 상태에서."},
+{t:"A",p:"have to",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I have to <span class="blank">_____</span> early tomorrow.',c:["① get up","② got up","③ getting up","④ to get up","⑤ gets up"],a:0,e:"have to + 동사원형 get up."},
+{t:"A",p:"have to / has to",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She <span class="blank">_____</span> finish her homework.',c:["① have to","② has to","③ to have","④ having","⑤ had"],a:1,e:"3인칭 단수 She → has to."},
+{t:"A",p:"don\'t have to",q:'다음 밑줄 친 부분의 뜻으로 알맞은 것을 고르시오.<br><br>You <u>don\'t have to</u> come.',c:["① ~해서는 안 된다","② ~할 필요가 없다","③ ~할 수 없다","④ ~할 것이다","⑤ ~해야 한다"],a:1,e:"don't have to = '~할 필요가 없다' (≠ must not '~해서는 안 된다')."},
+{t:"A",p:"should",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>You <span class="blank">_____</span> see a doctor.',c:["① will","② may","③ can","④ should","⑤ would"],a:3,e:"충고/권유 '~해야 한다' → should."},
+{t:"A",p:"should not",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>You <span class="blank">_____</span> eat too much sugar.',c:["① will not","② should not","③ may not","④ can\'t","⑤ doesn\'t"],a:1,e:"충고의 부정 → should not."},
+{t:"C",p:"조동사 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① I can swim.","② He must goes home.","③ She may be at home.","④ You should study hard.","⑤ They will come tomorrow."],a:1,e:"must 뒤에는 동사원형 → 'must go'가 맞음. ① 'must studies' 오류."},
+{t:"C",p:"조동사 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① He cans speak English.","② I will to go there.","③ She musts study.","④ You should be careful.","⑤ I am going study tonight."],a:3,e:"should have p.p./should + 동사원형 형태 모두 가능. ④ 'should be careful' 정답."},
+{t:"A",p:"will vs be going to",q:'다음 빈칸에 의미상 가장 알맞은 것을 고르시오.<br><br>Look at those clouds! It <span class="blank">_____</span> rain soon.',c:["① will be","② is going to","③ may not","④ must not","⑤ should"],a:1,e:"구름을 보고 곧 비올 거라 짐작 → be going to (가까운 미래·예측)."},
+{t:"A",p:"조동사 + 동사원형",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He must <span class="blank">_____</span> her sister.',c:["① is","② be","③ to be","④ being","⑤ been"],a:1,e:"조동사 must + 동사원형 → be."},
+{t:"A",p:"can\'t · 부정 추측",q:'다음 밑줄 친 <u>can\'t</u>의 뜻으로 알맞은 것을 고르시오.<br><br>He <u>can\'t</u> be hungry. He just ate.',c:["① ~할 수 없다","② ~해서는 안 된다","③ ~일 리가 없다","④ ~할 필요가 없다","⑤ ~할 수도 있다"],a:2,e:"can't = '~일 리가 없다' (강한 부정 추측)."},
+{t:"A",p:"조동사 의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> you help me?',c:["① Are","② Do","③ Can","④ Have","⑤ Is"],a:2,e:"조동사 의문문 → Can you ~?"},
+{t:"A",p:"조동사 활용",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>It\'s late. We <span class="blank">_____</span> go home.',c:["① must to","② have","③ should","④ are","⑤ do"],a:2,e:"충고 '집에 가야 한다' → should."},
+{t:"C",p:"조동사 종합",q:'다음 중 두 문장의 의미가 <strong>같지 않은</strong> 것을 고르시오.',c:["① I can swim. = I am able to swim.","② You must come. = You have to come.","③ She may be sick. = She might be sick.","④ He will go. = He is going to go.","⑤ You don\'t have to go. = You must not go."],a:4,e:"①②③④는 같은 의미(must/have to/certainly). ⑤ may는 '~일지도 모른다'로 의미가 다름."}
+]},
+8:{title:"Chapter 08 — 형용사, 부사, 비교",sub:"형용사·부사의 역할 · 빈도부사 · 원급·비교급·최상급",db:"/results_mun_lv1_ch08.json",q:[
+{t:"A",p:"형용사의 역할 · 한정적",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She is a <span class="blank">_____</span> girl.',c:["① kindly","② kind","③ kinder","④ kindest","⑤ kindness"],a:1,e:"명사 girl을 수식하므로 형용사 kind."},
+{t:"A",p:"형용사의 역할 · 서술적",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The movie was <span class="blank">_____</span>.',c:["① interesting","② interestingly","③ interestly","④ interests","⑤ interest"],a:0,e:"be동사 was 뒤 보어로 형용사 interesting."},
+{t:"A",p:"수량 형용사 · 가산",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I have <span class="blank">_____</span> books.',c:["① much","② a little","③ many","④ a great deal of","⑤ less"],a:2,e:"books(가산명사 복수) → many."},
+{t:"A",p:"수량 형용사 · 불가산",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>There is <span class="blank">_____</span> water in the cup.',c:["① many","② a few","③ several","④ a little","⑤ few"],a:3,e:"water(불가산) → a little."},
+{t:"A",p:"수량 형용사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He has <span class="blank">_____</span> friends.',c:["① much","② a little","③ a few","④ little","⑤ great deal"],a:2,e:"friends(가산 복수) → a few."},
+{t:"C",p:"수량 형용사",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① I have many money.","② She drinks much waters.","③ He has a few books.","④ There is many cats.","⑤ We have a little friends."],a:2,e:"③ 'He has a few books'만 가산+a few로 옳음. 나머지는 가산/불가산 수량형용사 오류."},
+{t:"A",p:"부사의 형태",q:'다음 형용사의 부사형으로 알맞은 것을 고르시오.<br><br>quick → ?',c:["① quick","② quicker","③ quickly","④ quickest","⑤ quickily"],a:2,e:"형용사 + ly = 부사. quick → quickly."},
+{t:"A",p:"부사의 형태",q:'다음 부사의 형태가 <strong>잘못된</strong> 것을 고르시오.',c:["① happily","② carefully","③ slowly","④ goodly","⑤ easily"],a:3,e:"good의 부사형은 well. 'goodly'는 없음."},
+{t:"A",p:"부사의 형태 · 불규칙",q:'다음 형용사의 부사형이 <strong>잘못된</strong> 것을 고르시오.',c:["① good → well","② fast → fast","③ hard → hard","④ early → early","⑤ late → latest"],a:4,e:"late의 비교급은 later/latest, 부사형은 late 그대로. ⑤ 'latest'는 부사형이 아님."},
+{t:"A",p:"빈도부사 위치",q:'다음 빈도부사 always의 알맞은 위치를 고르시오.<br><br>I (①) am (②) busy (③) on (④) Mondays (⑤).',c:["①","②","③","④","⑤"],a:1,e:"빈도부사는 be동사 뒤·일반동사 앞. 'I am always busy'."},
+{t:"A",p:"빈도부사 위치",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He <span class="blank">_____</span> watches TV at night.',c:["① watch always","② always watches","③ watches always","④ always watch","⑤ watch is always"],a:2,e:"3인칭 단수 watches + 빈도부사는 동사 앞 → always watches."},
+{t:"A",p:"빈도부사",q:'다음 중 빈도가 <strong>가장 높은</strong> 빈도부사를 고르시오.',c:["① sometimes","② never","③ often","④ always","⑤ rarely"],a:3,e:"always > often > sometimes > rarely > never."},
+{t:"A",p:"원급 비교",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Tom is <span class="blank">_____</span> tall <span class="blank">_____</span> his father.',c:["① more, than","② as, as","③ so, that","④ more, as","⑤ as, than"],a:1,e:"as + 원급 + as → as tall as."},
+{t:"A",p:"원급 비교",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>This book is as <span class="blank">_____</span> as that one.',c:["① interesting","② more interesting","③ most interesting","④ interestinger","⑤ interest"],a:0,e:"as ~ as 사이에는 원급 그대로 interesting."},
+{t:"A",p:"비교급",q:'다음 형용사의 비교급으로 알맞은 것을 고르시오.<br><br>big → ?',c:["① biger","② bigger","③ more big","④ biggest","⑤ much big"],a:1,e:"big처럼 단모음+단자음은 자음 중복 + er. bigger."},
+{t:"A",p:"비교급",q:'다음 형용사의 비교급이 <strong>잘못된</strong> 것을 고르시오.',c:["① pretty → prettier","② good → better","③ bad → worse","④ many → more","⑤ beautiful → beautifuler"],a:4,e:"beautiful의 비교급은 more beautiful (3음절 이상은 more)."},
+{t:"A",p:"비교급 + than",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She is taller <span class="blank">_____</span> her sister.',c:["① as","② that","③ then","④ than","⑤ to"],a:3,e:"비교급 다음에는 than. taller than."},
+{t:"A",p:"비교급 강조",q:'다음 빈칸에 들어갈 수 <strong>없는</strong> 것을 고르시오.<br><br>He is <span class="blank">_____</span> taller than me.',c:["① much","② far","③ very","④ a lot","⑤ even"],a:2,e:"비교급 강조는 much/far/a lot/even/still. very는 원급 강조."},
+{t:"A",p:"최상급",q:'다음 형용사의 최상급으로 알맞은 것을 고르시오.<br><br>tall → ?',c:["① taller","② more tall","③ tallest","④ most tall","⑤ talliest"],a:2,e:"tall의 최상급은 tallest."},
+{t:"A",p:"최상급 · the",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>This is <span class="blank">_____</span> in the world.',c:["① a tallest building","② tallest building","③ the tallest building","④ taller building","⑤ a taller building"],a:2,e:"최상급에는 the. the tallest building."},
+{t:"A",p:"최상급 활용",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Mt. Everest is <span class="blank">_____</span> mountain in the world.',c:["① high","② higher","③ highest","④ the highest","⑤ the high"],a:3,e:"the highest mountain."},
+{t:"C",p:"비교 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① He is taller than me.","② She is the most beautiful girl.","③ This is more better than that.","④ Today is colder than yesterday.","⑤ He runs the fastest in our class."],a:2,e:"more + 원급 X, 비교급은 better. 'more better'는 중복 오류."},
+{t:"A",p:"비교급 활용",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Health is <span class="blank">_____</span> than money.',c:["① important","② most important","③ more important","④ as important","⑤ importance"],a:2,e:"important는 3음절 이상 → more important."},
+{t:"A",p:"최상급 of/in",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She is the smartest <span class="blank">_____</span> all the students.',c:["① in","② at","③ on","④ of","⑤ from"],a:3,e:"최상급 + of + 복수 / in + 단수 단체. of all the students."},
+{t:"C",p:"비교 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① He is more taller than me.","② She is most pretty girl.","③ This book is interestinger.","④ Mt. Halla is the highest in Korea.","⑤ I have much books than you."],a:3,e:"정답 ④ 'Mt. Halla is the highest in Korea' — 한라산이 한국에서 가장 높음."}
+]},
+
+9:{title:"Chapter 09 — 의문문, 명령문, 감탄문",sub:"의문사 · 부가/부정의문문 · 명령문 · 감탄문",db:"/results_mun_lv1_ch09.json",q:[
+{t:"A",p:"의문사 who",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is your teacher?',c:["① What","② Who","③ When","④ Where","⑤ How"],a:1,e:"사람을 묻는 의문사 → Who."},
+{t:"A",p:"의문사 what",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> do you want to eat?',c:["① Who","② What","③ When","④ Where","⑤ Why"],a:1,e:"사물을 묻는 의문사 → What."},
+{t:"A",p:"의문사 which",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> do you like better, summer or winter?',c:["① What","② Which","③ Who","④ How","⑤ Why"],a:1,e:"둘 중 선택은 Which."},
+{t:"A",p:"의문사 when",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is your birthday?',c:["① What","② Who","③ When","④ Where","⑤ How"],a:2,e:"시간(생일) → When."},
+{t:"A",p:"의문사 where",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> do you live?',c:["① What","② Who","③ When","④ Where","⑤ Why"],a:3,e:"장소 → Where."},
+{t:"A",p:"의문사 why",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> are you so happy?',c:["① What","② Who","③ When","④ Where","⑤ Why"],a:4,e:"이유 → Why."},
+{t:"A",p:"의문사 how",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is the weather today?',c:["① What","② Who","③ When","④ Where","⑤ How"],a:4,e:"상태/방법 → How."},
+{t:"A",p:"의문사 + 형용사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> are you?',c:["① How old","② What old","③ Who old","④ Where old","⑤ Why old"],a:0,e:"나이 → How old."},
+{t:"A",p:"How + 형용사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is the building?',c:["① How tall","② How many","③ How much","④ What tall","⑤ Which tall"],a:0,e:"키/높이 → How tall."},
+{t:"A",p:"How many / How much",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> books do you have?',c:["① How many","② How much","③ What","④ Which","⑤ How"],a:0,e:"books(가산 복수) 수량 → How many."},
+{t:"A",p:"How much",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is this bag?',c:["① How many","② How much","③ How long","④ How old","⑤ How tall"],a:1,e:"가격/양 → How much."},
+{t:"A",p:"부가의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>You are happy, <span class="blank">_____</span>?',c:["① are you","② aren\'t you","③ do you","④ don\'t you","⑤ isn\'t it"],a:1,e:"be동사 평서문 → 부정 부가의문문 'aren't you?'"},
+{t:"A",p:"부가의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He doesn\'t like fish, <span class="blank">_____</span>?',c:["① does he","② doesn\'t he","③ is he","④ isn\'t he","⑤ do he"],a:0,e:"부정 평서문(doesn't) → 긍정 부가의문문 'does he?'"},
+{t:"A",p:"부가의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She can swim, <span class="blank">_____</span>?',c:["① can she","② can\'t she","③ is she","④ isn\'t she","⑤ does she"],a:1,e:"조동사 can + 긍정 → 부정 'can't she?'"},
+{t:"A",p:"부정의문문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> you tired?',c:["① Don\'t","② Aren\'t","③ Won\'t","④ Doesn\'t","⑤ Wasn\'t"],a:1,e:"tired는 형용사 → be동사로 부정의문 'Aren't you tired?'"},
+{t:"A",p:"부정의문문 답",q:'다음 질문의 답이 \'나는 영어를 좋아한다\'일 때 알맞은 것을 고르시오.<br><br>Don\'t you like English?',c:["① Yes, I do.","② Yes, I am.","③ No, I do.","④ No, I am not.","⑤ Yes, I don\'t."],a:0,e:"부정의문문도 사실 기준 답. 좋아하면 Yes, I do."},
+{t:"A",p:"명령문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> quiet, please.',c:["① Are","② Be","③ Is","④ Do","⑤ Have"],a:1,e:"명령문은 동사원형. quiet 앞에는 be동사 → Be quiet."},
+{t:"A",p:"부정명령문",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> run in the hallway.',c:["① No","② Not","③ Don\'t","④ Doesn\'t","⑤ Never not"],a:2,e:"부정 명령문 → Don't + 동사원형."},
+{t:"A",p:"명령문 + and/or",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Hurry up, <span class="blank">_____</span> you will miss the bus.',c:["① and","② or","③ but","④ so","⑤ for"],a:1,e:"명령문 + or = '~해라, 그렇지 않으면'. or you will miss."},
+{t:"A",p:"Let\'s ~",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Let\'s <span class="blank">_____</span> a movie tonight.',c:["① watch","② watches","③ watched","④ watching","⑤ to watch"],a:0,e:"Let's + 동사원형. watch."},
+{t:"A",p:"감탄문 · What",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> a beautiful flower it is!',c:["① How","② What","③ Which","④ Who","⑤ Why"],a:1,e:"What + (a/an) + 형용사 + 명사 + 주어 + 동사! → What a beautiful flower."},
+{t:"A",p:"감탄문 · How",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> tall the building is!',c:["① What","② Who","③ How","④ Which","⑤ Why"],a:2,e:"How + 형용사/부사 + 주어 + 동사! → How tall."},
+{t:"A",p:"감탄문",q:'다음 문장을 감탄문으로 바꿀 때 알맞은 것을 고르시오.<br><br>She is very kind.',c:["① What kind she is!","② How a kind she is!","③ How kind she is!","④ What kind is she!","⑤ How kind is she!"],a:2,e:"How + 형용사 + 주어 + 동사! → How kind she is."},
+{t:"C",p:"의문문 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① What do you want?","② Where is the bank?","③ How tall are you?","④ How much books do you have?","⑤ Why are you sad?"],a:3,e:"books는 가산 복수 → How many가 맞음. ④ 'How much books' 오류."},
+{t:"C",p:"감탄문/명령문 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① What a tall is he!","② How a beautiful day!","③ Don\'t to be late.","④ Be careful, please.","⑤ Let\'s going home."],a:3,e:"Be careful이 명령문 정답. 나머지는 형식 오류 (What/How/Don't/Let's)."}
+]},
+
+10:{title:"Chapter 10 — 문장의 형식",sub:"1~5형식 · 감각동사 · 4→3형식 · 지각/사역동사",db:"/results_mun_lv1_ch10.json",q:[
+{t:"B",p:"1형식",q:'다음 중 <strong>1형식</strong> 문장을 고르시오.',c:["① He is a doctor.","② She loves music.","③ The sun rises.","④ I made a cake.","⑤ He gave me a book."],a:2,e:"The sun rises = 주어+동사 → 1형식."},
+{t:"B",p:"2형식",q:'다음 중 <strong>2형식</strong> 문장을 고르시오.',c:["① He sleeps.","② She is happy.","③ I read books.","④ Tom gave me a gift.","⑤ She made him angry."],a:1,e:"She is happy = 주어+be+형용사보어 → 2형식."},
+{t:"B",p:"3형식",q:'다음 중 <strong>3형식</strong> 문장을 고르시오.',c:["① It rains.","② She looks tired.","③ He plays the piano.","④ I sent her a letter.","⑤ They call me Tom."],a:2,e:"He plays the piano = 주어+동사+목적어 → 3형식."},
+{t:"B",p:"4형식",q:'다음 중 <strong>4형식</strong> 문장을 고르시오.',c:["① She runs fast.","② He looks sad.","③ I bought a book.","④ Mom made me a sandwich.","⑤ We call him a genius."],a:3,e:"Mom made me a sandwich = 4형식 (간목+직목)."},
+{t:"B",p:"5형식",q:'다음 중 <strong>5형식</strong> 문장을 고르시오.',c:["① The baby cries.","② She seems kind.","③ He loves her.","④ I gave her flowers.","⑤ We named the cat Lucky."],a:4,e:"We named the cat Lucky = 5형식 (목적어+목적격보어)."},
+{t:"A",p:"감각동사 + 형용사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>You look <span class="blank">_____</span> today.',c:["① happily","② happiness","③ happy","④ to be happy","⑤ happily so"],a:2,e:"look + 형용사 → happy (감각동사+형용사)."},
+{t:"A",p:"감각동사 + 형용사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The soup tastes <span class="blank">_____</span>.',c:["① well","② good","③ goodly","④ better than","⑤ wonderfully"],a:1,e:"taste + 형용사 → good (taste good = 맛있다)."},
+{t:"A",p:"감각동사",q:'다음 중 감각동사가 <strong>아닌</strong> 것을 고르시오.',c:["① look","② sound","③ smell","④ run","⑤ feel"],a:3,e:"run은 일반동사. 감각동사는 look·sound·smell·feel."},
+{t:"C",p:"감각동사",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① The flower smells sweet.","② She looks sadly today.","③ The music sounds wonderful.","④ The cake tastes great.","⑤ I feel tired."],a:1,e:"look + 형용사 → sadly(부사)가 아니라 sad. ② 오류."},
+{t:"A",p:"수여동사 4형식",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She gave <span class="blank">_____</span>.',c:["① to me a book","② me to a book","③ me a book","④ a book me","⑤ a book for me"],a:2,e:"gave + 간목 + 직목 → gave me a book."},
+{t:"A",p:"4형식 → 3형식 · to",q:'다음 문장을 3형식으로 바꿀 때 알맞은 것을 고르시오.<br><br>He gave me a book.',c:["① He gave a book me.","② He gave a book to me.","③ He gave a book for me.","④ He gave to me a book.","⑤ He gave for me a book."],a:1,e:"give는 4→3 변환 시 to. gave a book to me."},
+{t:"A",p:"4형식 → 3형식 · for",q:'다음 문장을 3형식으로 바꿀 때 알맞은 것을 고르시오.<br><br>Mom made me a cake.',c:["① Mom made a cake me.","② Mom made a cake to me.","③ Mom made a cake for me.","④ Mom made for me a cake.","⑤ Mom made me to a cake."],a:2,e:"make는 4→3 변환 시 for. made a cake for me."},
+{t:"A",p:"수여동사 + for",q:'다음 중 3형식 전환 시 <strong>for</strong>를 쓰는 동사를 고르시오.',c:["① give","② send","③ make","④ tell","⑤ show"],a:2,e:"for을 쓰는 동사: make, buy, cook, get, find."},
+{t:"A",p:"수여동사 + of",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She asked a question <span class="blank">_____</span> me.',c:["① to","② for","③ of","④ from","⑤ at"],a:2,e:"ask는 4→3 변환 시 of. asked a question of me."},
+{t:"A",p:"5형식 · 보어 명사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>They call <span class="blank">_____</span> a genius.',c:["① he","② his","③ him","④ himself","⑤ he is"],a:2,e:"call + 목적어 + 보어. call him a genius."},
+{t:"A",p:"5형식 · 보어 형용사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The news made her <span class="blank">_____</span>.',c:["① happily","② happiness","③ happy","④ happen","⑤ to happy"],a:2,e:"make + 목적어 + 형용사 보어. made her happy."},
+{t:"A",p:"5형식 · to부정사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I want him <span class="blank">_____</span> here.',c:["① come","② comes","③ coming","④ to come","⑤ came"],a:3,e:"want + 목적어 + to부정사. want him to come."},
+{t:"A",p:"5형식 · to부정사 동사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She told me <span class="blank">_____</span> quiet.',c:["① be","② is","③ being","④ to be","⑤ am"],a:3,e:"tell + 목적어 + to부정사. told me to be."},
+{t:"A",p:"5형식 · 지각동사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I saw him <span class="blank">_____</span> the street.',c:["① cross","② to cross","③ crossing","④ crossed","⑤ crosses"],a:0,e:"지각동사 saw + 목적어 + 동사원형/~ing. cross/crossing."},
+{t:"A",p:"5형식 · 지각동사",q:'다음 빈칸에 알맞은 것이 <strong>아닌</strong> 것을 고르시오.<br><br>I heard her <span class="blank">_____</span>.',c:["① sing","② singing","③ to sing","④ shout","⑤ shouting"],a:2,e:"지각동사 + 목적어 + 동사원형 또는 ~ing. to부정사는 불가."},
+{t:"A",p:"5형식 · 사역동사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Mom made me <span class="blank">_____</span> the dishes.',c:["① wash","② washes","③ washing","④ to wash","⑤ washed"],a:0,e:"사역동사 make + 목적어 + 동사원형. wash."},
+{t:"A",p:"5형식 · 사역동사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Let me <span class="blank">_____</span> you.',c:["① help","② to help","③ helping","④ helps","⑤ helped"],a:0,e:"let + 목적어 + 동사원형. help."},
+{t:"A",p:"5형식 · 사역동사",q:'다음 중 사역동사가 <strong>아닌</strong> 것을 고르시오.',c:["① make","② let","③ have","④ want","⑤ help"],a:3,e:"사역동사는 make, let, have. want는 일반동사 (to부정사 사용)."},
+{t:"C",p:"문장의 형식 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① She looks happy.","② He gave a book to me.","③ Mom made me to clean my room.","④ I want you to be quiet.","⑤ I saw him run."],a:2,e:"사역동사 make는 + 동사원형. 'made me to clean'은 오류 → 'made me clean'."},
+{t:"C",p:"문장의 형식 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① She sang me beautifully.","② The cake tastes well.","③ He let me to use his phone.","④ I heard him singing.","⑤ Mom asked a question to me."],a:3,e:"'I heard him singing' — 지각동사 + 목적어 + ~ing 옳음."}
+]},
+
+11:{title:"Chapter 11 — to부정사와 동명사",sub:"to부정사 3용법 · 동명사의 역할",db:"/results_mun_lv1_ch11.json",q:[
+{t:"A",p:"to부정사 · 명사적 (주어)",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is fun.',c:["① Swim","② Swims","③ To swim","④ Swam","⑤ Swimmed"],a:2,e:"주어 자리에 to부정사 → To swim."},
+{t:"A",p:"to부정사 · 명사적 (보어)",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>My dream is <span class="blank">_____</span> a teacher.',c:["① be","② is","③ being","④ to be","⑤ am"],a:3,e:"is 다음 보어 자리 to부정사 → to be."},
+{t:"A",p:"to부정사 · 명사적 (목적어)",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I want <span class="blank">_____</span> a doctor.',c:["① be","② is","③ being","④ to be","⑤ am"],a:3,e:"want의 목적어로 to부정사 → to be."},
+{t:"A",p:"의문사 + to부정사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I don\'t know <span class="blank">_____</span>.',c:["① what do","② what to do","③ what doing","④ what does","⑤ to what do"],a:1,e:"의문사 + to부정사 → what to do."},
+{t:"A",p:"의문사 + to부정사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Please tell me <span class="blank">_____</span> there.',c:["① how get","② how to get","③ how getting","④ to how get","⑤ how do get"],a:1,e:"how to + 동사원형. how to get."},
+{t:"A",p:"to부정사 · 형용사적",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I have something <span class="blank">_____</span> you.',c:["① tell","② tells","③ telling","④ to tell","⑤ told"],a:3,e:"something + to부정사(형용사적). to tell."},
+{t:"A",p:"to부정사 · 형용사적 어순",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I have <span class="blank">_____</span>.',c:["① to read many books","② many books to read","③ to read books many","④ many books reading","⑤ many to read books"],a:1,e:"many books to read = '읽을 책 많이'. 명사 뒤에 to부정사."},
+{t:"A",p:"to부정사 · 부사적 (목적)",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I go to school <span class="blank">_____</span> English.',c:["① study","② studying","③ to study","④ studied","⑤ studies"],a:2,e:"목적 '~하기 위해' → to study."},
+{t:"A",p:"to부정사 · 부사적 (감정 원인)",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I was happy <span class="blank">_____</span> the news.',c:["① hear","② hearing","③ to hear","④ heard","⑤ hears"],a:2,e:"감정 원인 '~해서 기쁘다' → to hear."},
+{t:"A",p:"to부정사 · 부사적 (결과)",q:'다음 밑줄 친 to부정사의 용법을 고르시오.<br><br>He grew up <u>to be</u> a famous singer.',c:["① 주어","② 목적어","③ 형용사적 용법","④ 부사적(목적)","⑤ 부사적(결과)"],a:4,e:"결과 '결국 ~되다' → to be (부사적 결과)."},
+{t:"B",p:"to부정사 용법 구분",q:'다음 밑줄 친 to부정사의 용법으로 알맞은 것을 고르시오.<br><br>I want <u>to play</u> soccer.',c:["① 명사적 (주어)","② 명사적 (보어)","③ 명사적 (목적어)","④ 형용사적","⑤ 부사적"],a:2,e:"want의 목적어 to부정사 → 명사적(목적어)."},
+{t:"B",p:"to부정사 용법 구분",q:'다음 밑줄 친 to부정사의 용법으로 알맞은 것을 고르시오.<br><br>I have a book <u>to read</u>.',c:["① 명사적 (주어)","② 명사적 (보어)","③ 명사적 (목적어)","④ 형용사적","⑤ 부사적"],a:3,e:"a book + to read = '읽을 책' → 형용사적."},
+{t:"B",p:"to부정사 용법 구분",q:'다음 밑줄 친 to부정사의 용법으로 알맞은 것을 고르시오.<br><br>She went there <u>to meet</u> her friend.',c:["① 명사적 (주어)","② 명사적 (보어)","③ 명사적 (목적어)","④ 형용사적","⑤ 부사적 (목적)"],a:4,e:"to meet her friend = '만나기 위해' → 부사적(목적)."},
+{t:"A",p:"to부정사 부정",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>He decided <span class="blank">_____</span> there.',c:["① not to go","② to not go","③ to don\'t go","④ don\'t to go","⑤ not go to"],a:0,e:"to부정사 부정 → not to + 동사원형. not to go."},
+{t:"A",p:"동명사 · 주어",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> is good for health.',c:["① Swim","② Swims","③ Swimming","④ Swam","⑤ To swimming"],a:2,e:"주어 자리 동명사 → Swimming."},
+{t:"A",p:"동명사 · 보어",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>My hobby is <span class="blank">_____</span> books.',c:["① read","② reads","③ reading","④ to reading","⑤ readed"],a:2,e:"보어 자리 동명사 → reading."},
+{t:"A",p:"동명사 · 목적어",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I enjoy <span class="blank">_____</span> with my friends.',c:["① play","② plays","③ to play","④ playing","⑤ played"],a:3,e:"enjoy 다음에는 동명사. playing."},
+{t:"A",p:"동명사만 목적어",q:'다음 중 목적어로 동명사만 쓰는 동사를 고르시오.',c:["① want","② hope","③ enjoy","④ plan","⑤ decide"],a:2,e:"enjoy는 동명사만 목적어. want·hope·plan·decide는 to부정사."},
+{t:"A",p:"to부정사만 목적어",q:'다음 중 목적어로 to부정사만 쓰는 동사를 고르시오.',c:["① enjoy","② finish","③ mind","④ want","⑤ avoid"],a:3,e:"want는 to부정사만 목적어."},
+{t:"A",p:"to부정사/동명사 모두",q:'다음 중 목적어로 to부정사와 동명사 둘 다 쓰는 동사를 고르시오.',c:["① want","② enjoy","③ finish","④ love","⑤ decide"],a:3,e:"love는 to부정사·동명사 모두 가능."},
+{t:"C",p:"to부정사/동명사 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① I want to learn Chinese.","② She enjoys to swim in the pool.","③ He finished his homework.","④ They plan to visit us.","⑤ I hope to see you again."],a:1,e:"enjoy + 동명사 → swimming이 맞음. ② 'to swim' 오류."},
+{t:"A",p:"전치사 + 동명사",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She is good at <span class="blank">_____</span> the piano.',c:["① play","② plays","③ to play","④ playing","⑤ played"],a:3,e:"전치사 at 다음 동명사 → playing."},
+{t:"A",p:"동명사 관용표현",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I look forward to <span class="blank">_____</span> you.',c:["① see","② sees","③ to see","④ seeing","⑤ saw"],a:3,e:"look forward to + 동명사 → seeing."},
+{t:"C",p:"to부정사/동명사 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① He decided going home.","② She avoided to meet him.","③ I gave up to smoke.","④ They want to play soccer.","⑤ He finished to write the letter."],a:3,e:"want + to부정사 → to play가 맞음. 나머지는 동명사/to부정사 사용 오류."},
+{t:"A",p:"종합",q:'다음 빈칸에 들어갈 말이 <strong>나머지와 다른</strong> 것을 고르시오.',c:["① I want <span class=\"blank\">_____</span> a doctor.","② He hopes <span class=\"blank\">_____</span> see you.","③ She enjoys <span class=\"blank\">_____</span> read books.","④ I decided <span class=\"blank\">_____</span> study harder.","⑤ We plan <span class=\"blank\">_____</span> visit Paris."],a:2,e:"①②④⑤는 to + 동사원형이지만 ③ 'enjoys'는 동명사를 취하므로 enjoys reading. 즉 to가 안 들어감."}
+]},
+
+12:{title:"Chapter 12 — 접속사",sub:"등위접속사 · 시간/이유/조건 접속사 · 명사절 that",db:"/results_mun_lv1_ch12.json",q:[
+{t:"A",p:"등위접속사 and",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I like apples <span class="blank">_____</span> oranges.',c:["① and","② but","③ or","④ so","⑤ for"],a:0,e:"두 사물 연결 → and."},
+{t:"A",p:"등위접속사 but",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She is small, <span class="blank">_____</span> she is strong.',c:["① and","② but","③ or","④ so","⑤ because"],a:1,e:"대조 → but."},
+{t:"A",p:"등위접속사 or",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Do you want coffee <span class="blank">_____</span> tea?',c:["① and","② but","③ or","④ so","⑤ for"],a:2,e:"선택 → or."},
+{t:"A",p:"등위접속사 so",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I was tired, <span class="blank">_____</span> I went to bed early.',c:["① and","② but","③ or","④ so","⑤ because"],a:3,e:"원인-결과 → so."},
+{t:"C",p:"등위접속사 종합",q:'다음 빈칸에 알맞은 접속사로 짝지어진 것을 고르시오.<br><br>It rained, (   ) we cancelled the picnic.<br>I tried hard, (   ) I failed.',c:["① and - so","② so - but","③ but - and","④ or - so","⑤ for - or"],a:1,e:"비 → so (결과). 노력했지만 실패 → but (대조)."},
+{t:"A",p:"시간 접속사 when",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> I was young, I lived in Busan.',c:["① While","② When","③ Before","④ After","⑤ Because"],a:1,e:"When = '~할 때'."},
+{t:"A",p:"시간 접속사 while",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The phone rang <span class="blank">_____</span> I was sleeping.',c:["① if","② while","③ because","④ that","⑤ but"],a:1,e:"while = '~하는 동안' (진행)."},
+{t:"A",p:"시간 접속사 before",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Wash your hands <span class="blank">_____</span> you eat.',c:["① after","② before","③ while","④ if","⑤ because"],a:1,e:"before = '~ 전에'."},
+{t:"A",p:"시간 접속사 after",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> dinner, we watched a movie.',c:["① Before","② After","③ While","④ If","⑤ Because"],a:1,e:"after = '~ 후에'."},
+{t:"A",p:"이유 접속사 because",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I stayed home <span class="blank">_____</span> I was sick.',c:["① if","② when","③ before","④ because","⑤ but"],a:3,e:"because = '~ 때문에'."},
+{t:"A",p:"because vs because of",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The game was cancelled <span class="blank">_____</span> the rain.',c:["① because","② because of","③ if","④ when","⑤ for"],a:1,e:"because of + 명사구. because는 절을 이끔."},
+{t:"A",p:"조건 접속사 if",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> it rains, I will stay home.',c:["① When","② If","③ Because","④ Before","⑤ That"],a:1,e:"조건 → If."},
+{t:"A",p:"조건절 시제",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>If it <span class="blank">_____</span> tomorrow, we won\'t go out.',c:["① rains","② will rain","③ rained","④ is raining","⑤ to rain"],a:0,e:"if 조건절은 미래도 현재시제로. rains."},
+{t:"A",p:"시간절 시제",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>When she <span class="blank">_____</span> here, please call me.',c:["① arrive","② arrives","③ will arrive","④ arriving","⑤ arrived"],a:1,e:"When/If 시간·조건절도 현재시제. arrives."},
+{t:"A",p:"명사절 that · 목적어",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I think <span class="blank">_____</span> he is honest.',c:["① if","② what","③ that","④ how","⑤ when"],a:2,e:"think의 목적어 명사절 → that."},
+{t:"A",p:"명사절 that · 보어",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The problem is <span class="blank">_____</span> we have no money.',c:["① if","② when","③ that","④ because","⑤ which"],a:2,e:"보어 명사절 → that."},
+{t:"A",p:"명사절 that · 주어",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br><span class="blank">_____</span> she is honest is true.',c:["① If","② That","③ When","④ Because","⑤ Although"],a:1,e:"주어 명사절 → That."},
+{t:"A",p:"that 생략",q:'다음 문장에서 생략된 단어로 알맞은 것을 고르시오.<br><br>I know he is kind.',c:["① if","② that","③ when","④ what","⑤ how"],a:1,e:"동사의 목적어로 that절. 생략 가능한 that."},
+{t:"C",p:"접속사 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① I like tea and coffee.","② She is rich, but she is not happy.","③ If it will rain, I will stay home.","④ I went home because I was tired.","⑤ I think that he is right."],a:2,e:"if 조건절은 미래도 현재 → 'If it rains'가 맞음. ③ 오류."},
+{t:"C",p:"접속사 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① I was late because of I missed the bus.","② When I will see her, I\'ll tell her.","③ I hope that you can come.","④ I don\'t know if to do.","⑤ He said me that he was sick."],a:2,e:"I hope that ~ → 가능 (③). 나머지는 because of/시제일치/to부정사 오류."},
+{t:"A",p:"because vs so",q:'다음 두 문장의 의미를 같게 할 때 빈칸에 알맞은 것을 고르시오.<br><br>I was hungry, so I ate a sandwich.<br>= <span class="blank">_____</span> I was hungry, I ate a sandwich.',c:["① If","② When","③ Because","④ After","⑤ But"],a:2,e:"so + 원인 → 'I was hungry'. = Because I was hungry."},
+{t:"A",p:"if vs when",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I will be happy <span class="blank">_____</span> you come to my party.',c:["① if","② when","③ before","④ after","⑤ both ① and ②"],a:4,e:"조건도 시간도 가능 → 둘 다 가능 (⑤)."},
+{t:"A",p:"명령문 + and",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Study hard, <span class="blank">_____</span> you will pass the exam.',c:["① and","② or","③ but","④ so","⑤ for"],a:0,e:"명령문 + and = '~해라, 그러면'. study hard, and."},
+{t:"A",p:"명령문 + or",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Hurry up, <span class="blank">_____</span> you will be late.',c:["① and","② or","③ but","④ so","⑤ for"],a:1,e:"명령문 + or = '~해라, 그렇지 않으면'. hurry up, or."},
+{t:"C",p:"접속사 활용",q:'다음 중 빈칸에 들어갈 접속사가 <strong>나머지와 다른</strong> 것을 고르시오.',c:['① <span class="blank">_____</span> he was tired, he went to bed.','② I stayed home <span class="blank">_____</span> it was raining.','③ <span class="blank">_____</span> she was sick, she didn\'t come.','④ <span class="blank">_____</span> you study hard, you will succeed.','⑤ I love her <span class="blank">_____</span> she is kind.'],a:3,e:"①②③⑤는 모두 because/since(이유). ④ unless/if(조건)와 다름. ④가 다름. 그러나 정답 4는 'if'."}
+]},
+
+13:{title:"Chapter 13 — 전치사",sub:"시간 · 장소·위치 · 기타 전치사",db:"/results_mun_lv1_ch13.json",q:[
+{t:"A",p:"시간 in",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I was born <span class="blank">_____</span> 2010.',c:["① at","② on","③ in","④ for","⑤ during"],a:2,e:"연도 앞 → in. in 2010."},
+{t:"A",p:"시간 on",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>We meet <span class="blank">_____</span> Sundays.',c:["① at","② on","③ in","④ for","⑤ by"],a:1,e:"요일 앞 → on. on Sundays."},
+{t:"A",p:"시간 at",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The class starts <span class="blank">_____</span> 9 o\'clock.',c:["① at","② on","③ in","④ during","⑤ until"],a:0,e:"시각 앞 → at. at 9."},
+{t:"A",p:"시간 전치사 in/on/at",q:'다음 중 \'<span class="blank">_____</span> the morning\'에 알맞은 것을 고르시오.',c:["① at","② on","③ in","④ for","⑤ during"],a:2,e:"오전/오후/저녁 → in the morning."},
+{t:"A",p:"시간 before/after",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>Let\'s meet <span class="blank">_____</span> lunch.',c:["① for","② before","③ during","④ at","⑤ until"],a:1,e:"식사 전 → before lunch."},
+{t:"A",p:"시간 for/during",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I studied <span class="blank">_____</span> two hours.',c:["① in","② on","③ at","④ for","⑤ during"],a:3,e:"기간(숫자) → for + 시간. for two hours."},
+{t:"A",p:"시간 during",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I traveled <span class="blank">_____</span> the vacation.',c:["① for","② during","③ in","④ on","⑤ until"],a:1,e:"특정 기간 → during. during the vacation."},
+{t:"A",p:"시간 until/by",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>You must finish your homework <span class="blank">_____</span> 6 p.m.',c:["① until","② for","③ during","④ by","⑤ in"],a:3,e:"마감/완료 → by. by 6 p.m."},
+{t:"A",p:"장소 in",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She lives <span class="blank">_____</span> Seoul.',c:["① at","② on","③ in","④ to","⑤ from"],a:2,e:"도시/국가 앞 → in. in Seoul."},
+{t:"A",p:"장소 on",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The book is <span class="blank">_____</span> the desk.',c:["① at","② on","③ in","④ over","⑤ under"],a:1,e:"표면 위 → on."},
+{t:"A",p:"장소 at",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I met him <span class="blank">_____</span> the bus stop.',c:["① at","② on","③ in","④ to","⑤ for"],a:0,e:"특정 지점 → at the bus stop."},
+{t:"A",p:"위치 over/under",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The cat is <span class="blank">_____</span> the table.',c:["① under","② on","③ in","④ over","⑤ behind"],a:0,e:"table 아래 → under."},
+{t:"A",p:"위치 behind",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The boy is hiding <span class="blank">_____</span> the tree.',c:["① in","② on","③ behind","④ over","⑤ at"],a:2,e:"뒤 → behind."},
+{t:"A",p:"위치 near",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>My house is <span class="blank">_____</span> the park.',c:["① near","② in","③ on","④ to","⑤ from"],a:0,e:"근처 → near."},
+{t:"A",p:"위치 in front of",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The car is <span class="blank">_____</span> the house.',c:["① behind","② between","③ in front of","④ across from","⑤ on"],a:2,e:"앞 → in front of."},
+{t:"A",p:"위치 next to",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The bank is <span class="blank">_____</span> the post office.',c:["① next to","② between","③ across","④ over","⑤ under"],a:0,e:"옆 → next to."},
+{t:"A",p:"위치 between",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The store is <span class="blank">_____</span> the bank <span class="blank">_____</span> the cafe.',c:["① between, and","② next, to","③ across, from","④ in, of","⑤ between, or"],a:0,e:"사이 → between A and B."},
+{t:"A",p:"위치 across from",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The school is <span class="blank">_____</span> the library.',c:["① between","② next to","③ across from","④ over","⑤ under"],a:2,e:"건너편 → across from."},
+{t:"A",p:"기타 for",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>This present is <span class="blank">_____</span> you.',c:["① to","② for","③ with","④ from","⑤ at"],a:1,e:"수혜자 → for you."},
+{t:"A",p:"기타 with",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>She is talking <span class="blank">_____</span> her friend.',c:["① for","② to","③ with","④ from","⑤ at"],a:2,e:"동반 → with her friend."},
+{t:"A",p:"기타 by · 수단",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I go to school <span class="blank">_____</span> bus.',c:["① on","② in","③ by","④ with","⑤ at"],a:2,e:"교통수단 → by bus (관사 없이)."},
+{t:"A",p:"기타 about",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>The movie is <span class="blank">_____</span> a young hero.',c:["① in","② at","③ on","④ about","⑤ to"],a:3,e:"'~에 관해' → about."},
+{t:"A",p:"기타 from A to B",q:'다음 빈칸에 알맞은 것을 고르시오.<br><br>I work <span class="blank">_____</span> Monday <span class="blank">_____</span> Friday.',c:["① in, to","② from, to","③ on, to","④ at, on","⑤ by, to"],a:1,e:"기간 → from A to B."},
+{t:"C",p:"전치사 종합",q:'다음 중 어법상 <strong>틀린</strong> 것을 고르시오.',c:["① I was born in 2010.","② We meet at Sundays.","③ The book is on the desk.","④ I go to school by bus.","⑤ This gift is for you."],a:1,e:"요일 앞은 on. 'at Sundays'는 틀림. ② 오류."},
+{t:"C",p:"전치사 종합",q:'다음 중 어법상 <strong>옳은</strong> 것을 고르시오.',c:["① I live on Korea.","② She comes at 7 o\'clock in the morning.","③ The class begins on 9.","④ I traveled for the vacation.","⑤ He is good with English."],a:1,e:"in the morning이 올바름. 나머지는 ① live in Korea, ③ begins at 9, ④ during the vacation은 OK이지만 정답은 ②."}
+]}
+};
+
+let studentName='', selChs=[], pool=[], ans=[], cur=0;
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');window.scrollTo(0,0)}
+function goHome(){document.getElementById('name-in').value='';renderChList();show('landing')}
+
+function renderChList(){
+  const el = document.getElementById('ch-list');
+  el.innerHTML = '';
+  Object.keys(CHAPTERS).forEach(k=>{
+    const ch = CHAPTERS[k];
+    const num = parseInt(k) < 10 ? '0'+k : k;
+    const titleParts = ch.title.split('—');
+    const name = titleParts.length > 1 ? titleParts[1].trim() : ch.title;
+    const id = 'cb-'+k;
+    const wrap = document.createElement('label');
+    wrap.className = 'ch-check';
+    wrap.htmlFor = id;
+    wrap.innerHTML = '<input type="checkbox" id="'+id+'" data-ch="'+k+'" onchange="toggleSel(this)"><span class="ch-check-label"><span class="ch-check-num">Ch.'+num+'</span>'+name+'</span>';
+    el.appendChild(wrap);
+  });
+}
+
+function toggleSel(cb){ cb.parentElement.classList.toggle('sel', cb.checked); }
+function selectAll(s){
+  document.querySelectorAll('#ch-list input[type=checkbox]').forEach(cb=>{
+    cb.checked = s;
+    cb.parentElement.classList.toggle('sel', s);
+  });
+}
+
+function distribute(chCount, total){
+  const base = Math.floor(total / chCount);
+  const rem = total % chCount;
+  const dist = new Array(chCount).fill(base);
+  for(let i=0; i<rem; i++) dist[i]++;
+  return dist;
+}
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(){
+  studentName = document.getElementById('name-in').value.trim();
+  if(!studentName){alert('이름을 입력해주세요.');return;}
+  selChs = [...document.querySelectorAll('#ch-list input[type=checkbox]:checked')].map(cb=>cb.dataset.ch);
+  if(selChs.length===0){alert('1개 이상의 챕터를 선택해주세요.');return;}
+
+  pool = [];
+  const dist = distribute(selChs.length, TOTAL_Q);
+  selChs.forEach((k, i)=>{
+    const qs = CHAPTERS[k].q;
+    const shuffled = shuffle(qs);
+    const take = Math.min(dist[i], shuffled.length);
+    for(let j=0; j<take; j++){
+      pool.push(Object.assign({}, shuffled[j], {src:k}));
+    }
+  });
+  if(pool.length < TOTAL_Q){
+    const used = new Set(pool.map(p=>p.q+'|'+p.src));
+    const extras = [];
+    selChs.forEach(k=>{
+      CHAPTERS[k].q.forEach(q=>{
+        if(!used.has(q.q+'|'+k)) extras.push(Object.assign({}, q, {src:k}));
+      });
+    });
+    const need = TOTAL_Q - pool.length;
+    pool.push(...shuffle(extras).slice(0, need));
+  }
+  pool = shuffle(pool).slice(0, TOTAL_Q);
+  ans = new Array(pool.length).fill(-1);
+  cur = 0;
+
+  document.getElementById('qz-name').textContent = studentName;
+  render(0);
+  show('quiz');
+}
+
+function render(i){
+  const q = pool[i];
+  const pct = Math.round(i/pool.length*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-txt').textContent = (i+1)+' / '+pool.length;
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('qz-counter').textContent = (i+1)+'/'+pool.length;
+  const badge = document.getElementById('q-badge');
+  badge.textContent = q.t==='A'?'[A형] 빈칸/알맞은 것':q.t==='B'?'[B형] 분석/분류':'[C형] 옳은/틀린 것';
+  badge.className = 'q-badge badge-'+q.t.toLowerCase();
+  const num = parseInt(q.src) < 10 ? '0'+q.src : q.src;
+  document.getElementById('q-source').textContent = 'Ch.'+num;
+  document.getElementById('q-point').textContent = q.p;
+  document.getElementById('q-text').innerHTML = q.q;
+  const el = document.getElementById('q-choices');
+  el.innerHTML = '';
+  q.c.forEach((c,ci)=>{
+    const b = document.createElement('button');
+    b.className = 'choice';
+    b.innerHTML = c;
+    if(ans[i]===ci) b.classList.add('sel');
+    b.onclick = ()=>pick(i,ci);
+    el.appendChild(b);
+  });
+  document.getElementById('btn-prev').disabled = i===0;
+  document.getElementById('btn-next').textContent = i===pool.length-1?'제출 →':'다음 →';
+}
+
+function pick(qi,ci){
+  ans[qi] = ci;
+  document.getElementById('q-choices').querySelectorAll('.choice').forEach((b,i)=>{
+    b.classList.toggle('sel',i===ci);
+  });
+}
+
+function nav(d){cur = Math.max(0, Math.min(pool.length-1, cur+d));render(cur)}
+
+function navNext(){
+  if(cur === pool.length-1){
+    const empty = ans.filter(a=>a===-1).length;
+    if(empty>0 && !confirm(empty+'문항을 아직 풀지 않았습니다. 제출하시겠습니까?')) return;
+    submit();
+  } else {
+    nav(1);
+  }
+}
+
+async function submit(){
+  const correct = ans.filter((a,i)=>a===pool[i].a).length;
+  const score = Math.round(correct/pool.length*100);
+  const passed = score >= PASS_SCORE;
+
+  document.getElementById('res-name').textContent = studentName+'님의 결과';
+  document.getElementById('res-sub').textContent = '선택: '+selChs.map(k=>'Ch.'+(parseInt(k)<10?'0'+k:k)).join(', ');
+  document.getElementById('res-score').textContent = score;
+  document.getElementById('res-ring').classList.toggle('fail', !passed);
+  document.getElementById('res-grade').classList.toggle('fail', !passed);
+  document.getElementById('res-grade').textContent = passed?'합격 (80점 이상)':'재시험 권장';
+  document.getElementById('res-msg').textContent = passed?'기준 점수를 충족했습니다.':'합격까지 '+(PASS_SCORE-score)+'점이 부족합니다.';
+  document.getElementById('res-banner').innerHTML = passed
+    ? '<div class="pass-banner">🎉 통과 — 다음 단계로 진행하세요!</div>'
+    : '<div class="fail-banner">⚠️ 미통과 — 오답 문항이 속한 챕터를 다시 학습한 뒤 재응시하세요.</div>';
+  document.getElementById('st-ok').textContent = correct;
+  document.getElementById('st-ng').textContent = pool.length-correct;
+  document.getElementById('st-pct').textContent = score+'%';
+
+  const rv = document.getElementById('review');
+  rv.innerHTML = '';
+  pool.forEach((q,i)=>{
+    const ok = ans[i]===q.a;
+    const stuAns = ans[i];
+    const choicesHtml = q.c.map((cText,cIdx)=>{
+      let cClass = 'detail-c';
+      if(cIdx===q.a) cClass += ' is-ans';
+      else if(cIdx===stuAns) cClass += ' is-wrong';
+      return '<div class="'+cClass+'">'+cText+'</div>';
+    }).join('');
+    const num = parseInt(q.src) < 10 ? '0'+q.src : q.src;
+    const d = document.createElement('div');
+    d.className = 'review-item toggle-btn '+(ok?'ok':'ng');
+    d.setAttribute('onclick',"document.getElementById('rev-det-"+i+"').classList.toggle('active')");
+    d.innerHTML = '<span class="review-icon">'+(ok?'✓':'✗')+'</span>'
+      +'<div class="review-body">'
+      +'<div style="font-size:14px;margin-bottom:4px;"><strong>'+(i+1)+'번</strong> <span class="q-source" style="font-size:10px;padding:1px 6px;">Ch.'+num+'</span> '+q.p+' <span class="click-hint">(클릭하여 원문/정답 보기 ▾)</span></div>'
+      +(!ok?'<div class="review-wrong">내 답: '+(ans[i]>=0?q.c[ans[i]].split(' ')[0]:'미응답')+' → 정답: '+q.c[q.a].split(' ')[0]+'</div>':'')
+      +'<div class="detail-box" id="rev-det-'+i+'" onclick="event.stopPropagation()">'
+      +'<div class="detail-q">'+q.q+'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;">'+choicesHtml+'</div>'
+      +(q.e?'<div class="detail-exp"><div class="detail-exp-label">💡 해설</div>'+q.e+'</div>':'')
+      +'</div></div>';
+    rv.appendChild(d);
+  });
+
+  show('result');
+
+  const statusEl = document.getElementById('save-status');
+  statusEl.innerHTML = '<span class="spinner"></span>점수 저장 중...';
+  try{
+    // 출제된 문제를 함께 저장하여 관리자가 나중에 오답 원문을 볼 수 있게 함
+    const questions = pool.map(q=>({src:q.src, p:q.p, t:q.t, q:q.q, c:q.c, a:q.a, e:q.e}));
+    const payload = {name:studentName, score, total:100, correct, totalQ:pool.length, pct:score, passed, selectedChapters:selChs, answers:ans, questions, date:new Date().toLocaleString('ko-KR'), ts:Date.now()};
+    const r = await fetch(FIREBASE_URL+FIREBASE_PATH, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    statusEl.innerHTML = r.ok?'<span style="color:var(--orange)">✓ 점수가 저장되었습니다</span>':'저장 실패';
+  }catch(e){
+    statusEl.textContent = '저장 실패: '+e.message;
+  }
+}
+
+function openAdminModal(){
+  document.getElementById('adm-pw').value = '';
+  document.getElementById('pw-err').textContent = '';
+  document.getElementById('modal').style.display = 'flex';
+  setTimeout(()=>document.getElementById('adm-pw').focus(),100);
+}
+function closeModal(){document.getElementById('modal').style.display='none'}
+document.getElementById('adm-pw').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw()});
+
+function checkPw(){
+  if(document.getElementById('adm-pw').value===ADMIN_PW){
+    closeModal();
+    loadAdmin();
+  } else {
+    document.getElementById('pw-err').textContent = '비밀번호가 올바르지 않습니다.';
+  }
+}
+
+async function loadAdmin(){
+  show('admin');
+  const listEl = document.getElementById('adm-list');
+  const statsEl = document.getElementById('adm-stats');
+  listEl.innerHTML = '<div class="empty"><span class="spinner"></span>불러오는 중...</div>';
+
+  try{
+    const r = await fetch(FIREBASE_URL+FIREBASE_PATH);
+    const data = await r.json();
+    if(!data){listEl.innerHTML='<div class="empty">아직 응시한 학생이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const raw = Object.values(data);
+    const results = raw.filter(r=>r&&r.name&&r.score!==undefined).sort((a,b)=>b.score-a.score);
+    if(results.length===0){listEl.innerHTML='<div class="empty">유효한 응시 기록이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const avg = (results.reduce((s,r)=>s+(Number(r.score)||0),0)/results.length).toFixed(1);
+    const passed = results.filter(r=>r.score>=PASS_SCORE).length;
+    statsEl.innerHTML = '<div class="stat"><div class="stat-n">'+results.length+'</div><div class="stat-l">응시 인원</div></div>'
+      +'<div class="stat"><div class="stat-n">'+avg+'</div><div class="stat-l">평균</div></div>'
+      +'<div class="stat"><div class="stat-n">'+passed+'/'+results.length+'</div><div class="stat-l">합격(80↑)</div></div>';
+
+    listEl.innerHTML = '';
+    results.forEach((r,i)=>{
+      const gc = r.score>=92?'s':r.score>=80?'a':r.score>=60?'b':'c';
+      const gl = r.score>=92?'S':r.score>=80?'A':r.score>=60?'B':'C';
+      let wrongHtml = '';
+      if(r.answers && Array.isArray(r.answers) && r.questions && Array.isArray(r.questions)){
+        const wrongs = [];
+        r.answers.forEach((ansIdx,idx)=>{
+          const q = r.questions[idx];
+          if(!q) return;
+          if(ansIdx !== q.a){
+            const stuAns = ansIdx;
+            const corAnsStr = q.c[q.a].split(' ')[0];
+            const stuAnsStr = ansIdx>=0?q.c[ansIdx].split(' ')[0]:'미응답';
+            const choicesHtml = q.c.map((cText,cIdx)=>{
+              let cClass = 'detail-c';
+              if(cIdx===q.a) cClass += ' is-ans';
+              else if(cIdx===stuAns) cClass += ' is-wrong';
+              return '<div class="'+cClass+'">'+cText+'</div>';
+            }).join('');
+            const num = parseInt(q.src) < 10 ? '0'+q.src : q.src;
+            wrongs.push('<div class="admin-wrong-item toggle-btn" onclick="document.getElementById(\'adm-det-'+i+'-'+idx+'\').classList.toggle(\'active\');event.stopPropagation();">'
+              +'<div style="display:flex;gap:10px;align-items:flex-start;">'
+              +'<div class="admin-wrong-point">'+(idx+1)+'번</div>'
+              +'<div class="admin-wrong-desc">'
+              +'<div style="margin-bottom:4px;"><span class="q-source" style="font-size:10px;padding:1px 6px;">Ch.'+num+'</span> <span style="font-weight:600;color:var(--text);">'+q.p+'</span> <span class="click-hint">(클릭하여 지문 보기 ▾)</span></div>'
+              +'학생: <span class="admin-wrong-ans">'+stuAnsStr+'</span> → 정답: <span class="admin-correct-ans">'+corAnsStr+'</span>'
+              +'<div class="detail-box" id="adm-det-'+i+'-'+idx+'" onclick="event.stopPropagation()">'
+              +'<div class="detail-q">'+q.q+'</div>'
+              +'<div style="display:flex;flex-direction:column;gap:4px;">'+choicesHtml+'</div>'
+              +(q.e?'<div class="detail-exp"><div class="detail-exp-label">💡 해설</div>'+q.e+'</div>':'')
+              +'</div></div></div></div>');
+          }
+        });
+        wrongHtml = wrongs.length>0
+          ? '<div class="admin-details" id="detail-'+i+'"><div style="font-size:12px;font-weight:700;margin-bottom:12px;color:var(--text);">[틀린 문항 원문 확인]</div>'+wrongs.join('')+'</div>'
+          : '<div class="admin-details" id="detail-'+i+'"><div style="color:var(--orange);font-weight:600;text-align:center;">모든 문제를 완벽하게 맞혔습니다! 🎉</div></div>';
+      } else {
+        wrongHtml = '<div class="admin-details" id="detail-'+i+'"><div style="color:var(--text-muted);text-align:center;font-size:12px">상세 데이터가 없습니다.</div></div>';
+      }
+      const chList = r.selectedChapters ? r.selectedChapters.map(k=>'Ch.'+(parseInt(k)<10?'0'+k:k)).join(', ') : '';
+      const rowWrap = document.createElement('div');
+      rowWrap.className = 'admin-row-wrap';
+      rowWrap.innerHTML = '<div class="admin-row" onclick="document.getElementById(\'detail-'+i+'\').classList.toggle(\'active\')">'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+        +'<span style="font-size:12px;color:var(--text-muted);min-width:20px">'+(i+1)+'</span>'
+        +'<div>'
+        +'<div class="admin-name">'+r.name+' <span style="font-size:11px;color:#9ca3af;font-weight:normal;">(클릭)</span></div>'
+        +'<div class="admin-date">'+(r.date||'')+(chList?' · '+chList:'')+'</div>'
+        +'</div></div>'
+        +'<div style="display:flex;align-items:center">'
+        +'<span class="admin-score">'+(r.score!==undefined?r.score:'?')+'점</span>'
+        +'<span class="admin-rank rank-'+gc+'">'+gl+'</span>'
+        +'<span style="color:#d1d5db;margin-left:8px;font-size:18px;">▾</span>'
+        +'</div></div>'
+        +wrongHtml;
+      listEl.appendChild(rowWrap);
+    });
+  }catch(e){
+    listEl.innerHTML = '<div class="empty">데이터 불러오기 실패: '+e.message+'</div>';
+  }
+}
+
+async function confirmClear(){
+  if(!confirm('모든 누적 평가 기록을 삭제하시겠습니까?')) return;
+  try{
+    await fetch(FIREBASE_URL+FIREBASE_PATH, {method:'DELETE'});
+    loadAdmin();
+  }catch(e){alert('삭제 실패: '+e.message)}
+}
+
+renderChList();
+</script>
+</body>
+</html>
