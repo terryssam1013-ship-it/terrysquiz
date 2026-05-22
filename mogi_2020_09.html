@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2020년 9월 고1 전국연합 학력평가 — 영어 독해</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a3a5c;--navy-l:#e8f0f8;--navy-d:#0f2540;
+  --green:#1a7350;--green-l:#e1f5ee;
+  --orange:#d97706;--orange-l:#fef3c7;
+  --red:#a32d2d;--red-l:#fef0ef;
+  --purple:#6c3fc9;--purple-l:#f0ebff;
+  --bg:#f2f0eb;--card:#fff;
+  --border:rgba(0,0,0,.12);--r:8px
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;font-size:14px}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ──── HOME ──── */
+.home-hdr{background:var(--navy);color:#fff;padding:2.5rem 1.5rem;text-align:center}
+.home-badge{display:inline-block;font-size:11px;letter-spacing:.1em;background:rgba(255,255,255,.15);padding:4px 14px;border-radius:20px;margin-bottom:12px}
+.home-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.home-sub{font-size:13px;opacity:.75}
+.home-body{max-width:540px;margin:0 auto;padding:1.5rem 1rem 2rem;flex:1}
+.home-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:.875rem}
+.home-card-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.home-card-title::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--navy);flex-shrink:0}
+.part-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.part-btn{padding:1rem;border:1.5px solid var(--border);border-radius:var(--r);background:var(--card);cursor:pointer;text-align:left;transition:all .18s;font-family:inherit}
+.part-btn:hover{border-color:var(--navy);background:var(--navy-l)}
+.part-btn:active{transform:scale(.98)}
+.part-btn .pb-num{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.part-btn .pb-range{font-size:13px;font-weight:600;margin-bottom:2px}
+.part-btn .pb-cnt{font-size:11px;color:#888}
+input[type=text],input[type=password]{width:100%;padding:10px 14px;font-size:14px;font-family:inherit;border:1.5px solid var(--border);border-radius:var(--r);background:#fafaf8}
+input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(26,58,92,.1)}
+.btn-go{width:100%;padding:11px;background:var(--navy);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit}
+.btn-go:hover{background:var(--navy-d)}
+.btn-admin-link{width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:var(--r);font-size:12px;color:#888;cursor:pointer;margin-top:6px;font-family:inherit}
+.btn-admin-link:hover{background:#f0eee8}
+
+/* ──── TEST HEADER ──── */
+.test-hdr{background:var(--navy);color:#fff;padding:.875rem 1.25rem;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
+.test-hdr-l{font-size:13px}
+.test-hdr-l .part-badge{font-size:11px;background:rgba(255,255,255,.2);padding:2px 9px;border-radius:12px;margin-bottom:3px;display:inline-block}
+.test-hdr-l .hdr-name{font-size:12px;opacity:.7;margin-top:1px}
+.test-hdr-r{display:flex;align-items:center;gap:10px}
+.ans-counter{font-size:12px;background:rgba(255,255,255,.1);padding:4px 10px;border-radius:12px}
+.prog-bar{height:3px;background:rgba(255,255,255,.15)}
+.prog-fill{height:100%;background:#4ade80;transition:width .3s}
+
+/* ──── QUESTION LIST ──── */
+.q-list{max-width:780px;margin:0 auto;padding:.875rem 1rem 5rem;width:100%}
+.q-block{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:.875rem}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:.875rem;flex-wrap:wrap}
+.q-num-badge{font-size:15px;font-weight:700;color:var(--navy);min-width:28px}
+.q-type-tag{font-size:11px;font-weight:700;padding:2px 9px;border-radius:12px}
+.tag-purpose{background:#e0f2fe;color:#0369a1}
+.tag-mood{background:#fce7f3;color:#9d174d}
+.tag-claim{background:#dcfce7;color:#166534}
+.tag-meaning{background:#ede9fe;color:#5b21b6}
+.tag-gist{background:#fef9c3;color:#78350f}
+.tag-topic{background:#dcfce7;color:#166534}
+.tag-title{background:#fef3c7;color:#b45309}
+.tag-chart{background:#e0f2fe;color:#075985}
+.tag-fact{background:#f1f5f9;color:#334155}
+.tag-grammar{background:#fee2e2;color:#991b1b}
+.tag-vocab{background:#fef9c3;color:#78350f}
+.tag-blank{background:#ede9fe;color:#5b21b6}
+.tag-irrel{background:#fff7ed;color:#c2410c}
+.tag-order{background:#fce7f3;color:#be185d}
+.tag-insert{background:#e0f2fe;color:#075985}
+.tag-summary{background:#dcfce7;color:#166534}
+.tag-complex{background:#f1f5f9;color:#334155}
+.pts-badge{font-size:10px;background:var(--orange-l);color:var(--orange);padding:2px 7px;border-radius:12px;font-weight:700}
+
+.q-prompt{font-size:14px;color:#222;margin-bottom:.875rem;line-height:1.7;font-family:'Noto Serif KR',serif}
+.q-prompt strong{font-weight:700}
+.q-prompt em{font-style:italic}
+
+.passage{background:#fafaf8;border-left:3px solid var(--navy);border-radius:0 5px 5px 0;padding:10px 14px;margin-bottom:.875rem;font-size:13.5px;line-height:2;letter-spacing:.01em;color:#1a1a1a}
+.passage .uline{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--navy)}
+.passage .choice-marker{font-weight:700;color:var(--navy)}
+.passage .box-word{border:1px solid #888;padding:0 4px;border-radius:2px}
+.passage-note{font-size:11px;color:#888;font-style:italic;margin-top:4px}
+.passage-given{background:var(--navy-l);border:1px solid #b0c8e0;border-radius:5px;padding:8px 12px;margin-bottom:.875rem;font-size:13px;line-height:1.8;color:#1a3a5c;font-style:italic}
+
+.choices{display:flex;flex-direction:column;gap:6px;margin-bottom:.875rem}
+.choice{text-align:left;padding:8px 13px;border:1px solid var(--border);border-radius:5px;background:#fff;font-size:13.5px;cursor:pointer;transition:all .12s;font-family:inherit;line-height:1.6}
+.choice:hover:not(:disabled){border-color:var(--navy);background:var(--navy-l)}
+.choice.sel{border-color:var(--navy);background:var(--navy-l);color:var(--navy-d);font-weight:500}
+.choice.correct{border-color:#16a34a;background:#f0fdf4;color:#166534}
+.choice.wrong{border-color:var(--red);background:var(--red-l);color:var(--red)}
+.choice:disabled{cursor:default}
+
+.hint-btn{padding:5px 12px;font-size:11px;border:1px dashed var(--orange);border-radius:12px;background:var(--orange-l);color:var(--orange);cursor:pointer;font-family:inherit;transition:all .15s}
+.hint-btn:hover{background:#fde68a}
+.hint-box{display:none;background:var(--orange-l);border:1px solid #fcd34d;border-radius:5px;padding:9px 12px;margin-bottom:.875rem;font-size:12.5px;color:#78350f;line-height:1.8}
+.hint-box.show{display:block}
+.hint-box .hw{font-weight:700}
+
+/* ──── SUBMIT BAR ──── */
+.submit-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;z-index:90}
+.sub-info{font-size:12px;color:#888}
+.sub-info span{font-weight:700;color:var(--navy)}
+.btn-submit{padding:10px 24px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-submit.warn{background:var(--orange)}
+.btn-submit:hover{opacity:.9}
+
+/* ──── RESULT ──── */
+.result-hdr{background:var(--navy);color:#fff;padding:1.75rem 1.5rem;text-align:center}
+.result-ring{width:136px;height:136px;border-radius:50%;border:4px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem}
+.r-score{font-size:42px;font-weight:700;line-height:1}
+.r-denom{font-size:13px;opacity:.65;margin-top:2px}
+.r-grade{font-size:20px;font-weight:700;margin-bottom:4px}
+.r-msg{font-size:13px;opacity:.8}
+.result-body{max-width:680px;margin:0 auto;padding:1rem 1rem 3rem;flex:1}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:.875rem;text-align:center}
+.stat-n{font-size:22px;font-weight:700;color:var(--navy)}
+.stat-n.red{color:var(--red)}
+.stat-n.g{color:var(--green)}
+.stat-n.o{color:var(--orange)}
+.stat-l{font-size:11px;color:#888;margin-top:2px}
+.save-st{font-size:12px;color:#888;text-align:center;margin:.5rem 0}
+.sec-lbl{font-size:11px;font-weight:700;letter-spacing:.06em;color:#888;text-transform:uppercase;margin:1rem 0 .5rem;padding-bottom:4px;border-bottom:1px solid var(--border)}
+
+.rv-item{display:flex;gap:10px;padding:10px 12px;border-radius:var(--r);border:1px solid transparent;margin-bottom:5px;cursor:pointer;transition:all .15s;align-items:flex-start}
+.rv-item.ok{background:#f0fdf4;border-color:#bbf7d0}
+.rv-item.ng{background:#fef2f2;border-color:#fecaca}
+.rv-item:hover{opacity:.85}
+.rv-icon{flex-shrink:0;font-size:14px;margin-top:1px}
+.rv-body{flex:1;font-size:12.5px;line-height:1.5}
+.rv-wrong{font-size:11.5px;color:var(--red);margin-top:2px}
+.rv-hint-tag{font-size:10.5px;color:#9ca3af;margin-left:4px}
+.detail-box{display:none;background:#fff;padding:10px 12px;margin-top:8px;border-radius:var(--r);border:1px solid var(--border);cursor:default;font-size:12.5px}
+.detail-box.active{display:block;animation:fd .2s}
+@keyframes fd{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.dc-passage{background:#fafaf8;border-left:3px solid var(--navy);padding:8px 12px;margin-bottom:8px;font-size:12.5px;line-height:1.9}
+.dc-c{padding:5px 10px;border-radius:4px;border:1px solid var(--border);margin-bottom:4px;background:#f9f9f7;font-size:12.5px;color:#666}
+.dc-c.is-ans{border-color:#16a34a;background:#f0fdf4;color:#166534;font-weight:600}
+.dc-c.is-wrong{border-color:#fca5a5;background:#fef2f2;color:#991b1b;text-decoration:line-through;opacity:.8}
+
+.result-btns{display:flex;gap:8px;margin-top:1.25rem}
+.result-btns button{flex:1;padding:11px;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--border)}
+.btn-retry{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-home{background:#fff;color:#666}
+
+/* ──── ADMIN ──── */
+.admin-hdr{background:var(--navy);color:#fff;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.admin-body{max-width:680px;margin:0 auto;padding:1rem;flex:1}
+.admin-tabs{display:flex;gap:8px;margin-bottom:1rem}
+.admin-tab{flex:1;padding:9px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;background:#fff;color:#666}
+.admin-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.adm-row-wrap{border-bottom:1px solid var(--border);padding:10px 0}
+.adm-row-wrap:last-child{border-bottom:none}
+.adm-row{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.adm-details{display:none;background:#f9f9f7;padding:12px;border-radius:var(--r);margin-top:8px;border:1px solid var(--border)}
+.adm-details.active{display:block}
+.adm-wrong-item{padding:8px 10px;border-bottom:1px dashed var(--border);font-size:12.5px;line-height:1.5;cursor:pointer;border-radius:4px;transition:background .15s}
+.adm-wrong-item:hover{background:#f0eee8}
+.adm-wrong-item:last-child{border-bottom:none}
+.adm-rank{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px}
+.rank-1{background:var(--navy-l);color:var(--navy)}.rank-2{background:var(--green-l);color:var(--green)}
+.rank-3{background:var(--orange-l);color:var(--orange)}.rank-4{background:var(--red-l);color:var(--red)}
+.adm-name{font-weight:600;font-size:14px;transition:color .15s}.adm-row:hover .adm-name{color:var(--navy)}
+.adm-date{font-size:11px;color:#aaa;margin-top:2px}
+.adm-score{font-weight:700;color:var(--navy);font-size:15px;margin-right:6px}
+.empty{text-align:center;padding:2rem;color:#aaa;font-size:13px}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem}
+.modal-box{background:#fff;border-radius:var(--r);padding:1.5rem;width:100%;max-width:320px}
+.modal-box h3{font-size:15px;font-weight:700;margin-bottom:.875rem}
+.modal-btns{display:flex;gap:8px;margin-top:.875rem}
+.modal-btns button{flex:1;padding:9px;border-radius:var(--r);font-size:13px;cursor:pointer;border:1px solid var(--border);background:#f9f9f7;font-family:inherit}
+.modal-btns button.ok{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+.err-msg{font-size:11px;color:var(--red);margin-top:3px;min-height:14px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(26,58,92,.2);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-family:inherit}
+
+/* part selector highlight on home */
+.selected-part{border-color:var(--navy) !important;background:var(--navy-l) !important}
+.selected-part .pb-num{color:var(--navy-d)}
+</style>
+</head>
+<body>
+
+<!-- ════════════ HOME ════════════ -->
+<div id="s-home" class="screen active">
+  <div class="home-hdr">
+    <div class="home-badge">2020학년도 9월 고1 전국연합학력평가</div>
+    <div class="home-title">영어 영역 — 독해 파트</div>
+    <div class="home-sub">Reading 18번~45번 · PART별 선택</div>
+  </div>
+  <div class="home-body">
+    <div class="home-card">
+      <div class="home-card-title">파트 선택</div>
+      <div class="part-btns">
+        <button class="part-btn" id="btn-p1" onclick="selectPart(1)">
+          <div class="pb-num">P1</div>
+          <div class="pb-range">18번 ~ 31번</div>
+          <div class="pb-cnt">14문항</div>
+        </button>
+        <button class="part-btn" id="btn-p2" onclick="selectPart(2)">
+          <div class="pb-num">P2</div>
+          <div class="pb-range">32번 ~ 45번</div>
+          <div class="pb-cnt">14문항</div>
+        </button>
+      </div>
+    </div>
+    <div class="home-card">
+      <div class="home-card-title">이름 입력 후 시작</div>
+      <input type="text" id="name-in" placeholder="예) 홍길동" autocomplete="off" style="margin-bottom:8px">
+      <button class="btn-go" onclick="startTest()">테스트 시작 →</button>
+    </div>
+    <button class="btn-admin-link" onclick="openAdminModal()">관리자 로그인</button>
+  </div>
+</div>
+
+<!-- ════════════ TEST ════════════ -->
+<div id="s-test" class="screen">
+  <div class="test-hdr">
+    <div class="test-hdr-l">
+      <div class="part-badge" id="hdr-part"></div>
+      <div class="hdr-name" id="hdr-name"></div>
+    </div>
+    <div class="test-hdr-r">
+      <div class="ans-counter">답안 <span id="ans-cnt">0</span>/<span id="ans-tot"></span></div>
+    </div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="q-list" id="q-list"></div>
+  <div class="submit-bar">
+    <div class="sub-info">답안 입력: <span id="sub-cnt">0</span>/<span id="sub-tot"></span></div>
+    <button class="btn-submit" id="btn-submit" onclick="trySubmit()">답안 제출 →</button>
+  </div>
+</div>
+
+<!-- ════════════ RESULT ════════════ -->
+<div id="s-result" class="screen">
+  <div class="result-hdr">
+    <div class="result-ring">
+      <div class="r-score" id="r-score"></div>
+      <div class="r-denom" id="r-denom"></div>
+    </div>
+    <div class="r-grade" id="r-grade"></div>
+    <div class="r-msg" id="r-msg"></div>
+  </div>
+  <div class="result-body">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-n" id="rs-ok"></div><div class="stat-l">정답</div></div>
+      <div class="stat-box"><div class="stat-n red" id="rs-ng"></div><div class="stat-l">오답</div></div>
+      <div class="stat-box"><div class="stat-n g" id="rs-score"></div><div class="stat-l">점수</div></div>
+      <div class="stat-box"><div class="stat-n o" id="rs-pct"></div><div class="stat-l">정답률</div></div>
+    </div>
+    <div class="save-st" id="save-st"></div>
+    <div class="sec-lbl">문항별 결과 — 클릭하면 원지문·정답 확인</div>
+    <div id="review-list"></div>
+    <div class="result-btns">
+      <button class="btn-retry" onclick="retryTest()">다시 풀기</button>
+      <button class="btn-home" onclick="goHome()">파트 선택으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ADMIN ════════════ -->
+<div id="s-admin" class="screen">
+  <div class="admin-hdr">
+    <div><div style="font-size:11px;opacity:.7;margin-bottom:2px">관리자 패널 — 2020 고1 9월 전국연합</div><div style="font-size:16px;font-weight:700">영어 독해 성적 현황</div></div>
+    <button class="btn-sm" onclick="confirmClear()">초기화</button>
+  </div>
+  <div class="admin-body">
+    <div class="admin-tabs">
+      <button class="admin-tab active" id="adm-tab-1" onclick="switchAdminTab(1)">PART 1 (18~31번)</button>
+      <button class="admin-tab" id="adm-tab-2" onclick="switchAdminTab(2)">PART 2 (32~45번)</button>
+    </div>
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)" id="adm-stats"></div>
+    <div class="sec-lbl">응시 학생 목록 (이름 클릭 → 오답 확인)</div>
+    <div id="adm-list"></div>
+    <button style="width:100%;padding:10px;background:#fff;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:inherit;margin-top:.875rem;font-size:13px" onclick="goHome()">← 나가기</button>
+  </div>
+</div>
+
+<div id="modal" class="modal-bg" style="display:none">
+  <div class="modal-box">
+    <h3>관리자 비밀번호</h3>
+    <input type="password" id="adm-pw" placeholder="비밀번호 입력" style="width:100%;padding:9px 12px;font-size:14px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;margin-bottom:4px">
+    <div class="err-msg" id="pw-err"></div>
+    <div class="modal-btns"><button onclick="closeModal()">취소</button><button class="ok" onclick="checkPw()">로그인</button></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  설정
+// ═══════════════════════════════════════════════════════════
+const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
+const ADMIN_PW = "terry2025";
+
+// ═══════════════════════════════════════════════════════════
+//  문제 데이터
+// ═══════════════════════════════════════════════════════════
+const ALL_Q = [
+
+// ── PART 1: 18~31번 ─────────────────────────────────────
+
+{n:18, part:1, ans:3, pts:2, type:"글의 목적", typeClass:"tag-purpose",
+ prompt:"다음 글의 <strong>목적</strong>으로 가장 적절한 것은?",
+ passage:`Dear Wildwood residents,
+Wildwood Academy is a local school that seeks to help children with disabilities and learning challenges. We currently have over 200 students enrolled. This year we'd like to add a music class in the hope that each of our students will have the opportunity to develop their musical abilities. To get the class started, we need more instruments than we have now. We are asking you to look around your house and donate any instruments that you may no longer use. Each one donated will be assigned to a student in need. Simply call us and we will be happy to drop by and pick up the instrument.
+Sincerely,
+Karen Hansen, Principal`,
+ choices:["① 고장 난 악기의 수리를 의뢰하려고","② 학부모 공개 수업 참석을 권장하려고","③ 음악 수업을 위한 악기 기부를 요청하려고","④ 추가로 개설된 음악 수업 신청을 독려하려고","⑤ 지역 주민을 위한 자선 음악 행사를 홍보하려고"],
+ hint:"disability(장애), enroll(등록하다), donate(기부하다), instrument(악기), assign(배정하다), drop by(들르다)"},
+
+{n:19, part:1, ans:1, pts:2, type:"심경 변화", typeClass:"tag-mood",
+ prompt:"다음 글에 드러난 <strong>Salva의 심경 변화</strong>로 가장 적절한 것은?",
+ passage:`Salva had to raise money for a project to help southern Sudan. It was the first time that Salva spoke in front of an audience. There were more than a hundred people. Salva's knees were shaking as he walked to the microphone. "H-h-hello," he said. His hands trembling, he looked out at the audience. Everyone was looking at him. At that moment, he noticed that every face looked interested in what he had to say. People were smiling and seemed friendly. That made him feel a little better, so he spoke into the microphone again. "Hello," he repeated. He smiled, feeling at ease, and went on. "I am here to talk to you about a project for southern Sudan."`,
+ choices:["① nervous → relieved","② indifferent → excited","③ worried → disappointed","④ satisfied → frustrated","⑤ confident → embarrassed"],
+ hint:"raise money(모금하다), tremble(떨리다), at ease(안심한), audience(청중), shaking(후들거리는)"},
+
+{n:20, part:1, ans:2, pts:2, type:"필자 주장", typeClass:"tag-claim",
+ prompt:"다음 글에서 <strong>필자가 주장하는 바</strong>로 가장 적절한 것은?",
+ passage:`Any goal you set is going to be difficult to achieve, and you will certainly be disappointed at some points along the way. So why not set your goals much higher than you consider worthy from the beginning? If they are going to require work, effort, and energy, then why not exert 10 times as much of each? What if you are underestimating your capabilities? You might be protesting, saying, "What of the disappointment that comes from setting unrealistic goals?" However, take just a few moments to look back over your life. Chances are that you have more often been disappointed by setting targets that are too low and achieving them ― only to be shocked that you still didn't get what you wanted.
+* exert: 발휘하다`,
+ choices:["① 매사에 최선을 다하는 태도를 가져야 한다.","② 목표는 자신의 생각보다 높게 설정해야 한다.","③ 변화하는 상황에 따라 목표를 수정해야 한다.","④ 과거의 실패를 되돌아보는 습관을 길러야 한다.","⑤ 목표 달성을 위해 계획을 구체적으로 세워야 한다."],
+ hint:"worthy(가치 있는), underestimate(과소평가하다), capability(능력), protest(이의를 제기하다), unrealistic(비현실적인)"},
+
+{n:21, part:1, ans:4, pts:3, type:"함축 의미", typeClass:"tag-meaning",
+ prompt:"밑줄 친 <em>have that same scenario</em>가 다음 글에서 의미하는 바로 가장 적절한 것은? <span style='font-size:12px;color:#9ca3af'>[3점]</span>",
+ passage:`There are more than 700 million cell phones used in the US today and at least 140 million of those cell phone users will abandon their current phone for a new phone every 14-18 months. I'm not one of those people who just "must" have the latest phone. Actually, I use my cell phone until the battery no longer holds a good charge. At that point, it's time. So I figure I'll just get a replacement battery. But I'm told that battery is no longer made and the phone is no longer manufactured because there's newer technology and better features in the latest phones. That's a typical justification. The phone wasn't even that old; maybe a little over one year? I'm just one example. Can you imagine how many countless other people <span style="text-decoration:underline;text-underline-offset:3px">have that same scenario</span>? No wonder cell phones take the lead when it comes to "e-waste."`,
+ choices:["① have frequent trouble updating programs","② cannot afford new technology due to costs","③ spend a lot of money repairing their cell phones","④ are driven to change their still usable cell phones","⑤ are disappointed with newly launched phone models"],
+ hint:"abandon(버리다), charge(충전), replacement(교체), manufacture(제조하다), justification(정당화), e-waste(전자쓰레기)"},
+
+{n:22, part:1, ans:2, pts:2, type:"글의 요지", typeClass:"tag-gist",
+ prompt:"다음 글의 <strong>요지</strong>로 가장 적절한 것은?",
+ passage:`Learners function within complex developmental, cognitive, physical, social, and cultural systems. Research and theory from diverse fields have contributed to an evolving understanding that all learners grow and learn in culturally defined ways in culturally defined contexts. While humans share basic brain structures and processes, as well as fundamental experiences such as relationships with family, age-related stages, and many more, each of these phenomena is shaped by an individual's precise experiences. Learning does not happen in the same way for all people because cultural influences are influential from the beginning of life. These ideas about the intertwining of learning and culture have been supported by research on many aspects of learning and development.
+* intertwine: 뒤얽히다`,
+ choices:["① 문화 다양성에 대한 체계적 연구가 필요하다.","② 개인의 문화적 경험이 학습에 영향을 끼친다.","③ 인간의 뇌 구조는 학습을 통해 복잡하게 진화했다.","④ 원만한 대인관계 형성은 건강한 성장의 토대가 된다.","⑤ 학습 발달 단계에 적합한 자극을 제공하는 것이 좋다."],
+ hint:"cognitive(인지적인), diverse(다양한), phenomenon(현상, 복수: phenomena), precise(정확한), intertwining(뒤얽힘)"},
+
+{n:23, part:1, ans:2, pts:2, type:"글의 주제", typeClass:"tag-topic",
+ prompt:"다음 글의 <strong>주제</strong>로 가장 적절한 것은?",
+ passage:`Animals as well as humans engage in play activities. In animals, play has long been seen as a way of learning and practicing skills and behaviors that are necessary for future survival. In children, too, play has important functions during development. From its earliest beginnings in infancy, play is a way in which children learn about the world and their place in it. Children's play serves as a training ground for developing physical abilities ―skills like walking, running, and jumping that are necessary for everyday living. Play also allows children to try out and learn social behaviors and to acquire values and personality traits that will be important in adulthood. For example, they learn how to compete and cooperate with others, how to lead and follow, how to make decisions, and so on.`,
+ choices:["① necessity of trying out creative ideas","② roles of play in children's development","③ contrasts between human and animal play","④ effects of children's physical abilities on play","⑤ children's needs at various developmental stages"],
+ hint:"engage in(참여하다), infancy(유아기), training ground(훈련의 토대), acquire(습득하다), trait(특성), adulthood(성인기)"},
+
+{n:24, part:1, ans:2, pts:2, type:"글의 제목", typeClass:"tag-title",
+ prompt:"다음 글의 <strong>제목</strong>으로 가장 적절한 것은?",
+ passage:`The loss of many traditional jobs in everything from art to healthcare will partly be offset by the creation of new human jobs. Primary care doctors who focus on diagnosing known diseases and giving familiar treatments will probably be replaced by AI doctors. But precisely because of that, there will be much more money to pay human doctors and lab assistants to do groundbreaking research and develop new medicines or surgical procedures. AI might help create new human jobs in another way. Instead of humans competing with AI, they could focus on servicing and using AI. For example, the replacement of human pilots by drones has eliminated some jobs but created many new opportunities in maintenance, remote control, data analysis, and cyber security.
+* offset: 상쇄하다`,
+ choices:["① What Makes Robots Smarter?","② Is AI Really a Threat to Your Job?","③ Watch Out! AI Can Read Your Mind","④ Future Jobs: Less Work, More Gains","⑤ Ongoing Challenges for AI Development"],
+ hint:"offset(상쇄하다), diagnose(진단하다), groundbreaking(획기적인), eliminate(없애다), maintenance(정비), surgical(수술의)"},
+
+{n:25, part:1, ans:4, pts:2, type:"도표 일치", typeClass:"tag-chart",
+ prompt:"다음 도표의 내용과 <strong>일치하지 않는</strong> 것은?",
+ passage:`[그래프: Final Energy Consumption for Indoor Cooling by Country/Region in 2016]
+United States: 616 TWh / China: 450 TWh / European Union: 152 TWh / Middle East: 129 TWh / Japan: 107 TWh / India: 91 TWh / South Korea: 41 TWh / Mexico: 37 TWh / Brazil: 32 TWh / Indonesia: 25 TWh / (2021 TWh global in 2016 vs 608 TWh in 1990)
+
+The graph above shows the final energy consumption for indoor cooling by country/region in 2016. ① The global final energy consumption for indoor cooling was over three times larger in 2016 than in 1990. ② It was the United States that had the largest final energy consumption, which amounted to 616 TWh. ③ The combined amount of the final energy consumption of the European Union, the Middle East, and Japan was less than the amount of China's final energy consumption. ④ The difference in amount between India's and South Korea's final energy consumption was more than 60 TWh. ⑤ Indonesia's final energy consumption was the smallest among the countries/regions above, totaling 25 TWh.`,
+ choices:["① ","② ","③ ","④ ","⑤ "],
+ hint:"TWh(테라와트시), consumption(소비), combined(합산된), amounted to(~에 달했다), difference(차이), totaling(합계)"},
+
+{n:26, part:1, ans:3, pts:2, type:"내용 불일치", typeClass:"tag-fact",
+ prompt:"Jessie Redmon Fauset에 관한 다음 글의 내용과 <strong>일치하지 않는</strong> 것은?",
+ passage:`Jessie Redmon Fauset was born in Snow Hill, New Jersey, in 1884. She was the first black woman to graduate from Cornell University. In addition to writing novels, poetry, short stories, and essays, Fauset taught French in public schools in Washington, D.C. and worked as a journal editor. While working as an editor, she encouraged many well-known writers of the Harlem Renaissance. Though she is more famous for being an editor than for being a fiction writer, many critics consider her novel Plum Bun Fauset's strongest work. In it, she tells the story of a black girl who could pass for white but ultimately claims her racial identity and pride. Fauset died of heart disease April 30, 1961, in Philadelphia.
+* pass for: ~으로 여겨지다`,
+ choices:["① Cornell University를 졸업한 최초의 흑인 여성이었다.","② Washington, D.C.의 공립학교에서 프랑스어를 가르쳤다.","③ 편집자보다는 소설가로서 더 유명하다.","④ 흑인 소녀의 이야기를 다룬 소설을 썼다.","⑤ Philadelphia에서 심장병으로 사망했다."],
+ hint:"graduate(졸업하다), journal editor(저널 편집자), encourage(고무시키다), ultimately(결국), racial identity(인종적 정체성)"},
+
+{n:27, part:1, ans:4, pts:2, type:"안내문 불일치", typeClass:"tag-fact",
+ prompt:"Greenville Community Cleanup Day에 관한 다음 안내문의 내용과 <strong>일치하지 않는</strong>것은?",
+ passage:`Greenville Community Cleanup Day
+The 6th annual Greenville Community Cleanup Day is just around the corner!
+▪When: Saturday, October 17, 2020
+▪Where: North Strand Recreation Center · Participants will be transported by bus to clean up litter.
+▪Who: Any residents who want to join · Children under 10 must be accompanied by an adult.
+▪Cleanup Schedule: 9:00 a.m.: Registration / 9:30 a.m. - 11:30 a.m.: Cleanup at various locations
+✓ Safety vests and gloves will be provided.
+✓ Don't forget to wear closed-toe shoes.
+✓ All participants will get a free T-shirt and snack.
+To sign up, email your name and phone number to info@gvcommunity.org.`,
+ choices:["① 매년 열리는 청소 행사이다.","② 참가자들은 청소를 하기 위해 버스를 타고 이동할 것이다.","③ 10세 미만의 어린이는 성인과 동행해야 한다.","④ 안전 조끼와 장갑은 제공되지 않을 것이다.","⑤ 모든 참가자들은 티셔츠와 간식을 무료로 받을 것이다."],
+ hint:"annual(연례의), transport(이동시키다), litter(쓰레기), accompanied(동행한), registration(등록)"},
+
+{n:28, part:1, ans:4, pts:2, type:"안내문 일치", typeClass:"tag-fact",
+ prompt:"Springfield High School Book Fair에 관한 다음 안내문의 내용과 <strong>일치하는</strong> 것은?",
+ passage:`Springfield High School Book Fair
+Date & Time: November 9 - 13, 2020 / 9:00 a.m. - 3:00 p.m.
+Place: School Library
+Special Programs:
+▪Book Cover Design Contest: November 10, 11:00 a.m. / Winners will get a gift certificate that can be used at the book fair.
+▪Closing Ceremony: November 13, 2:00 p.m. / Don't miss the opportunity to meet Rosa Park, this year's best-selling author.
+※ Anyone who wants to volunteer at the book fair must sign up online in advance.`,
+ choices:["① 행사 기간 동안 매일 4시간씩 진행된다.","② 학교 강당에서 개최된다.","③ 책 표지 디자인 대회 참가자 전원에게 상품권이 증정될 것이다.","④ 폐막식에서 올해의 베스트셀러 작가를 만날 기회가 제공된다.","⑤ 현장에서 자원봉사 등록이 가능하다."],
+ hint:"gift certificate(상품권), closing ceremony(폐막식), volunteer(자원봉사하다), in advance(사전에), best-selling(베스트셀러의)"},
+
+{n:29, part:1, ans:4, pts:3, type:"어법", typeClass:"tag-grammar",
+ prompt:"다음 글의 밑줄 친 부분 중, <strong>어법상 틀린</strong> 것은? <span style='font-size:12px;color:#9ca3af'>[3점]</span>",
+ passage:`Although it is obvious that part of our assessment of food is its visual appearance, it is perhaps surprising ①<span class="uline">how</span> visual input can override taste and smell. People find it very ②<span class="uline">difficult</span> to correctly identify fruit-flavoured drinks if the colour is wrong, for instance an orange drink that is coloured green. Perhaps even more striking ③<span class="uline">is</span> the experience of wine tasters. One study of Bordeaux University students of wine and wine making revealed that they chose tasting notes appropriate for red wines, such as 'prune and chocolate', when they ④<span class="uline">gave</span> white wine coloured with a red dye. Experienced New Zealand wine experts were similarly tricked into thinking ⑤<span class="uline">that</span> the white wine Chardonnay was in fact a red wine, when it had been coloured with a red dye.
+* override: ~에 우선하다  ** prune: 자두`,
+ choices:["① how","② difficult","③ is","④ gave → were given","⑤ that"],
+ hint:"override(우선하다), striking(놀라운), taster(감정사), reveal(드러내다), dye(염료), tricked(속은)"},
+
+{n:30, part:1, ans:2, pts:3, type:"문맥 어휘", typeClass:"tag-vocab",
+ prompt:"(A), (B), (C)의 각 네모 안에서 문맥에 맞는 낱말로 가장 적절한 것은? <span style='font-size:12px;color:#9ca3af'>[3점]</span>",
+ passage:`Social connections are so essential for our survival and well-being that we not only cooperate with others to build relationships, we also compete with others for friends. And often we do both at the same time. Take gossip. Through gossip, we bond with our friends, sharing interesting details. But at the same time, we are (A) <span class="box-word">creating / forgiving</span> potential enemies in the targets of our gossip. Or consider rival holiday parties where people compete to see who will attend their party. We can even see this (B) <span class="box-word">harmony / tension</span> in social media as people compete for the most friends and followers. At the same time, competitive exclusion can also (C) <span class="box-word">generate / prevent</span> cooperation. High school social clubs and country clubs use this formula to great effect: It is through selective inclusion and exclusion that they produce loyalty and lasting social bonds.`,
+ choices:["① creating …… harmony …… prevent","② creating …… tension …… generate","③ creating …… tension …… prevent","④ forgiving …… tension …… prevent","⑤ forgiving …… harmony …… generate"],
+ hint:"gossip(험담), bond(유대를 형성하다), potential(잠재적인), exclusion(배제), inclusion(포함), loyalty(충성심), formula(공식)"},
+
+{n:31, part:1, ans:3, pts:2, type:"빈칸 추론", typeClass:"tag-blank",
+ prompt:"다음 빈칸에 들어갈 말로 가장 적절한 것을 고르시오.",
+ passage:`As the tenth anniversary of the terrorist attacks of September 11, 2001, approached, 9/11-related media stories peaked in the days immediately surrounding the anniversary date and then dropped off rapidly in the weeks thereafter. Surveys conducted during those times asked citizens to choose two "especially important" events from the past seventy years. Two weeks prior to the anniversary, before the media blitz began, about 30 percent of respondents named 9/11. But as the anniversary drew closer, and the media treatment intensified, survey respondents started identifying 9/11 in increasing numbers ― to a high of 65 percent. Two weeks later, though, after reportage had decreased to earlier levels, once again only about 30 percent of the participants placed it among their two especially important events of the past seventy years. Clearly, the __________ of news coverage can make a big difference in the perceived significance of an issue among observers as they are exposed to the coverage.
+* blitz: 대선전, 집중 공세`,
+ choices:["① accuracy","② tone","③ amount","④ source","⑤ type"],
+ hint:"anniversary(기념일), peaked(최고조에 달하다), respondent(응답자), intensify(강화되다), perceived(인식된), significance(중요성)"},
+
+// ── PART 2: 32~45번 ─────────────────────────────────────
+
+{n:32, part:2, ans:1, pts:2, type:"빈칸 추론", typeClass:"tag-blank",
+ prompt:"다음 빈칸에 들어갈 말로 가장 적절한 것을 고르시오.",
+ passage:`Here's the unpleasant truth: we are all biased. Every human being is affected by unconscious biases that lead us to make incorrect assumptions about other people. Everyone. To a certain extent, bias is a(n) __________. If you're an early human, perhaps Homo Erectus, walking around the jungles, you may see an animal approaching. You have to make very fast assumptions about whether that animal is safe or not, based solely on its appearance. The same is true of other humans. You make split-second decisions about threats in order to have plenty of time to escape, if necessary. This could be one root of our tendency to categorize and label others based on their looks and their clothes.`,
+ choices:["① necessary survival skill","② origin of imagination","③ undesirable mental capacity","④ barrier to relationships","⑤ challenge to moral judgment"],
+ hint:"biased(편향된), unconscious(무의식적인), assumption(추측), split-second(순간적인), categorize(범주화하다), label(분류하다)"},
+
+{n:33, part:2, ans:3, pts:3, type:"빈칸 추론", typeClass:"tag-blank",
+ prompt:"다음 빈칸에 들어갈 말로 가장 적절한 것을 고르시오. <span style='font-size:12px;color:#9ca3af'>[3점]</span>",
+ passage:`In Dutch bicycle culture, it is common to have a passenger on the backseat. So as to follow the rider's movements, the person on the backseat needs to hold on tightly. Bicycles turn not just by steering but also by leaning, so the passenger needs to lean the same way as the rider. A passenger who would keep sitting up straight would literally be a pain in the behind. On motorcycles, this is even more critical. Their higher speed requires more leaning on turns, and lack of coordination can be disastrous. The passenger is a true partner in the ride, expected to __________.`,
+ choices:["① warn other people of danger","② stop the rider from speeding","③ mirror the rider's every move","④ relieve the rider's emotional anxiety","⑤ monitor the road conditions carefully"],
+ hint:"steer(조종하다), lean(기울다), literally(말 그대로), coordination(협응), disastrous(재앙적인), mirror(따라하다)"},
+
+{n:34, part:2, ans:1, pts:3, type:"빈칸 추론", typeClass:"tag-blank",
+ prompt:"다음 빈칸에 들어갈 말로 가장 적절한 것을 고르시오. <span style='font-size:12px;color:#9ca3af'>[3점]</span>",
+ passage:`We're often told that newborns and infants are comforted by rocking because this motion is similar to what they experienced in the womb, and that they must take comfort in this familiar feeling. This may be true; however, to date there are no convincing data that demonstrate a significant relationship between the amount of time a mother moves during pregnancy and her newborn's response to rocking. Just as likely is the idea that newborns come to associate gentle rocking with being fed. Parents understand that rocking quiets a newborn, and they very often provide gentle, repetitive movement during feeding. Since the appearance of food is a primary reinforcer, newborns may __________ because they have been conditioned through a process of associative learning.
+* womb: 자궁  ** reinforcer: 강화물`,
+ choices:["① acquire a fondness for motion","② want consistent feeding","③ dislike severe rocking","④ remember the tastes of food","⑤ form a bond with their mothers"],
+ hint:"newborn(신생아), comforted(달래진), womb(자궁), associate(연관짓다), reinforcer(강화물), conditioned(조건화된), associative(연상의)"},
+
+{n:35, part:2, ans:4, pts:2, type:"무관한 문장", typeClass:"tag-irrel",
+ prompt:"다음 글에서 <strong>전체 흐름과 관계 없는 문장</strong>은?",
+ passage:`In a single week, the sun delivers more energy to our planet than humanity has used through the burning of coal, oil, and natural gas through all of human history. And the sun will keep shining on our planet for billions of years. ①Our challenge isn't that we're running out of energy. ②It's that we have been focused on the wrong source ―the small, finite one that we're using up. ③Indeed, all the coal, natural gas, and oil we use today is just solar energy from millions of years ago, a very tiny part of which was preserved deep underground. ④Our efforts to develop technologies that use fossil fuels have shown meaningful results. ⑤Our challenge, and our opportunity, is to learn to efficiently and cheaply use the much more abundant source that is the new energy striking our planet each day from the sun.`,
+ choices:["① ","② ","③ ","④ ","⑤ "],
+ hint:"finite(한정적인), fossil fuel(화석연료), preserved(보존된), abundant(풍부한), efficiently(효율적으로)"},
+
+{n:36, part:2, ans:2, pts:2, type:"글의 순서", typeClass:"tag-order",
+ prompt:"주어진 글 다음에 이어질 글의 <strong>순서</strong>로 가장 적절한 것을 고르시오.",
+ passage:`We make decisions based on what we think we know. It wasn't too long ago that the majority of people believed the world was flat.
+(A) It wasn't until that minor detail was revealed ─ the world is round ─ that behaviors changed on a massive scale. Upon this discovery, societies began to travel across the planet. Trade routes were established; spices were traded.
+(B) This perceived truth impacted behavior. During this period, there was very little exploration. People feared that if they traveled too far they might fall off the edge of the earth. So for the most part they didn't dare to travel.
+(C) New ideas, like mathematics, were shared between societies which allowed for all kinds of innovations and advancements. The correction of a simple false assumption moved the human race forward.`,
+ choices:["① (A) - (C) - (B)","② (B) - (A) - (C)","③ (B) - (C) - (A)","④ (C) - (A) - (B)","⑤ (C) - (B) - (A)"],
+ hint:"perceived(인식된), exploration(탐험), massive scale(대규모), trade route(무역경로), innovation(혁신), assumption(가정)"},
+
+{n:37, part:2, ans:5, pts:2, type:"글의 순서", typeClass:"tag-order",
+ prompt:"주어진 글 다음에 이어질 글의 <strong>순서</strong>로 가장 적절한 것을 고르시오.",
+ passage:`Mirrors and other smooth, shiny surfaces reflect light. We see reflections from such surfaces because the rays of light form an image on the retina of our eyes.
+(A) Keep your eyes on the reflected image while you are writing and not on your paper. After a little practice, it will be easier to write "backwards." When your friend receives such a message he will be able to read it by holding the paper up to a mirror.
+(B) Stand a mirror upright on the table, so that a piece of paper on the table can be clearly seen in the mirror. Now write a message that looks right when you look in the mirror.
+(C) Such images are always reversed. Look at yourself in a mirror, wink your right eye and your left eye seems to wink back at you. You can use a mirror to send a coded message to a friend.
+* retina: (눈의) 망막`,
+ choices:["① (A) - (C) - (B)","② (B) - (A) - (C)","③ (B) - (C) - (A)","④ (C) - (A) - (B)","⑤ (C) - (B) - (A)"],
+ hint:"reflect(반사하다), retina(망막), reversed(거꾸로 된), upright(수직으로), coded(암호의), backwards(거꾸로)"},
+
+{n:38, part:2, ans:3, pts:3, type:"문장 삽입", typeClass:"tag-insert",
+ prompt:"글의 흐름으로 보아, 주어진 문장이 들어가기에 <strong>가장 적절한 곳</strong>을 고르시오. <span style='font-size:12px;color:#9ca3af'>[3점]</span>",
+ givenSentence:"The few times that they do occur, it is the possessor who tries to make someone leave the circle.",
+ passage:`Reciprocity can be explored in captivity by handing one chimpanzee a large amount of food, such as a watermelon or leafy branch, and then observing what follows. ( ① ) The owner will be center stage, with a group of others around him or her, soon to be followed by newly formed groups around those who obtained a sizable share, until all food has been distributed. ( ② ) Beggars may complain and cry, but aggressive conflicts are rare. ( ③ ) She will hit them over their head with her branch or bark at them in a high-pitched voice until they leave her alone. ( ④ ) Whatever their rank, possessors control the food flow. ( ⑤ ) Once chimpanzees enter reciprocity mode, their social rank no longer matters.
+* reciprocity: 호혜주의, 상호의 이익`,
+ choices:["① ","② ","③ ","④ ","⑤ "],
+ hint:"reciprocity(호혜주의), captivity(포획), possessor(소유자), sizable(상당한), distribute(분배하다), high-pitched(고음의), aggressive(공격적인)"},
+
+{n:39, part:2, ans:3, pts:2, type:"문장 삽입", typeClass:"tag-insert",
+ prompt:"글의 흐름으로 보아, 주어진 문장이 들어가기에 <strong>가장 적절한 곳</strong>을 고르시오.",
+ givenSentence:"However, we live in a society where gender roles and boundaries are not as strict as in prior generations.",
+ passage:`Gender research shows a complex relationship between gender and conflict styles. ( ① ) Some research suggests that women from Western cultures tend to be more caring than men. ( ② ) This tendency may result from socialization processes in which women are encouraged to care for their families and men are encouraged to be successful in competitive work environments. ( ③ ) There is significant variability in assertiveness and cooperation among women, as well as among men. ( ④ ) Although conflict resolution experts should be able to recognize cultural and gender differences, they should also be aware of within-group variations and the risks of stereotyping. ( ⑤ ) Culture and gender may affect the way people perceive, interpret, and respond to conflict; however, we must be careful to avoid overgeneralizations and to consider individual differences.`,
+ choices:["① ","② ","③ ","④ ","⑤ "],
+ hint:"socialization(사회화), assertiveness(단호함), variability(차이), stereotype(고정관념), overgeneralization(과잉일반화), prior(이전의)"},
+
+{n:40, part:2, ans:1, pts:2, type:"요약문 완성", typeClass:"tag-summary",
+ prompt:"다음 글의 내용을 한 문장으로 요약하고자 한다. 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것은?",
+ passage:`One way that music could express emotion is simply through a learned association. Perhaps there is nothing naturally sad about a piece of music in a minor key, or played slowly with low notes. Maybe we have just come to hear certain kinds of music as sad because we have learned to associate them in our culture with sad events like funerals. If this view is correct, we should have difficulty interpreting the emotions expressed in culturally unfamiliar music. Totally opposed to this view is the position that the link between music and emotion is one of resemblance. For example, when we feel sad we move slowly and speak slowly and in a low-pitched voice. Thus when we hear slow, low music, we hear it as sad. If this view is correct, we should have little difficulty understanding the emotion expressed in culturally unfamiliar music.
+
+▼
+It is believed that emotion expressed in music can be understood through a(n) __(A)__ learned association or it can be understood due to the __(B)__ between music and emotion.`,
+ choices:["① (A)culturally …… (B)similarity","② (A)culturally …… (B)balance","③ (A)socially …… (B)difference","④ (A)incorrectly …… (B)connection","⑤ (A)incorrectly …… (B)contrast"],
+ hint:"association(연관), resemblance(유사성), minor key(단조), interpret(해석하다), culturally unfamiliar(문화적으로 친숙하지 않은)"},
+
+{n:41, part:2, ans:2, pts:2, type:"글의 제목", typeClass:"tag-title",
+ prompt:"<strong>[41~42]</strong> 다음 글을 읽고, 물음에 답하시오.<br><br>41. 윗글의 <strong>제목</strong>으로 가장 적절한 것은?",
+ passage:`A bedroom temperature of around 65 degrees Fahrenheit (18.3°C) is ideal for the sleep of most people, assuming standard bedding and clothing. This (a) surprises many, as it sounds just a little too cold for comfort. Of course, that specific temperature will vary depending on the individual in question and their gender and age. But like calorie recommendations, it's a good target for the average human being. Most of us set bedroom temperatures higher than are ideal for good sleep and this likely contributes to (b) lower quantity and quality of sleep than you are otherwise capable of getting. Lower than 55 degrees Fahrenheit can be harmful rather than helpful to sleep, unless warm bedding or nightclothes are used. However, most of us fall into the (c) opposite category of setting a controlled bedroom temperature that is too high: 70 or 72 degrees. Sleep clinicians treating patients who can't sleep at night will often ask about room temperature, and will advise patients to (d) raise their current thermostat set-point by 3 to 5 degrees from that which they currently use.
+Anyone disbelieving of the influence of temperature on sleep can explore some related experiments on this topic. Scientists have, for example, gently warmed the feet or the body of rats to encourage blood to rise to the surface of the skin and release heat, thereby decreasing core body temperature. The rats fell asleep far (e) faster than was otherwise normal.
+* thermostat: 온도 조절 장치`,
+ choices:["① Signs of Sleep Problems","② Stay Cool for Better Sleep","③ Turn Up the Heat in Your Room","④ How to Correct Bad Sleeping Posture","⑤ A Key to Quality Sleep: Clean Bedding"],
+ hint:"ideal(이상적인), bedding(침구), quantity(양), clinician(임상의), thermostat(온도 조절 장치), core body temperature(심부체온)"},
+
+{n:42, part:2, ans:4, pts:3, type:"문맥 어휘", typeClass:"tag-vocab",
+ prompt:"밑줄 친 (a)~(e) 중에서 <strong>문맥상 낱말의 쓰임이 적절하지 않은</strong> 것은? <span style='font-size:12px;color:#9ca3af'>[3점]</span>",
+ passage:`[41~42번 동일 지문 참조]
+밑줄 친 (a) surprises, (b) lower, (c) opposite, (d) raise, (e) faster 중 문맥상 적절하지 않은 것을 고르시오.
+※ (d) raise → lower가 되어야 함: 수면 임상의는 온도를 낮추라고 조언해야 함`,
+ choices:["① (a)","② (b)","③ (c)","④ (d)","⑤ (e)"],
+ hint:"contribute to(기여하다), clinician(임상의), thermostat(온도 조절기), set-point(설정값), core body temperature(심부체온)"},
+
+{n:43, part:2, ans:2, pts:2, type:"글의 순서(장문)", typeClass:"tag-complex",
+ prompt:"<strong>[43~45]</strong> 다음 글을 읽고, 물음에 답하시오.<br><br>43. 주어진 글 (A)에 이어질 내용을 <strong>순서에 맞게 배열</strong>한 것으로 가장 적절한 것은?",
+ passage:`(A) A merchant in a small town had identical twin sons. The boys worked for their father in the store he owned and when he died, they took over the store. Everything went well until the day a twenty-dollar bill disappeared. One of the brothers had left the bill on the counter and walked outside with a friend. When he returned, the money was gone. (a) He asked his older brother, "Did you see that twenty-dollar bill on the counter?"
+(B) Then one day a man from another state stopped by the store. He walked in and asked the younger brother, "How long have you been here?" (b) He replied that he'd been there all his life. The customer said, "Twenty years ago I came into this town in a boxcar. I hadn't eaten for three days. I came into this store and saw a twenty-dollar bill on the counter. I put it in my pocket and walked out. All these years I haven't been able to forgive myself. So I had to come back to return it."
+(C) His older brother replied that he had not. But (c) the young man kept questioning him. "Twenty-dollar bills just don't get up and walk away! Surely you must have seen it!" There was subtle accusation in (d) his voice. Anger began to rise. Hatred set in. Before long, bitterness divided the twins. They refused to speak. They finally decided they could no longer work together and a dividing wall was built down the center of the store. For twenty years the hostility grew, spreading to their families and the community.
+(D) The customer was amazed to see tears well up in the eyes of the man. "Would you please go next door and tell that same story to (e) the man in the store?" the younger brother said. Then the customer was even more amazed to see the two middle-aged men hugging each other and weeping together in the front of the store. After twenty years, the brokenness was repaired. The wall of anger that divided them came down.`,
+ choices:["① (B) - (D) - (C)","② (C) - (B) - (D)","③ (C) - (D) - (B)","④ (D) - (B) - (C)","⑤ (D) - (C) - (B)"],
+ hint:"merchant(상인), identical twin(일란성 쌍둥이), accusation(비난), hostility(적대감), bitterness(신랄함), boxcar(유개화차), brokenness(단절)"},
+
+{n:44, part:2, ans:5, pts:2, type:"지칭 추론", typeClass:"tag-fact",
+ prompt:"밑줄 친 (a)~(e) 중에서 가리키는 대상이 <strong>나머지 넷과 다른</strong> 것은?",
+ passage:`[43~45번 동일 지문 참조]
+(a) He - (b) He - (c) the young man - (d) his - (e) the man in the store
+※ (a)(b)(c)(d)는 동생(younger brother), (e)는 형(older brother)을 가리킴`,
+ choices:["① (a)","② (b)","③ (c)","④ (d)","⑤ (e)"],
+ hint:"merchant(상인), identical twin(일란성 쌍둥이), counter(카운터), younger/older brother(동생/형)"},
+
+{n:45, part:2, ans:5, pts:2, type:"내용 불일치(장문)", typeClass:"tag-fact",
+ prompt:"윗글에 관한 내용으로 <strong>적절하지 않은</strong> 것은?",
+ passage:`[43~45번 동일 지문 참조]`,
+ choices:["① 쌍둥이 형제는 아버지의 가게를 물려받았다.","② 카운터 위에 놓여진 20달러 지폐가 없어졌다.","③ 손님은 20년 만에 가게에 다시 방문했다.","④ 쌍둥이 형제의 가게 중앙에 벽이 세워졌다.","⑤ 쌍둥이 형제는 끝까지 화해하지 못했다."],
+ hint:"take over(물려받다), accusation(비난), hostility(적대감), weeping(흐느껴 우는), repaired(회복된)"}
+];
+
+// ═══════════════════════════════════════════════════════════
+//  배점 계산
+// ═══════════════════════════════════════════════════════════
+function calcMaxScore(part){return ALL_Q.filter(q=>q.part===part).reduce((s,q)=>s+q.pts,0);}
+
+// ═══════════════════════════════════════════════════════════
+//  상태
+// ═══════════════════════════════════════════════════════════
+let curPart=0, studentName='', ans=[], curQ=[];
+let adminCurPart=1;
+
+// ═══════════════════════════════════════════════════════════
+//  화면 전환
+// ═══════════════════════════════════════════════════════════
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goHome(){curPart=0;document.getElementById('btn-p1').classList.remove('selected-part');document.getElementById('btn-p2').classList.remove('selected-part');show('s-home');}
+function retryTest(){startTest();}
+
+function selectPart(p){
+  curPart=p;
+  document.getElementById('btn-p1').classList.toggle('selected-part',p===1);
+  document.getElementById('btn-p2').classList.toggle('selected-part',p===2);
+}
+
+function startTest(){
+  if(!curPart){alert('파트를 먼저 선택해주세요.');return;}
+  studentName=document.getElementById('name-in').value.trim();
+  if(!studentName){alert('이름을 입력해주세요.');return;}
+  curQ=ALL_Q.filter(q=>q.part===curPart);
+  ans=new Array(curQ.length).fill(-1);
+  document.getElementById('hdr-part').textContent=`PART ${curPart} (${curPart===1?'18~31':'32~45'}번)`;
+  document.getElementById('hdr-name').textContent=studentName;
+  document.getElementById('ans-tot').textContent=curQ.length;
+  document.getElementById('sub-tot').textContent=curQ.length;
+  renderQuestions();
+  updateProgress();
+  show('s-test');
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  문제 렌더링
+// ═══════════════════════════════════════════════════════════
+function renderQuestions(){
+  const el=document.getElementById('q-list');el.innerHTML='';
+  curQ.forEach((q,qi)=>{
+    const block=document.createElement('div');block.className='q-block';block.id='qb-'+qi;
+    // 메타
+    let metaHtml=`<div class="q-meta">
+      <span class="q-num-badge">${q.n}</span>
+      <span class="q-type-tag ${q.typeClass}">${q.type}</span>
+      ${q.pts===3?`<span class="pts-badge">3점</span>`:''}
+      <button class="hint-btn" onclick="toggleHint(${qi})">💡 힌트</button>
+    </div>`;
+    // 힌트박스
+    let hintHtml=`<div class="hint-box" id="hint-${qi}"><span class="hw">📝 주요 어휘:</span> ${q.hint}</div>`;
+    // 주어진 문장 (삽입형)
+    let givenHtml='';
+    if(q.givenSentence){
+      givenHtml=`<div class="passage-given">${q.givenSentence}</div>`;
+    }
+    // 지문
+    let passageHtml=q.passage?`<div class="passage">${q.passage.replace(/\n/g,'<br>').replace(/(①|②|③|④|⑤)/g,'<span class="choice-marker">$1</span>')}</div>`:'';
+    // 질문
+    let promptHtml=`<div class="q-prompt">${q.prompt}</div>`;
+    // 보기
+    let choicesHtml=`<div class="choices" id="c-${qi}">${q.choices.map((c,ci)=>`<button class="choice" onclick="pickAns(${qi},${ci})">${c}</button>`).join('')}</div>`;
+
+    block.innerHTML=metaHtml+hintHtml+promptHtml+givenHtml+passageHtml+choicesHtml;
+    el.appendChild(block);
+  });
+}
+
+function toggleHint(qi){
+  const hb=document.getElementById('hint-'+qi);
+  hb.classList.toggle('show');
+}
+
+function pickAns(qi,ci){
+  ans[qi]=ci;
+  document.getElementById('c-'+qi).querySelectorAll('.choice').forEach((b,i)=>b.classList.toggle('sel',i===ci));
+  updateProgress();
+}
+
+function updateProgress(){
+  const cnt=ans.filter(a=>a>=0).length;
+  const total=curQ.length;
+  const pct=Math.round(cnt/total*100);
+  document.getElementById('ans-cnt').textContent=cnt;
+  document.getElementById('sub-cnt').textContent=cnt;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  const btn=document.getElementById('btn-submit');
+  btn.className='btn-submit'+(cnt<total?' warn':'');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  제출
+// ═══════════════════════════════════════════════════════════
+function trySubmit(){
+  const unanswered=ans.filter(a=>a<0).length;
+  if(unanswered>0){if(!confirm(`${unanswered}문항을 풀지 않았습니다. 제출하시겠습니까?`))return;}
+  submitTest();
+}
+
+async function submitTest(){
+  let totalScore=0, okCnt=0;
+  ans.forEach((a,i)=>{if(a===curQ[i].ans-1){totalScore+=curQ[i].pts;okCnt++;}});
+  const maxScore=calcMaxScore(curPart);
+  const pct=Math.round(okCnt/curQ.length*100);
+  const grades=[
+    {min:90,g:'A+ (최우수)',m:'완벽에 가까운 독해력입니다!'},
+    {min:80,g:'A (우수)',m:'훌륭한 실력입니다!'},
+    {min:70,g:'B+ (양호)',m:'꽤 잘했어요!'},
+    {min:60,g:'B (보통)',m:'조금 더 연습이 필요해요.'},
+    {min:0,g:'C (노력 필요)',m:'지문을 다시 꼼꼼히 읽어보세요.'}
+  ];
+  const grade=grades.find(g=>pct>=g.min);
+
+  document.getElementById('r-score').textContent=totalScore;
+  document.getElementById('r-denom').textContent='/ '+maxScore+'점';
+  document.getElementById('r-grade').textContent=grade.g;
+  document.getElementById('r-msg').textContent=grade.m;
+  document.getElementById('rs-ok').textContent=okCnt;
+  document.getElementById('rs-ng').textContent=curQ.length-okCnt;
+  document.getElementById('rs-score').textContent=totalScore+'점';
+  document.getElementById('rs-pct').textContent=pct+'%';
+
+  renderReview();
+  show('s-result');
+  window.scrollTo(0,0);
+
+  // Firebase 저장
+  const stEl=document.getElementById('save-st');
+  stEl.innerHTML='<span class="spinner"></span>점수 저장 중...';
+  try{
+    const dbPath=`/results_mogi2020_09_p${curPart}.json`;
+    const payload={name:studentName,part:curPart,score:totalScore,maxScore,okCnt,total:curQ.length,pct,grade:grade.g,answers:ans,date:new Date().toLocaleString('ko-KR'),ts:Date.now()};
+    const r=await fetch(FIREBASE_URL+dbPath,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    stEl.innerHTML=r.ok?'<span style="color:var(--green)">✓ 점수가 저장되었습니다</span>':'저장 실패';
+  }catch(e){stEl.textContent='저장 실패: '+e.message;}
+}
+
+function renderReview(){
+  const el=document.getElementById('review-list');el.innerHTML='';
+  curQ.forEach((q,qi)=>{
+    const ok=ans[qi]===q.ans-1;
+    const stuAns=ans[qi];
+    let choicesHtml=q.choices.map((c,ci)=>{
+      let cls='dc-c';
+      if(ci===q.ans-1)cls+=' is-ans';
+      else if(ci===stuAns)cls+=' is-wrong';
+      return`<div class="${cls}">${c}</div>`;
+    }).join('');
+    let passageSnippet='';
+    if(q.passage){
+      passageSnippet=`<div class="dc-passage">${q.passage.replace(/\n/g,'<br>')}</div>`;
+    }
+    if(q.givenSentence){
+      passageSnippet=`<div style="background:#e8f0f8;border:1px solid #b0c8e0;padding:6px 10px;border-radius:4px;margin-bottom:6px;font-size:12px;color:#1a3a5c;font-style:italic">📌 주어진 문장: <strong>${q.givenSentence}</strong></div>`+passageSnippet;
+    }
+
+    const d=document.createElement('div');
+    d.className='rv-item '+(ok?'ok':'ng');
+    d.setAttribute('onclick',`document.getElementById('rv-det-${qi}').classList.toggle('active')`);
+    d.innerHTML=`
+      <span class="rv-icon">${ok?'✓':'✗'}</span>
+      <div class="rv-body">
+        <div style="font-size:13px;margin-bottom:3px">
+          <strong>${q.n}번</strong>
+          <span style="font-size:11px;color:#888;margin-left:4px">${q.type}</span>
+          ${q.pts===3?`<span style="font-size:10px;background:var(--orange-l);color:var(--orange);padding:1px 5px;border-radius:8px;margin-left:4px">3점</span>`:''}
+          <span class="rv-hint-tag">(클릭 ▾)</span>
+        </div>
+        ${!ok?`<div class="rv-wrong">내 답: ${stuAns>=0?q.choices[stuAns]:'미응답'} → 정답: ${q.choices[q.ans-1]}</div>`:''}
+        <div class="detail-box" id="rv-det-${qi}" onclick="event.stopPropagation()">
+          <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--navy)">${q.prompt.replace(/<[^>]+>/g,'')}</div>
+          ${passageSnippet}
+          <div style="font-size:11.5px;margin-bottom:6px;color:var(--orange)">💡 ${q.hint}</div>
+          ${choicesHtml}
+        </div>
+      </div>`;
+    el.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  관리자
+// ═══════════════════════════════════════════════════════════
+function openAdminModal(){document.getElementById('adm-pw').value='';document.getElementById('pw-err').textContent='';document.getElementById('modal').style.display='flex';setTimeout(()=>document.getElementById('adm-pw').focus(),80);}
+function closeModal(){document.getElementById('modal').style.display='none';}
+document.getElementById('adm-pw').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
+function checkPw(){if(document.getElementById('adm-pw').value===ADMIN_PW){closeModal();loadAdmin(adminCurPart);}else document.getElementById('pw-err').textContent='비밀번호가 올바르지 않습니다.';}
+
+function switchAdminTab(p){
+  adminCurPart=p;
+  document.getElementById('adm-tab-1').className='admin-tab'+(p===1?' active':'');
+  document.getElementById('adm-tab-2').className='admin-tab'+(p===2?' active':'');
+  loadAdmin(p);
+}
+
+async function loadAdmin(p){
+  show('s-admin');
+  const listEl=document.getElementById('adm-list'),statsEl=document.getElementById('adm-stats');
+  listEl.innerHTML='<div class="empty"><span class="spinner"></span>불러오는 중...</div>';
+  const dbPath=`/results_mogi2020_09_p${p}.json`;
+  const pQ=ALL_Q.filter(q=>q.part===p);
+  try{
+    const r=await fetch(FIREBASE_URL+dbPath);const data=await r.json();
+    if(!data){listEl.innerHTML='<div class="empty">응시 기록이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const results=Object.values(data).filter(r=>r&&r.name).sort((a,b)=>b.score-a.score);
+    if(!results.length){listEl.innerHTML='<div class="empty">응시 기록이 없습니다.</div>';return;}
+    const avg=(results.reduce((s,r)=>s+(r.score||0),0)/results.length).toFixed(1);
+    const maxS=calcMaxScore(p);
+    statsEl.innerHTML=`
+      <div class="stat-box"><div class="stat-n">${results.length}</div><div class="stat-l">응시 인원</div></div>
+      <div class="stat-box"><div class="stat-n">${avg}</div><div class="stat-l">평균 점수</div></div>
+      <div class="stat-box"><div class="stat-n">${results[0].score||0}/${maxS}</div><div class="stat-l">최고 점수</div></div>`;
+    listEl.innerHTML='';
+    results.forEach((r,i)=>{
+      const pct=r.pct||Math.round((r.okCnt||0)/(r.total||14)*100);
+      const gc=pct>=90?'1':pct>=80?'2':pct>=60?'3':'4';
+      const gl=pct>=90?'A+':pct>=80?'A':pct>=60?'B':'C';
+      let wrongs=[];
+      if(r.answers&&Array.isArray(r.answers)){
+        r.answers.forEach((a,idx)=>{
+          if(!pQ[idx])return;
+          if(a!==pQ[idx].ans-1){
+            const stuAns=a>=0?(pQ[idx].choices[a]?.substring(0,25)||'?'):'미응답';
+            const corAns=pQ[idx].choices[pQ[idx].ans-1]?.substring(0,25)||'?';
+            wrongs.push(`<div class="adm-wrong-item">
+              <span style="font-weight:700;margin-right:6px">${pQ[idx].n}번</span>
+              <span style="font-size:11px;color:#888;margin-right:8px">${pQ[idx].type}</span>
+              학생: <span style="color:var(--red)">${stuAns}</span> → 정답: <span style="color:var(--green)">${corAns}</span>
+            </div>`);
+          }
+        });
+      }
+      const wrongHtml=`<div class="adm-details" id="adm-detail-${p}-${i}">
+        ${wrongs.length?wrongs.join(''):'<div style="color:var(--green);font-weight:600;text-align:center;padding:.5rem">모든 문제 정답! 🎉</div>'}
+      </div>`;
+      const rowWrap=document.createElement('div');rowWrap.className='adm-row-wrap';
+      rowWrap.innerHTML=`
+        <div class="adm-row" onclick="document.getElementById('adm-detail-${p}-${i}').classList.toggle('active')">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;color:#ccc;min-width:18px">${i+1}</span>
+            <div><div class="adm-name">${r.name} <span style="font-size:11px;color:#ccc;font-weight:normal">(클릭)</span></div><div class="adm-date">${r.date||''}</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="adm-score">${r.score}점</span>
+            <span class="adm-rank rank-${gc}">${gl}</span>
+            <span style="color:#ccc;font-size:16px">▾</span>
+          </div>
+        </div>
+        ${wrongHtml}`;
+      listEl.appendChild(rowWrap);
+    });
+  }catch(e){listEl.innerHTML=`<div class="empty">오류: ${e.message}</div>`;}
+}
+
+async function confirmClear(){
+  if(!confirm(`PART ${adminCurPart} 기록을 모두 삭제하시겠습니까?`))return;
+  try{await fetch(FIREBASE_URL+`/results_mogi2020_09_p${adminCurPart}.json`,{method:'DELETE'});loadAdmin(adminCurPart);}catch(e){alert('삭제 실패');}
+}
+</script>
+</body>
+</html>

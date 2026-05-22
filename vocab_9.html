@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수능만만 단어테스트 — 9회</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height:100vh}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+:root{--green:#1a7350;--green-l:#e1f5ee;--green-d:#0f6e56;--blue:#2563eb;--blue-l:#dbeafe;--red:#a32d2d;--red-l:#fef2f2}
+
+/* Header */
+.hdr{background:var(--green);padding:1.25rem 1.5rem;color:#fff}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.hdr-sub{font-size:12px;opacity:.7;margin-bottom:3px}
+.hdr-title{font-size:19px;font-weight:700}
+
+/* Card */
+.body{flex:1;padding:1.25rem 1rem 2rem;max-width:620px;margin:0 auto;width:100%}
+.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:1.5rem}
+
+/* Input */
+label{font-size:14px;font-weight:500;display:block;margin-bottom:6px}
+input[type=text]{width:100%;padding:11px 14px;font-size:15px;border:1px solid rgba(0,0,0,.15);border-radius:8px;background:#fff;margin-bottom:14px}
+input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(26,115,80,.12)}
+
+/* Buttons */
+.btn{display:block;width:100%;padding:12px;font-size:15px;font-weight:600;border-radius:9px;border:none;cursor:pointer;transition:all .15s}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:var(--green-d)}
+.btn-outline{background:#fff;color:#6b7280;border:1px solid rgba(0,0,0,.12);margin-top:8px;font-weight:500}
+.btn-outline:hover{background:#f9fafb}
+.btn-sm{padding:7px 13px;font-size:12px;width:auto;display:inline-block;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+
+/* Progress */
+.prog-wrap{margin-bottom:1.25rem}
+.prog-bar{height:7px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:5px 0 3px}
+.prog-fill{height:100%;border-radius:4px;transition:width .3s}
+.fill-en{background:var(--green)}
+.fill-ko{background:var(--blue)}
+.prog-info{display:flex;justify-content:space-between;font-size:12px;color:#6b7280}
+
+/* Type badge */
+.type-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+.badge-en{background:var(--green-l);color:var(--green-d)}
+.badge-ko{background:var(--blue-l);color:var(--blue)}
+
+/* Prompt */
+.prompt-box{background:#f8fafb;border:1.5px solid rgba(0,0,0,.08);border-radius:12px;padding:1.25rem;text-align:center;margin-bottom:1.25rem}
+.prompt-word{font-size:26px;font-weight:700;color:var(--green);letter-spacing:.5px}
+.prompt-meaning{font-size:22px;font-weight:600;color:#1a1a1a}
+.prompt-hint{font-size:12px;color:#9ca3af;margin-top:6px}
+
+/* Choices */
+.choices{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.choice{text-align:left;padding:12px 16px;border:1px solid rgba(0,0,0,.1);border-radius:10px;background:#fff;color:#1a1a1a;cursor:pointer;font-size:14px;font-weight:500;transition:all .15s}
+.choice:hover{border-color:var(--green);background:var(--green-l)}
+.choice.sel{border-color:var(--green);background:var(--green-l);color:var(--green-d)}
+.choice.correct{border-color:#16a34a;background:#f0fdf4;color:#166534}
+.choice.wrong{border-color:#dc2626;background:var(--red-l);color:var(--red)}
+
+/* Nav */
+.nav{display:flex;gap:8px}
+.nav-btn{flex:1;padding:11px;border-radius:9px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid rgba(0,0,0,.1);background:#f3f4f6;color:#6b7280;transition:all .15s}
+.nav-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
+.nav-btn:hover:not(:disabled){opacity:.85}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* Score */
+.score-wrap{text-align:center;padding:1.5rem 0 1rem}
+.score-ring{width:130px;height:130px;border-radius:50%;background:var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem;color:#fff}
+.s-num{font-size:40px;font-weight:700;line-height:1}
+.s-tot{font-size:14px;opacity:.75;margin-top:2px}
+.s-grade{font-size:22px;font-weight:700;color:var(--green);margin-bottom:4px}
+.s-msg{font-size:13px;color:#6b7280}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:.75rem 0}
+.stat{background:#f8fafb;border-radius:9px;padding:.75rem;text-align:center}
+.stat-n{font-size:22px;font-weight:700;color:var(--green)}
+.stat-n.red{color:var(--red)}
+.stat-n.blue{color:var(--blue)}
+.stat-l{font-size:11px;color:#6b7280;margin-top:2px}
+
+/* Review */
+.sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin:1.25rem 0 .5rem;padding-bottom:4px;border-bottom:1px solid #e5e7eb}
+.rv-item{display:flex;gap:10px;padding:9px 11px;border-radius:9px;margin-bottom:6px;font-size:13px;align-items:flex-start}
+.rv-ok{background:#f0fdf4;border:1px solid #bbf7d0}
+.rv-ng{background:var(--red-l);border:1px solid #fecaca}
+.rv-icon{font-size:14px;margin-top:1px;flex-shrink:0}
+.rv-body{flex:1;line-height:1.5}
+.rv-ans{font-size:11px;color:var(--red);margin-top:2px}
+
+/* Admin */
+.admin-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.admin-row:last-child{border-bottom:none}
+.a-name{font-weight:600}
+.a-date{font-size:11px;color:#9ca3af;margin-top:1px}
+.a-score{font-weight:700;color:var(--green);font-size:15px;margin-right:8px}
+.rank{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+.rs{background:var(--green-l);color:var(--green-d)}
+.ra{background:var(--blue-l);color:var(--blue)}
+.rb{background:#fef3c7;color:#92400e}
+.rc{background:var(--red-l);color:var(--red)}
+.empty{text-align:center;padding:2.5rem;color:#9ca3af;font-size:14px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(26,115,80,.2);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem}
+.modal{background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:320px}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:1rem}
+.m-btns{display:flex;gap:8px;margin-top:1rem}
+.m-btns button{flex:1;padding:10px;border-radius:8px;font-size:14px;cursor:pointer;border:1px solid rgba(0,0,0,.1);background:#f3f4f6;color:#1a1a1a}
+.m-btns button.ok{background:var(--green);color:#fff;border-color:var(--green);font-weight:600}
+.err{font-size:12px;color:var(--red);min-height:16px;margin-top:4px}
+.save-status{font-size:12px;color:#6b7280;text-align:center;margin:.5rem 0}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="s-landing" class="screen active">
+  <div class="hdr">
+    <div class="hdr-sub">수능만만 기본독해 10+1 · 9회</div>
+    <div class="hdr-title">단어 테스트</div>
+  </div>
+  <div class="body">
+    <div class="card">
+      <p style="font-size:13px;color:#6b7280;margin-bottom:.75rem">60문항 · 5지선다 · 영→한 30문 + 한→영 30문</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem">
+        <div style="background:var(--green-l);border-radius:9px;padding:.75rem;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--green)">30</div>
+          <div style="font-size:11px;color:var(--green-d)">영어 → 한국어</div>
+        </div>
+        <div style="background:var(--blue-l);border-radius:9px;padding:.75rem;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--blue)">30</div>
+          <div style="font-size:11px;color:var(--blue)">한국어 → 영어</div>
+        </div>
+      </div>
+      <label>이름</label>
+      <input type="text" id="name-in" placeholder="예) 홍길동" autocomplete="off">
+      <button class="btn btn-green" onclick="startQuiz()">테스트 시작 →</button>
+      <button class="btn btn-outline" onclick="openModal()">관리자 로그인</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="s-quiz" class="screen">
+  <div class="hdr hdr-row">
+    <div>
+      <div class="hdr-sub" id="qz-name"></div>
+      <div class="hdr-title" style="font-size:15px">단어 테스트 · 9회</div>
+    </div>
+    <span id="qz-cnt" style="font-size:13px;opacity:.8"></span>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="prog-wrap">
+        <div class="prog-info"><span id="prog-txt"></span><span id="prog-pct"></span></div>
+        <div class="prog-bar"><div id="prog-fill" class="prog-fill fill-en" style="width:0%"></div></div>
+      </div>
+      <span id="q-badge" class="type-badge badge-en"></span>
+      <div id="prompt-box" class="prompt-box"></div>
+      <div id="choices" class="choices"></div>
+      <div class="nav">
+        <button class="nav-btn" id="btn-prev" onclick="nav(-1)">← 이전</button>
+        <button class="nav-btn primary" id="btn-next" onclick="navNext()">다음 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="s-result" class="screen">
+  <div class="hdr">
+    <div class="hdr-sub">테스트 완료</div>
+    <div class="hdr-title" id="res-name"></div>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="score-wrap">
+        <div class="score-ring">
+          <span class="s-num" id="res-score"></span>
+          <span class="s-tot">/ 60</span>
+        </div>
+        <div class="s-grade" id="res-grade"></div>
+        <div class="s-msg" id="res-msg"></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="st-ok"></div><div class="stat-l">정답</div></div>
+        <div class="stat"><div class="stat-n red" id="st-ng"></div><div class="stat-l">오답</div></div>
+        <div class="stat"><div class="stat-n blue" id="st-en"></div><div class="stat-l">영→한</div></div>
+        <div class="stat"><div class="stat-n" id="st-ko"></div><div class="stat-l">한→영</div></div>
+      </div>
+      <div id="retake-box" style="display:none;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:14px 16px;margin:1rem 0;text-align:center;color:#991b1b;font-weight:600;font-size:14px;line-height:1.5">⚠️ <strong>80점 미만입니다.</strong><br><span style="font-weight:500;font-size:13px">단어를 다시 외운 후 재응시해주세요.</span></div><div id="pass-box" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin:1rem 0;text-align:center;color:#166534;font-weight:600;font-size:14px">🎉 합격! 80점 이상 통과했습니다.</div>
+      <div class="save-status" id="save-st"></div>
+      <div class="sec-lbl">오답 목록</div>
+      <div id="review"></div>
+      <button class="btn btn-outline" style="margin-top:1rem" onclick="goHome()">처음으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="s-admin" class="screen">
+  <div class="hdr hdr-row">
+    <div><div class="hdr-sub">관리자 패널</div><div class="hdr-title">학생 성적 현황</div></div>
+    <button class="btn-sm" onclick="confirmClear()">초기화</button>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="stats" id="adm-stats"></div>
+      <div class="sec-lbl">응시 학생 목록</div>
+      <div id="adm-list"></div>
+      <button class="btn btn-outline" style="margin-top:1rem" onclick="goHome()">← 나가기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal-bg" style="display:none">
+  <div class="modal">
+    <h3>관리자 비밀번호</h3>
+    <input type="password" id="adm-pw" placeholder="비밀번호"
+      style="width:100%;padding:10px 14px;font-size:15px;border:1px solid rgba(0,0,0,.15);border-radius:8px;background:#fff;margin-bottom:4px">
+    <div class="err" id="pw-err"></div>
+    <div class="m-btns">
+      <button onclick="closeModal()">취소</button>
+      <button class="ok" onclick="checkPw()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
+const ADMIN_PW = "terry2025";
+const TOTAL = 60;
+const Q = [{"type": "en_ko", "n": 1, "prompt": "support", "question": "\"support\"의 뜻으로 알맞은 것은?", "choices": ["부양하다", "약", "구매하다", "분명한", "부정적인"], "answer": 0}, {"type": "en_ko", "n": 2, "prompt": "gene", "question": "\"gene\"의 뜻으로 알맞은 것은?", "choices": ["비교적", "침착한", "유전자", "투옥하다", "수채화"], "answer": 2}, {"type": "en_ko", "n": 3, "prompt": "force", "question": "\"force\"의 뜻으로 알맞은 것은?", "choices": ["(일)자리", "유전의", "수분(受粉)", "강요하다", "수감자"], "answer": 3}, {"type": "en_ko", "n": 4, "prompt": "underestimate", "question": "\"underestimate\"의 뜻으로 알맞은 것은?", "choices": ["재정(상)의", "과소평가하다", "강요하다", "사랑스러운", "유전자"], "answer": 1}, {"type": "en_ko", "n": 5, "prompt": "automatically", "question": "\"automatically\"의 뜻으로 알맞은 것은?", "choices": ["자동으로", "유전의", "실제로", "고전", "만족스러운"], "answer": 0}, {"type": "en_ko", "n": 6, "prompt": "evenly", "question": "\"evenly\"의 뜻으로 알맞은 것은?", "choices": ["(농)작물", "수감자", "골고루", "추천하다", "옮기다"], "answer": 2}, {"type": "en_ko", "n": 7, "prompt": "court", "question": "\"court\"의 뜻으로 알맞은 것은?", "choices": ["수채화", "법정", "시도하다", "반사작용", "동료"], "answer": 1}, {"type": "en_ko", "n": 8, "prompt": "lose track of", "question": "\"lose track of\"의 뜻으로 알맞은 것은?", "choices": ["(pl.) 생물", "전자의", "~을 놓치다", "재정적으로", "만화가"], "answer": 2}, {"type": "en_ko", "n": 9, "prompt": "creature", "question": "\"creature\"의 뜻으로 알맞은 것은?", "choices": ["시도하다", "(pl.) 생물", "외식하다", "종양", "반사작용"], "answer": 1}, {"type": "en_ko", "n": 10, "prompt": "damage", "question": "\"damage\"의 뜻으로 알맞은 것은?", "choices": ["비서의", "효과적이지 못한", "허가", "투표하다", "손상을 주다"], "answer": 4}, {"type": "en_ko", "n": 11, "prompt": "passer-by", "question": "\"passer-by\"의 뜻으로 알맞은 것은?", "choices": ["행인", "자동으로", "개성", "적혈구", "분명한"], "answer": 0}, {"type": "en_ko", "n": 12, "prompt": "benefit", "question": "\"benefit\"의 뜻으로 알맞은 것은?", "choices": ["넘어뜨리다", "학대자", "직업적으로", "~에게 도움이 되다", "면역 체계"], "answer": 3}, {"type": "en_ko", "n": 13, "prompt": "jail", "question": "\"jail\"의 뜻으로 알맞은 것은?", "choices": ["자기를 인식하는", "(농)작물", "감사하다", "교도소", "분배하다"], "answer": 3}, {"type": "en_ko", "n": 14, "prompt": "attempt", "question": "\"attempt\"의 뜻으로 알맞은 것은?", "choices": ["일관되게", "투표하다", "시도하다", "세대", "넘어뜨리다"], "answer": 2}, {"type": "en_ko", "n": 15, "prompt": "recommend", "question": "\"recommend\"의 뜻으로 알맞은 것은?", "choices": ["직업적으로", "~을 놓치다", "교도소", "추천하다", "금지"], "answer": 3}, {"type": "en_ko", "n": 16, "prompt": "knock over", "question": "\"knock over\"의 뜻으로 알맞은 것은?", "choices": ["넘어뜨리다", "전자의", "접근하다", "자동으로", "환경 운동가"], "answer": 0}, {"type": "en_ko", "n": 17, "prompt": "purchase", "question": "\"purchase\"의 뜻으로 알맞은 것은?", "choices": ["분명한", "구매하다", "~을 고려하다", "처벌", "투옥하다"], "answer": 1}, {"type": "en_ko", "n": 18, "prompt": "simultaneously", "question": "\"simultaneously\"의 뜻으로 알맞은 것은?", "choices": ["~에게 도움이 되다", "영리한", "동시에", "끌어들이다", "~을 고려하다"], "answer": 2}, {"type": "en_ko", "n": 19, "prompt": "take a step", "question": "\"take a step\"의 뜻으로 알맞은 것은?", "choices": ["동정심 있는", "(pl.) 생물", "강요하다", "제조(공업)", "조치를 취하다"], "answer": 4}, {"type": "en_ko", "n": 20, "prompt": "reflex", "question": "\"reflex\"의 뜻으로 알맞은 것은?", "choices": ["정제", "사랑스러운", "세대", "반사작용", "상황"], "answer": 3}, {"type": "en_ko", "n": 21, "prompt": "dine", "question": "\"dine\"의 뜻으로 알맞은 것은?", "choices": ["비서의", "면역 체계", "우연히", "식사를 하다", "염증"], "answer": 3}, {"type": "en_ko", "n": 22, "prompt": "as a whole", "question": "\"as a whole\"의 뜻으로 알맞은 것은?", "choices": ["고전", "인위적으로", "전체로서", "골고루", "만족스러운"], "answer": 2}, {"type": "en_ko", "n": 23, "prompt": "radiation", "question": "\"radiation\"의 뜻으로 알맞은 것은?", "choices": ["만화가", "전시하다", "학대자", "방사능", "대인 관계의"], "answer": 3}, {"type": "en_ko", "n": 24, "prompt": "amount", "question": "\"amount\"의 뜻으로 알맞은 것은?", "choices": ["양", "분배하다", "접근하다", "개성", "연금"], "answer": 0}, {"type": "en_ko", "n": 25, "prompt": "permit", "question": "\"permit\"의 뜻으로 알맞은 것은?", "choices": ["투표하다", "허가하다", "전시하다", "은퇴", "독살하다"], "answer": 1}, {"type": "en_ko", "n": 26, "prompt": "branch", "question": "\"branch\"의 뜻으로 알맞은 것은?", "choices": ["나뭇가지", "독살하다", "증상", "침착한", "분명한"], "answer": 0}, {"type": "en_ko", "n": 27, "prompt": "pollination", "question": "\"pollination\"의 뜻으로 알맞은 것은?", "choices": ["알리다", "전체로서", "수채화", "수분(受粉)", "고전"], "answer": 3}, {"type": "en_ko", "n": 28, "prompt": "promote", "question": "\"promote\"의 뜻으로 알맞은 것은?", "choices": ["촉진하다", "생산적인", "막다", "골고루", "질"], "answer": 0}, {"type": "en_ko", "n": 29, "prompt": "clever", "question": "\"clever\"의 뜻으로 알맞은 것은?", "choices": ["영리한", "한가한 시간", "습득하다", "전자의", "덫을 놓다"], "answer": 0}, {"type": "en_ko", "n": 30, "prompt": "sentence", "question": "\"sentence\"의 뜻으로 알맞은 것은?", "choices": ["동료", "구매하다", "금지", "회사", "선고하다"], "answer": 4}, {"type": "ko_en", "n": 31, "prompt": "망막", "question": "\"망막\"에 해당하는 영어 단어는?", "choices": ["retina", "demand", "feed on", "ruin", "accidentally"], "answer": 0}, {"type": "ko_en", "n": 32, "prompt": "~을 먹고 살다", "question": "\"~을 먹고 살다\"에 해당하는 영어 단어는?", "choices": ["sympathetic", "tablet", "circumstance", "feed on", "purchase"], "answer": 3}, {"type": "ko_en", "n": 33, "prompt": "~을 고수하다", "question": "\"~을 고수하다\"에 해당하는 영어 단어는?", "choices": ["pension", "hold on to", "life expectancy", "generation", "candidate"], "answer": 1}, {"type": "ko_en", "n": 34, "prompt": "실제로", "question": "\"실제로\"에 해당하는 영어 단어는?", "choices": ["election", "irritation", "apparently", "weaken", "creature"], "answer": 2}, {"type": "ko_en", "n": 35, "prompt": "학대자", "question": "\"학대자\"에 해당하는 영어 단어는?", "choices": ["abuser", "promote", "method", "feather", "red blood cell"], "answer": 0}, {"type": "ko_en", "n": 36, "prompt": "침착한", "question": "\"침착한\"에 해당하는 영어 단어는?", "choices": ["simultaneously", "attractive", "inmate", "visible", "calm"], "answer": 4}, {"type": "ko_en", "n": 37, "prompt": "질", "question": "\"질\"에 해당하는 영어 단어는?", "choices": ["quality", "vision", "knock over", "promote", "agriculture"], "answer": 0}, {"type": "ko_en", "n": 38, "prompt": "덫을 놓다", "question": "\"덫을 놓다\"에 해당하는 영어 단어는?", "choices": ["passer-by", "leisure", "trap", "endangered", "simultaneously"], "answer": 2}, {"type": "ko_en", "n": 39, "prompt": "기업", "question": "\"기업\"에 해당하는 영어 단어는?", "choices": ["corporation", "take a step", "medication", "trap", "life expectancy"], "answer": 0}, {"type": "ko_en", "n": 40, "prompt": "분배하다", "question": "\"분배하다\"에 해당하는 영어 단어는?", "choices": ["distribute", "classic", "calm", "lose track of", "apparently"], "answer": 0}, {"type": "ko_en", "n": 41, "prompt": "일관되게", "question": "\"일관되게\"에 해당하는 영어 단어는?", "choices": ["transfer", "crop", "passer-by", "financially", "consistently"], "answer": 4}, {"type": "ko_en", "n": 42, "prompt": "방법", "question": "\"방법\"에 해당하는 영어 단어는?", "choices": ["damage", "vision", "obedient", "method", "adverse"], "answer": 3}, {"type": "ko_en", "n": 43, "prompt": "양", "question": "\"양\"에 해당하는 영어 단어는?", "choices": ["evenly", "attract", "genetic", "volume", "secretarial"], "answer": 3}, {"type": "ko_en", "n": 44, "prompt": "보통의", "question": "\"보통의\"에 해당하는 영어 단어는?", "choices": ["position", "take ... into consideration", "radiation", "ordinary", "irritation"], "answer": 3}, {"type": "ko_en", "n": 45, "prompt": "우연히", "question": "\"우연히\"에 해당하는 영어 단어는?", "choices": ["accidentally", "trap", "intrapersonal", "obedient", "dine"], "answer": 0}, {"type": "ko_en", "n": 46, "prompt": "만족스러운", "question": "\"만족스러운\"에 해당하는 영어 단어는?", "choices": ["trap", "demand", "satisfying", "corporation", "candidate"], "answer": 2}, {"type": "ko_en", "n": 47, "prompt": "동정심 있는", "question": "\"동정심 있는\"에 해당하는 영어 단어는?", "choices": ["sympathetic", "artificially", "attractive", "acquire", "leisure"], "answer": 0}, {"type": "ko_en", "n": 48, "prompt": "요구하다", "question": "\"요구하다\"에 해당하는 영어 단어는?", "choices": ["demand", "accidentally", "ruin", "relatively", "amount"], "answer": 0}, {"type": "ko_en", "n": 49, "prompt": "경악하게 만들다", "question": "\"경악하게 만들다\"에 해당하는 영어 단어는?", "choices": ["corporation", "satisfying", "dismay", "productive", "feed on"], "answer": 2}, {"type": "ko_en", "n": 50, "prompt": "비교적", "question": "\"비교적\"에 해당하는 영어 단어는?", "choices": ["relatively", "pollination", "financially", "tablet", "tumor"], "answer": 0}, {"type": "ko_en", "n": 51, "prompt": "개인 내의", "question": "\"개인 내의\"에 해당하는 영어 단어는?", "choices": ["intrapersonal", "candidate", "position", "imprison", "mindlessly"], "answer": 0}, {"type": "ko_en", "n": 52, "prompt": "반대로", "question": "\"반대로\"에 해당하는 영어 단어는?", "choices": ["as a whole", "amount", "lovable", "take a step", "conversely"], "answer": 4}, {"type": "ko_en", "n": 53, "prompt": "고전", "question": "\"고전\"에 해당하는 영어 단어는?", "choices": ["transfer", "artificially", "classic", "pension", "life expectancy"], "answer": 2}, {"type": "ko_en", "n": 54, "prompt": "세대", "question": "\"세대\"에 해당하는 영어 단어는?", "choices": ["financial", "generation", "crop", "evenly", "intention"], "answer": 1}, {"type": "ko_en", "n": 55, "prompt": "약화하다", "question": "\"약화하다\"에 해당하는 영어 단어는?", "choices": ["artificially", "calm", "weaken", "abuser", "reflex"], "answer": 2}, {"type": "ko_en", "n": 56, "prompt": "회사", "question": "\"회사\"에 해당하는 영어 단어는?", "choices": ["intrapersonal", "calm", "firm", "harm", "reflect"], "answer": 2}, {"type": "ko_en", "n": 57, "prompt": "시력", "question": "\"시력\"에 해당하는 영어 단어는?", "choices": ["genetic", "firm", "pension", "volume", "vision"], "answer": 4}, {"type": "ko_en", "n": 58, "prompt": "~을 고려하다", "question": "\"~을 고려하다\"에 해당하는 영어 단어는?", "choices": ["passer-by", "report", "victim", "amount", "take ... into consideration"], "answer": 4}, {"type": "ko_en", "n": 59, "prompt": "자기를 인식하는", "question": "\"자기를 인식하는\"에 해당하는 영어 단어는?", "choices": ["position", "self-aware", "force", "consistently", "access"], "answer": 1}, {"type": "ko_en", "n": 60, "prompt": "선거", "question": "\"선거\"에 해당하는 영어 단어는?", "choices": ["crop", "election", "lovable", "classic", "pension"], "answer": 1}];
+
+const GRADES=[
+  {min:54,g:"S",label:"S — 최우수",msg:"완벽에 가까운 암기력입니다! 🎉"},
+  {min:48,g:"A",label:"A — 우수",msg:"단어 암기가 잘 됐습니다!"},
+  {min:36,g:"B",label:"B — 양호",msg:"조금 더 반복 암기가 필요해요."},
+  {min:24,g:"C",label:"C — 보통",msg:"어휘리스트를 다시 한 번 복습하세요."},
+  {min:0,g:"D",label:"D — 부족",msg:"단어장부터 차근차근 다시 외워보세요."}
+];
+
+let studentName='', ans=new Array(TOTAL).fill(-1), cur=0;
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');}
+function goHome(){document.getElementById('name-in').value='';show('landing');}
+
+function startQuiz(){
+  studentName=document.getElementById('name-in').value.trim();
+  if(!studentName){alert('이름을 입력해주세요.');return;}
+  ans=new Array(TOTAL).fill(-1);cur=0;
+  document.getElementById('qz-name').textContent=studentName;
+  render(0);show('quiz');
+}
+
+function render(i){
+  const q=Q[i];
+  const pct=Math.round(i/TOTAL*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-fill').className='prog-fill '+(q.type==='en_ko'?'fill-en':'fill-ko');
+  document.getElementById('prog-txt').textContent=(i+1)+' / '+TOTAL;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('qz-cnt').textContent=(i+1)+'/'+TOTAL;
+
+  const badge=document.getElementById('q-badge');
+  if(q.type==='en_ko'){badge.textContent='영어 → 한국어';badge.className='type-badge badge-en';}
+  else{badge.textContent='한국어 → 영어';badge.className='type-badge badge-ko';}
+
+  const pb=document.getElementById('prompt-box');
+  if(q.type==='en_ko'){
+    pb.innerHTML=`<div class="prompt-word">${q.prompt}</div><div class="prompt-hint">이 단어의 뜻은?</div>`;
+  }else{
+    pb.innerHTML=`<div class="prompt-meaning">${q.prompt}</div><div class="prompt-hint">이 뜻에 해당하는 영어 단어는?</div>`;
+  }
+
+  const el=document.getElementById('choices');
+  el.innerHTML='';
+  q.choices.forEach((c,ci)=>{
+    const b=document.createElement('button');
+    b.className='choice'+(ans[i]===ci?' sel':'');
+    b.textContent=c;
+    b.onclick=()=>pick(i,ci);
+    el.appendChild(b);
+  });
+
+  document.getElementById('btn-prev').disabled=i===0;
+  document.getElementById('btn-next').textContent=i===TOTAL-1?'제출 →':'다음 →';
+}
+
+function pick(qi,ci){
+  ans[qi]=ci;
+  document.getElementById('choices').querySelectorAll('.choice').forEach((b,i)=>{
+    b.classList.toggle('sel',i===ci);
+  });
+}
+
+function nav(d){cur=Math.max(0,Math.min(TOTAL-1,cur+d));render(cur);}
+
+function navNext(){
+  if(cur===TOTAL-1){
+    const empty=ans.filter(a=>a===-1).length;
+    if(empty>0&&!confirm(`${empty}문항을 풀지 않았습니다. 제출할까요?`))return;
+    submit();
+  }else{nav(1);}
+}
+
+async function submit(){
+  const score=ans.filter((a,i)=>a===Q[i].answer).length;
+  const enScore=ans.slice(0,30).filter((a,i)=>a===Q[i].answer).length;
+  
+  const enOk=Q.slice(0,30).filter((q,i)=>ans[i]===q.answer).length;
+  const koOk=Q.slice(30,60).filter((q,i)=>ans[i+30]===q.answer).length;
+  const pct=Math.round(score/TOTAL*100);
+  const grade=GRADES.find(g=>score>=g.min);
+
+  document.getElementById('res-name').textContent=studentName+'님의 결과';
+  document.getElementById('res-score').textContent=score;
+  document.getElementById('res-grade').textContent=grade.label;
+  document.getElementById('res-msg').textContent=grade.msg;
+  document.getElementById('st-ok').textContent=score;
+  document.getElementById('st-ng').textContent=TOTAL-score;
+  document.getElementById('st-en').textContent=enOk+'/30';
+  document.getElementById('st-ko').textContent=koOk+'/30';
+
+  const rv=document.getElementById('review');rv.innerHTML='';
+  let ngCount=0;
+  Q.forEach((q,i)=>{
+    if(ans[i]!==q.answer){
+      ngCount++;
+      const d=document.createElement('div');
+      d.className='rv-item rv-ng';
+      d.innerHTML=`<span class="rv-icon">✗</span>
+        <div class="rv-body">
+          <strong>${i+1}번</strong> <em>${q.prompt}</em>
+          <div class="rv-ans">내 답: ${ans[i]>=0?q.choices[ans[i]]:'미응답'} → 정답: ${q.choices[q.answer]}</div>
+        </div>`;
+      rv.appendChild(d);
+    }
+  });
+  if(ngCount===0)rv.innerHTML='<div style="text-align:center;padding:1.5rem;color:#1a7350;font-weight:600">전부 정답! 🎉</div>';
+
+
+  // 재시험/합격 안내
+  if(pct >= 80){
+    document.getElementById('pass-box').style.display='block';
+    document.getElementById('retake-box').style.display='none';
+  } else {
+    document.getElementById('pass-box').style.display='none';
+    document.getElementById('retake-box').style.display='block';
+  }
+
+  show('result');
+
+  const stEl=document.getElementById('save-st');
+  stEl.innerHTML='<span class="spinner"></span>점수 저장 중...';
+  try{
+    const payload={name:studentName,score,total:TOTAL,pct,grade:grade.g,enOk,koOk,date:new Date().toLocaleString('ko-KR'),ts:Date.now(),testId:'vocab_9'};
+    const r=await fetch(FIREBASE_URL+'/results.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    stEl.innerHTML=r.ok?'<span style="color:var(--green)">✓ 점수 저장 완료</span>':'저장 실패';
+  }catch(e){stEl.textContent='저장 실패: '+e.message;}
+}
+
+function openModal(){document.getElementById('adm-pw').value='';document.getElementById('pw-err').textContent='';document.getElementById('modal').style.display='flex';setTimeout(()=>document.getElementById('adm-pw').focus(),100);}
+function closeModal(){document.getElementById('modal').style.display='none';}
+document.getElementById('adm-pw').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
+function checkPw(){
+  if(document.getElementById('adm-pw').value===ADMIN_PW){closeModal();loadAdmin();}
+  else document.getElementById('pw-err').textContent='비밀번호가 올바르지 않습니다.';
+}
+
+async function loadAdmin(){
+  show('admin');
+  const listEl=document.getElementById('adm-list');
+  const statsEl=document.getElementById('adm-stats');
+  listEl.innerHTML='<div class="empty"><span class="spinner"></span>불러오는 중...</div>';
+  try{
+    const r=await fetch(FIREBASE_URL+'/results.json');
+    const data=await r.json();
+    if(!data){listEl.innerHTML='<div class="empty">아직 응시한 학생이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const results=Object.values(data).filter(r=>r&&r.name&&r.score!==undefined&&r.testId==='vocab_9').sort((a,b)=>b.score-a.score);
+    if(!results.length){listEl.innerHTML='<div class="empty">아직 응시한 학생이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const avg=(results.reduce((s,r)=>s+(Number(r.score)||0),0)/results.length).toFixed(1);
+    statsEl.innerHTML=`<div class="stat"><div class="stat-n">${results.length}</div><div class="stat-l">응시 인원</div></div>
+      <div class="stat"><div class="stat-n">${avg}</div><div class="stat-l">평균</div></div>
+      <div class="stat"><div class="stat-n">${results[0].score}</div><div class="stat-l">최고점</div></div>
+      <div class="stat"><div class="stat-n blue">${results[results.length-1].score}</div><div class="stat-l">최저점</div></div>`;
+    listEl.innerHTML='';
+    results.forEach((r,i)=>{
+      const gc=r.pct>=90?'s':r.pct>=80?'a':r.pct>=60?'b':'c';
+      const gl=r.pct>=90?'S':r.pct>=80?'A':r.pct>=60?'B':'C';
+      const row=document.createElement('div');row.className='admin-row';
+      row.innerHTML=`<div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:#9ca3af;min-width:20px">${i+1}</span>
+        <div><div class="a-name">${r.name}</div><div class="a-date">${r.date||''}</div></div></div>
+        <div style="display:flex;align-items:center"><span class="a-score">${r.score}점</span><span class="rank r${gc}">${gl}</span></div>`;
+      listEl.appendChild(row);
+    });
+  }catch(e){listEl.innerHTML='<div class="empty">데이터 불러오기 실패</div>';}
+}
+
+async function confirmClear(){
+  if(!confirm('단어테스트 기록을 삭제하시겠습니까?'))return;
+  const r=await fetch(FIREBASE_URL+'/results.json');
+  const data=await r.json();
+  if(!data)return;
+  for(const[k,v]of Object.entries(data)){
+    if(v&&v.testId==='vocab_9')await fetch(FIREBASE_URL+'/results/'+k+'.json',{method:'DELETE'});
+  }
+  loadAdmin();
+}
+</script>
+</body>
+</html>

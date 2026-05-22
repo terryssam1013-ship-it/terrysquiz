@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수능만만 누적 단어 테스트</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height:100vh}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+:root{--green:#1a7350;--green-l:#e1f5ee;--green-d:#0f6e56;--blue:#2563eb;--blue-l:#dbeafe;--red:#a32d2d;--red-l:#fef2f2;--purple:#7c3aed;--purple-l:#f3e8ff;--purple-d:#5b21b6}
+
+/* Header */
+.hdr{background:var(--purple);padding:1.25rem 1.5rem;color:#fff}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.hdr-sub{font-size:12px;opacity:.75;margin-bottom:3px}
+.hdr-title{font-size:19px;font-weight:700}
+
+/* Card */
+.body{flex:1;padding:1.25rem 1rem 2rem;max-width:620px;margin:0 auto;width:100%}
+.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:1.5rem}
+
+/* Input */
+label{font-size:14px;font-weight:500;display:block;margin-bottom:6px}
+input[type=text]{width:100%;padding:11px 14px;font-size:15px;border:1px solid rgba(0,0,0,.15);border-radius:8px;background:#fff;margin-bottom:14px}
+input:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.15)}
+
+/* Round checkboxes - chip style */
+.round-section{margin:1rem 0 1.25rem}
+.round-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.round-label{font-size:14px;font-weight:600;color:#1a1a1a}
+.round-actions{display:flex;gap:6px}
+.round-actions button{font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.12);background:#fff;color:#6b7280;cursor:pointer}
+.round-actions button:hover{background:#f3f4f6;color:#1a1a1a}
+.round-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.round-chip{position:relative;cursor:pointer;user-select:none}
+.round-chip input{position:absolute;opacity:0;pointer-events:none}
+.round-chip .chip-box{display:flex;align-items:center;justify-content:center;padding:10px 4px;border:1.5px solid rgba(0,0,0,.12);border-radius:9px;background:#fff;font-size:14px;font-weight:600;color:#6b7280;transition:all .15s}
+.round-chip input:checked + .chip-box{border-color:var(--purple);background:var(--purple-l);color:var(--purple-d)}
+.round-chip:hover .chip-box{border-color:var(--purple)}
+
+/* Selected summary */
+.sel-summary{background:var(--purple-l);border:1px solid rgba(124,58,237,.25);border-radius:10px;padding:12px 14px;margin-bottom:1.25rem;font-size:13px;color:var(--purple-d);line-height:1.5}
+.sel-summary.warn{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+.sel-summary strong{font-weight:700}
+
+/* Buttons */
+.btn{display:block;width:100%;padding:12px;font-size:15px;font-weight:600;border-radius:9px;border:none;cursor:pointer;transition:all .15s}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-purple:hover{background:var(--purple-d)}
+.btn-purple:disabled{background:#d1d5db;cursor:not-allowed}
+.btn-outline{background:#fff;color:#6b7280;border:1px solid rgba(0,0,0,.12);margin-top:8px;font-weight:500}
+.btn-outline:hover{background:#f9fafb}
+.btn-sm{padding:7px 13px;font-size:12px;width:auto;display:inline-block;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+
+/* Progress */
+.prog-wrap{margin-bottom:1.25rem}
+.prog-bar{height:7px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:5px 0 3px}
+.prog-fill{height:100%;border-radius:4px;transition:width .3s}
+.fill-en{background:var(--purple)}
+.fill-ko{background:var(--blue)}
+.prog-info{display:flex;justify-content:space-between;font-size:12px;color:#6b7280}
+
+/* Type badge */
+.type-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+.badge-en{background:var(--purple-l);color:var(--purple-d)}
+.badge-ko{background:var(--blue-l);color:var(--blue)}
+
+/* Prompt */
+.prompt-box{background:#f8fafb;border:1.5px solid rgba(0,0,0,.08);border-radius:12px;padding:1.25rem;text-align:center;margin-bottom:1.25rem}
+.prompt-word{font-size:26px;font-weight:700;color:var(--purple);letter-spacing:.5px}
+.prompt-meaning{font-size:22px;font-weight:600;color:#1a1a1a}
+.prompt-hint{font-size:12px;color:#9ca3af;margin-top:6px}
+.prompt-round{font-size:10px;color:#9ca3af;margin-top:4px}
+
+/* Choices */
+.choices{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.choice{text-align:left;padding:12px 16px;border:1px solid rgba(0,0,0,.1);border-radius:10px;background:#fff;color:#1a1a1a;cursor:pointer;font-size:14px;font-weight:500;transition:all .15s}
+.choice:hover{border-color:var(--purple);background:var(--purple-l)}
+.choice.sel{border-color:var(--purple);background:var(--purple-l);color:var(--purple-d)}
+.choice.correct{border-color:#16a34a;background:#f0fdf4;color:#166534}
+.choice.wrong{border-color:#dc2626;background:var(--red-l);color:var(--red)}
+
+/* Nav */
+.nav{display:flex;gap:8px}
+.nav-btn{flex:1;padding:11px;border-radius:9px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid rgba(0,0,0,.1);background:#f3f4f6;color:#6b7280;transition:all .15s}
+.nav-btn.primary{background:var(--purple);color:#fff;border-color:var(--purple)}
+.nav-btn:hover:not(:disabled){opacity:.85}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* Score */
+.score-wrap{text-align:center;padding:1.5rem 0 1rem}
+.score-ring{width:130px;height:130px;border-radius:50%;background:var(--purple);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem;color:#fff}
+.s-num{font-size:40px;font-weight:700;line-height:1}
+.s-tot{font-size:14px;opacity:.75;margin-top:2px}
+.s-grade{font-size:22px;font-weight:700;color:var(--purple);margin-bottom:4px}
+.s-msg{font-size:13px;color:#6b7280}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:.75rem 0}
+.stat{background:#f8fafb;border-radius:9px;padding:.75rem;text-align:center}
+.stat-n{font-size:22px;font-weight:700;color:var(--purple)}
+.stat-n.red{color:var(--red)}
+.stat-n.blue{color:var(--blue)}
+.stat-l{font-size:11px;color:#6b7280;margin-top:2px}
+
+/* Review */
+.sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin:1.25rem 0 .5rem;padding-bottom:4px;border-bottom:1px solid #e5e7eb}
+.rv-item{display:flex;gap:10px;padding:9px 11px;border-radius:9px;margin-bottom:6px;font-size:13px;align-items:flex-start}
+.rv-ok{background:#f0fdf4;border:1px solid #bbf7d0}
+.rv-ng{background:var(--red-l);border:1px solid #fecaca}
+.rv-icon{font-size:14px;margin-top:1px;flex-shrink:0}
+.rv-body{flex:1;line-height:1.5}
+.rv-ans{font-size:11px;color:var(--red);margin-top:2px}
+.rv-round{font-size:10px;color:#9ca3af;margin-top:1px}
+
+/* Admin */
+.admin-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.admin-row:last-child{border-bottom:none}
+.a-name{font-weight:600}
+.a-date{font-size:11px;color:#9ca3af;margin-top:1px}
+.a-rounds{font-size:10px;color:var(--purple);margin-top:1px;font-weight:600}
+.a-score{font-weight:700;color:var(--purple);font-size:15px;margin-right:8px}
+.rank{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+.rs{background:var(--purple-l);color:var(--purple-d)}
+.ra{background:var(--blue-l);color:var(--blue)}
+.rb{background:#fef3c7;color:#92400e}
+.rc{background:var(--red-l);color:var(--red)}
+.empty{text-align:center;padding:2.5rem;color:#9ca3af;font-size:14px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(124,58,237,.2);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem}
+.modal{background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:320px}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:1rem}
+.m-btns{display:flex;gap:8px;margin-top:1rem}
+.m-btns button{flex:1;padding:10px;border-radius:8px;font-size:14px;cursor:pointer;border:1px solid rgba(0,0,0,.1);background:#f3f4f6;color:#1a1a1a}
+.m-btns button.ok{background:var(--purple);color:#fff;border-color:var(--purple);font-weight:600}
+.err{font-size:12px;color:var(--red);min-height:16px;margin-top:4px}
+.save-status{font-size:12px;color:#6b7280;text-align:center;margin:.5rem 0}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="s-landing" class="screen active">
+  <div class="hdr">
+    <div class="hdr-sub">수능만만 기본독해 10+1 · 누적 평가</div>
+    <div class="hdr-title">📚 누적 단어 테스트</div>
+  </div>
+  <div class="body">
+    <div class="card">
+      <p style="font-size:13px;color:#6b7280;margin-bottom:1rem">선택한 회차들의 단어에서 <strong>균등하게 60문제</strong> 출제됩니다.<br>(영→한 30문 + 한→영 30문 · 5지선다)</p>
+
+      <label>이름</label>
+      <input type="text" id="name-in" placeholder="예) 홍길동" autocomplete="off">
+
+      <div class="round-section">
+        <div class="round-label-row">
+          <span class="round-label">응시할 회차 선택</span>
+          <div class="round-actions">
+            <button onclick="selectAll()">전체</button>
+            <button onclick="clearAll()">해제</button>
+          </div>
+        </div>
+        <div class="round-grid" id="round-grid">
+          <!-- 자동 생성 -->
+        </div>
+      </div>
+
+      <div class="sel-summary" id="sel-summary">회차를 선택해주세요.</div>
+
+      <button class="btn btn-purple" id="start-btn" onclick="startQuiz()" disabled>테스트 시작 →</button>
+      <button class="btn btn-outline" onclick="openModal()">관리자 로그인</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="s-quiz" class="screen">
+  <div class="hdr hdr-row">
+    <div>
+      <div class="hdr-sub" id="qz-name"></div>
+      <div class="hdr-title" style="font-size:15px" id="qz-title">누적 단어 테스트</div>
+    </div>
+    <span id="qz-cnt" style="font-size:13px;opacity:.8"></span>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="prog-wrap">
+        <div class="prog-info"><span id="prog-txt"></span><span id="prog-pct"></span></div>
+        <div class="prog-bar"><div id="prog-fill" class="prog-fill fill-en" style="width:0%"></div></div>
+      </div>
+      <span id="q-badge" class="type-badge badge-en"></span>
+      <div id="prompt-box" class="prompt-box"></div>
+      <div id="choices" class="choices"></div>
+      <div class="nav">
+        <button class="nav-btn" id="btn-prev" onclick="nav(-1)">← 이전</button>
+        <button class="nav-btn primary" id="btn-next" onclick="navNext()">다음 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="s-result" class="screen">
+  <div class="hdr">
+    <div class="hdr-sub">테스트 완료</div>
+    <div class="hdr-title" id="res-name"></div>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="score-wrap">
+        <div class="score-ring">
+          <span class="s-num" id="res-score"></span>
+          <span class="s-tot">/ 60</span>
+        </div>
+        <div class="s-grade" id="res-grade"></div>
+        <div class="s-msg" id="res-msg"></div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:8px" id="res-rounds"></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="st-ok"></div><div class="stat-l">정답</div></div>
+        <div class="stat"><div class="stat-n red" id="st-ng"></div><div class="stat-l">오답</div></div>
+        <div class="stat"><div class="stat-n blue" id="st-en"></div><div class="stat-l">영→한</div></div>
+        <div class="stat"><div class="stat-n" id="st-ko"></div><div class="stat-l">한→영</div></div>
+      </div>
+      <div id="retake-box" style="display:none;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:14px 16px;margin:1rem 0;text-align:center;color:#991b1b;font-weight:600;font-size:14px;line-height:1.5">⚠️ <strong>80점 미만입니다.</strong><br><span style="font-weight:500;font-size:13px">단어를 다시 외운 후 재응시해주세요.</span></div><div id="pass-box" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin:1rem 0;text-align:center;color:#166534;font-weight:600;font-size:14px">🎉 합격! 80점 이상 통과했습니다.</div>
+      <div class="save-status" id="save-st"></div>
+      <div class="sec-lbl">오답 목록</div>
+      <div id="review"></div>
+      <button class="btn btn-outline" style="margin-top:1rem" onclick="goHome()">처음으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="s-admin" class="screen">
+  <div class="hdr hdr-row">
+    <div><div class="hdr-sub">관리자 패널</div><div class="hdr-title">학생 성적 현황</div></div>
+    <button class="btn-sm" onclick="confirmClear()">초기화</button>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="stats" id="adm-stats"></div>
+      <div class="sec-lbl">응시 학생 목록</div>
+      <div id="adm-list"></div>
+      <button class="btn btn-outline" style="margin-top:1rem" onclick="goHome()">← 나가기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal-bg" style="display:none">
+  <div class="modal">
+    <h3>관리자 비밀번호</h3>
+    <input type="password" id="adm-pw" placeholder="비밀번호"
+      style="width:100%;padding:10px 14px;font-size:15px;border:1px solid rgba(0,0,0,.15);border-radius:8px;background:#fff;margin-bottom:4px">
+    <div class="err" id="pw-err"></div>
+    <div class="m-btns">
+      <button onclick="closeModal()">취소</button>
+      <button class="ok" onclick="checkPw()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
+const ADMIN_PW = "terry2025";
+const TOTAL = 60;
+
+const WORDS = {"1": [{"w": "legendary", "m": "전설적인"}, {"w": "stable", "m": "마구간"}, {"w": "patiently", "m": "끈기 있게"}, {"w": "observe", "m": "관찰하다"}, {"w": "seemingly", "m": "겉보기에"}, {"w": "unbreakable", "m": "깨지지 않는"}, {"w": "inspire", "m": "고무하다"}, {"w": "conquer", "m": "정복하다"}, {"w": "conquest", "m": "정복"}, {"w": "tame", "m": "길들이다"}, {"w": "unconquerable", "m": "정복하기 어려운"}, {"w": "crucial", "m": "중대한"}, {"w": "numerous", "m": "다수의"}, {"w": "navigate", "m": "길을 찾다"}, {"w": "predator", "m": "포식자"}, {"w": "interfere with", "m": "~을 방해하다"}, {"w": "inhibit", "m": "억제하다"}, {"w": "frequency", "m": "빈도"}, {"w": "globe", "m": "구체"}, {"w": "come up with", "m": "~을 찾아내다"}, {"w": "erasable", "m": "지울 수 있는"}, {"w": "reverse", "m": "반대"}, {"w": "expose", "m": "노출시키다"}, {"w": "temperature", "m": "온도"}, {"w": "extreme", "m": "극도의"}, {"w": "erase", "m": "지우다"}, {"w": "equivalent", "m": "(~에) 상당하는 것"}, {"w": "contribute to", "m": "~에 기여하다"}, {"w": "previous", "m": "이전의"}, {"w": "accomplishment", "m": "성취"}, {"w": "keep track of", "m": "~을 기록하다"}, {"w": "achieve", "m": "달성하다"}, {"w": "unfortunately", "m": "불행하게"}, {"w": "equal", "m": "같은"}, {"w": "vary", "m": "서로 다르다"}, {"w": "greatly", "m": "대단히"}, {"w": "resource", "m": "자원"}, {"w": "private", "m": "사유의"}, {"w": "facility", "m": "시설"}, {"w": "luxury", "m": "사치"}, {"w": "be located in", "m": "~에 위치하다"}, {"w": "neighborhood", "m": "이웃"}, {"w": "average", "m": "평균(의)"}, {"w": "afford", "m": "~할 여유가 있다"}, {"w": "unfair", "m": "부당한"}, {"w": "unacceptable", "m": "받아들일 수 없는"}, {"w": "vital", "m": "필수적인"}, {"w": "desperately", "m": "필사적으로"}, {"w": "survival", "m": "생존"}, {"w": "critical", "m": "비판적인"}, {"w": "existence", "m": "존재"}, {"w": "economist", "m": "경제학자"}, {"w": "attempt", "m": "시도하다"}, {"w": "satisfaction", "m": "만족"}, {"w": "additional", "m": "추가적인"}, {"w": "scarce", "m": "희귀한"}, {"w": "acquire", "m": "얻다"}, {"w": "pointless", "m": "무의미한"}, {"w": "paradox", "m": "역설"}, {"w": "illusion", "m": "환상"}, {"w": "surplus", "m": "과잉"}, {"w": "narcissist", "m": "자기도취자"}, {"w": "individual", "m": "개인"}, {"w": "caring", "m": "배려하는"}, {"w": "dedicated", "m": "전념하는"}, {"w": "cover", "m": "(연구ㆍ주제를) 다루다"}, {"w": "thoroughly", "m": "철저히"}, {"w": "possess", "m": "가지다"}, {"w": "interfere", "m": "간섭하다"}, {"w": "performance", "m": "성과"}, {"w": "authority", "m": "권위"}, {"w": "float", "m": "떠다니다"}, {"w": "cast", "m": "던지다"}, {"w": "retina", "m": "망막"}, {"w": "harmless", "m": "무해한"}, {"w": "occurrence", "m": "존재"}, {"w": "fairly", "m": "상당히"}, {"w": "solid", "m": "단단한"}, {"w": "liquid", "m": "액체의"}, {"w": "phenomenon", "m": "현상"}, {"w": "surgical", "m": "외과의"}, {"w": "procedure", "m": "과정"}, {"w": "undergo", "m": "겪다"}, {"w": "mildly", "m": "부드럽게"}, {"w": "irritating", "m": "자극하는"}, {"w": "vision", "m": "시력"}, {"w": "prediction", "m": "예보"}, {"w": "utilize", "m": "이용하다"}, {"w": "prior to", "m": "~에 앞서"}, {"w": "nerve", "m": "신경"}, {"w": "alternative", "m": "대안의"}, {"w": "disrupt", "m": "붕괴시키다"}, {"w": "intense", "m": "강렬한"}, {"w": "potentially", "m": "잠재적으로"}, {"w": "shrink", "m": "줄어들다"}, {"w": "natural", "m": "타고난"}, {"w": "symptom", "m": "증상"}, {"w": "partly", "m": "부분적으로"}, {"w": "formation", "m": "대형"}, {"w": "migrate", "m": "이주하다"}, {"w": "collective", "m": "집단적인"}, {"w": "tremendous", "m": "거대한"}, {"w": "togetherness", "m": "단결"}, {"w": "flap", "m": "퍼덕이다"}, {"w": "flock", "m": "떼"}, {"w": "rotate", "m": "교대하다"}, {"w": "companion", "m": "동료"}, {"w": "resume", "m": "다시 시작하다"}, {"w": "injure", "m": "부상을 입히다"}, {"w": "comedy", "m": "희극"}, {"w": "tragedy", "m": "비극"}, {"w": "satire", "m": "풍자"}, {"w": "unjust", "m": "부당한"}, {"w": "contain", "m": "담고 있다"}, {"w": "censor", "m": "검열하다"}, {"w": "collapse", "m": "무너지다"}, {"w": "manage to", "m": "간신히 ~하다"}, {"w": "fashionable", "m": "유행하는"}, {"w": "decoration", "m": "장식"}, {"w": "prevalence", "m": "널리 퍼짐"}, {"w": "permanent", "m": "영구적인"}, {"w": "puncture", "m": "~을 찌르다"}, {"w": "insert", "m": "삽입하다"}, {"w": "material", "m": "재료"}, {"w": "instrument", "m": "기구"}, {"w": "thorn", "m": "가시"}, {"w": "sharpened", "m": "뾰족하게 깎은"}, {"w": "side effect", "m": "부작용"}, {"w": "tuition", "m": "수업료"}, {"w": "dejected", "m": "실의에 빠진"}, {"w": "confused", "m": "혼란스러워하는"}, {"w": "bruised", "m": "멍든"}, {"w": "swollen", "m": "부어오른"}, {"w": "unexpectedly", "m": "뜻밖에"}, {"w": "exclaim", "m": "소리치다"}], "2": [{"w": "atelier", "m": "작업실"}, {"w": "gallery", "m": "미술관"}, {"w": "professional", "m": "직업의"}, {"w": "senior citizen", "m": "어르신"}, {"w": "participant", "m": "참가자"}, {"w": "get in the way of", "m": "~에 방해되다"}, {"w": "accompany", "m": "동반하다"}, {"w": "register", "m": "등록하다"}, {"w": "in advance", "m": "미리"}, {"w": "pregnancy", "m": "임신"}, {"w": "nausea", "m": "메스꺼움"}, {"w": "vomit", "m": "토하다"}, {"w": "get rid of", "m": "제거하다"}, {"w": "toxin", "m": "독소"}, {"w": "microorganism", "m": "미생물"}, {"w": "potential", "m": "가능성"}, {"w": "turn out", "m": "~임이 드러나다"}, {"w": "beneficial", "m": "이익이 되는"}, {"w": "modify", "m": "수정하다"}, {"w": "transfer", "m": "전하다"}, {"w": "premature", "m": "정상보다 이른"}, {"w": "describe", "m": "서술하다"}, {"w": "innovation", "m": "혁신"}, {"w": "alternative", "m": "대안"}, {"w": "probably", "m": "아마도"}, {"w": "go extinct", "m": "멸종되다"}, {"w": "electronic device", "m": "전자 기기"}, {"w": "security", "m": "보안"}, {"w": "account", "m": "계좌"}, {"w": "glow", "m": "빛나다"}, {"w": "particle", "m": "입자"}, {"w": "emission", "m": "방사"}, {"w": "consistent", "m": "일관된"}, {"w": "constant", "m": "끊임없는"}, {"w": "solar", "m": "태양의"}, {"w": "depend on", "m": "~에 의존하다"}, {"w": "nitrogen", "m": "질소"}, {"w": "origin", "m": "기원"}, {"w": "term", "m": "용어"}, {"w": "management", "m": "경영"}, {"w": "valuable", "m": "귀중한"}, {"w": "predator", "m": "포식자"}, {"w": "enthusiastic", "m": "열정적인"}, {"w": "competitive", "m": "경쟁력 있는"}, {"w": "contain", "m": "담고 있다"}, {"w": "protein", "m": "단백질"}, {"w": "fiber", "m": "섬유"}, {"w": "iron", "m": "쇠"}, {"w": "deficiency", "m": "결핍"}, {"w": "nutritional", "m": "영양상의"}, {"w": "nutrition", "m": "영양 섭취"}, {"w": "essential", "m": "필수적인"}, {"w": "require", "m": "필요로 하다"}, {"w": "emit", "m": "방출하다"}, {"w": "release", "m": "풀어 주다"}, {"w": "explode", "m": "폭발하다"}, {"w": "primary", "m": "주요한"}, {"w": "vegetation", "m": "식물"}, {"w": "native species", "m": "토착종"}, {"w": "mammal", "m": "포유류"}, {"w": "lifeless", "m": "생명이 없는"}, {"w": "endangered", "m": "멸종위기에 처한"}, {"w": "ecosystem", "m": "생태계"}, {"w": "experiment", "m": "실험"}, {"w": "participant", "m": "참가자"}, {"w": "instruction", "m": "설명"}, {"w": "costume", "m": "의상"}, {"w": "suggest", "m": "제안하다"}, {"w": "handle", "m": "처리하다"}, {"w": "react", "m": "반응하다"}, {"w": "accuracy", "m": "정확도"}, {"w": "vision", "m": "시력"}, {"w": "concentrate", "m": "집중하다"}, {"w": "multiple", "m": "다수의"}, {"w": "consider", "m": "여기다"}, {"w": "surround", "m": "둘러싸다"}, {"w": "healing", "m": "치유"}, {"w": "quality", "m": "질"}, {"w": "boom", "m": "호황을 맞다"}, {"w": "flood", "m": "물에 잠기게 하다"}, {"w": "abandoned", "m": "버려진"}, {"w": "submerge", "m": "물속에 잠기다"}, {"w": "expose", "m": "드러내다"}, {"w": "located", "m": "~에 위치한"}, {"w": "mountainous", "m": "산이 많은"}, {"w": "ancient", "m": "고대의"}, {"w": "sandstone", "m": "사암"}, {"w": "cliff", "m": "낭떠러지"}, {"w": "invader", "m": "침입자"}, {"w": "feature", "m": "특징"}, {"w": "architectural", "m": "건축의"}, {"w": "rediscover", "m": "재발견하다"}, {"w": "explorer", "m": "탐험가"}, {"w": "describe", "m": "묘사하다"}, {"w": "name", "m": "지명하다"}, {"w": "act", "m": "행동"}, {"w": "colony", "m": "식민지"}, {"w": "protest", "m": "항의"}, {"w": "manufacturer", "m": "제조자"}, {"w": "reverse", "m": "뒤바꾸다"}, {"w": "voice", "m": "(말로) 나타내다"}, {"w": "complaint", "m": "불평"}, {"w": "representative", "m": "대표"}, {"w": "enforce", "m": "집행하다"}, {"w": "legislature", "m": "입법부"}, {"w": "assistance", "m": "원조"}, {"w": "fluency", "m": "유창성"}, {"w": "confidence", "m": "자신(감)"}, {"w": "comfort", "m": "위안"}, {"w": "companionship", "m": "동료"}, {"w": "nursing home", "m": "양로원"}, {"w": "motivated", "m": "동기가 부여된"}, {"w": "value", "m": "가치"}, {"w": "come up with", "m": "~을 생각해 내다"}, {"w": "innovative", "m": "혁신적인"}, {"w": "interest rate", "m": "금리"}, {"w": "novel", "m": "새로운"}, {"w": "reflect", "m": "반영하다"}, {"w": "stock exchange", "m": "주식 거래소"}, {"w": "share", "m": "주식"}, {"w": "trade", "m": "매매하다"}, {"w": "fake", "m": "가짜의"}, {"w": "financial institution", "m": "금융기관"}, {"w": "trick", "m": "속임수"}, {"w": "the plague", "m": "전염병"}, {"w": "civilization", "m": "문명"}, {"w": "epidemic", "m": "유행병"}, {"w": "demand", "m": "수요"}, {"w": "merchant", "m": "상인"}, {"w": "indirectly", "m": "간접적으로"}, {"w": "fund", "m": "자금을 제공하다"}, {"w": "break apart", "m": "분해되다"}, {"w": "population", "m": "인구"}, {"w": "massive", "m": "거대한"}, {"w": "boost", "m": "신장시키다"}, {"w": "arrival", "m": "등장"}, {"w": "formation", "m": "형성"}], "3": [{"w": "look into", "m": "조사하다"}, {"w": "be made up of", "m": "~로 구성되다"}, {"w": "primarily", "m": "주로"}, {"w": "grain", "m": "곡물"}, {"w": "contribute to", "m": "~의 원인이 되다"}, {"w": "life span", "m": "수명"}, {"w": "strict", "m": "엄격한"}, {"w": "alternative", "m": "대안"}, {"w": "climate", "m": "기후"}, {"w": "sharply", "m": "급격하게"}, {"w": "decade", "m": "10년간"}, {"w": "degree", "m": "학위"}, {"w": "willingness", "m": "의지"}, {"w": "immerse", "m": "담그다"}, {"w": "long", "m": "애타게 바라다"}, {"w": "branch", "m": "분야"}, {"w": "economics", "m": "경제학"}, {"w": "involve", "m": "수반하다"}, {"w": "analysis", "m": "분석"}, {"w": "unemployment", "m": "실업"}, {"w": "interest rate", "m": "금리"}, {"w": "figure out", "m": "~을 이해하다"}, {"w": "vital", "m": "필수적인"}, {"w": "financial", "m": "재정적인"}, {"w": "grasp", "m": "완전히 이해하다"}, {"w": "individual", "m": "개인"}, {"w": "moistness", "m": "촉촉함"}, {"w": "dryness", "m": "건조함"}, {"w": "overall", "m": "총체적인"}, {"w": "reveal", "m": "드러내다"}, {"w": "organ", "m": "기관"}, {"w": "cracked", "m": "금이 간"}, {"w": "severe", "m": "심한"}, {"w": "interpret", "m": "해석하다"}, {"w": "trait", "m": "특성"}, {"w": "inherit", "m": "상속하다"}, {"w": "picture", "m": "상상하다"}, {"w": "couch", "m": "긴 의자"}, {"w": "hit", "m": "(생각 등이 불현듯) 떠오르다"}, {"w": "relationship", "m": "관계"}, {"w": "recall", "m": "생각해내다"}, {"w": "on one’s own", "m": "스스로"}, {"w": "concentrate", "m": "집중하다"}, {"w": "seasickness", "m": "뱃멀미"}, {"w": "fluid", "m": "유동체"}, {"w": "disturbance", "m": "혼란"}, {"w": "rocking", "m": "흔들림"}, {"w": "stabilize", "m": "안정시키다"}, {"w": "dizziness", "m": "현기증"}, {"w": "greasy", "m": "기름진"}, {"w": "conversely", "m": "거꾸로"}, {"w": "temporarily", "m": "일시적으로"}, {"w": "automobile", "m": "자동차"}, {"w": "in case of", "m": "~의 경우에는"}, {"w": "collision", "m": "충돌"}, {"w": "crucial", "m": "중대한"}, {"w": "reckless", "m": "부주의한"}, {"w": "fault", "m": "결점"}, {"w": "guilt", "m": "죄책감"}, {"w": "aircraft", "m": "항공기"}, {"w": "investigator", "m": "조사자"}, {"w": "crash", "m": "충돌 (사고)"}, {"w": "state", "m": "상태"}, {"w": "asset", "m": "자산"}, {"w": "stability", "m": "안정(성)"}, {"w": "monetary", "m": "통화의"}, {"w": "recession", "m": "경기 후퇴"}, {"w": "factor", "m": "요인"}, {"w": "host", "m": "주최하다"}, {"w": "dozens of", "m": "수십의"}, {"w": "feature", "m": "~의 특징을 이루다"}, {"w": "prohibit", "m": "금지하다"}, {"w": "claim", "m": "주장하다"}, {"w": "facility", "m": "시설"}, {"w": "resident", "m": "거주자"}, {"w": "survey", "m": "설문 조사"}, {"w": "appear", "m": "등장하다"}, {"w": "respect", "m": "존중하다"}, {"w": "confidently", "m": "확신을 갖고"}, {"w": "opposite", "m": "반대편의"}, {"w": "clue", "m": "실마리"}, {"w": "overtake", "m": "불시에 닥치다"}, {"w": "widen", "m": "넓어지다"}, {"w": "alert", "m": "주의하다"}, {"w": "blown-up", "m": "(풍선 따위가) 부풀어 오른"}, {"w": "put out", "m": "(불 따위를) 끄다"}, {"w": "phenomenon", "m": "현상"}, {"w": "toxic", "m": "유독한"}, {"w": "particle", "m": "입자"}, {"w": "crawl", "m": "기다"}, {"w": "contaminate", "m": "오염시키다"}, {"w": "introduction", "m": "도입"}, {"w": "restriction", "m": "제한 규정"}, {"w": "location", "m": "위치"}, {"w": "present", "m": "(사람이) 있는"}, {"w": "give off", "m": "방출하다"}, {"w": "vanish", "m": "사라지다"}, {"w": "fancy", "m": "화려한"}, {"w": "vocational", "m": "직업상의"}, {"w": "shift", "m": "교대"}, {"w": "operation", "m": "수술"}, {"w": "instruction", "m": "교육"}, {"w": "secretarial", "m": "비서의"}, {"w": "school credit", "m": "학점"}, {"w": "extra", "m": "추가의"}, {"w": "formality", "m": "격식"}, {"w": "neutral", "m": "중립의"}, {"w": "address", "m": "주소"}, {"w": "greeting", "m": "인사"}, {"w": "peer", "m": "친구"}, {"w": "improper", "m": "부적절한"}, {"w": "conservation", "m": "보호"}, {"w": "coral reef", "m": "산호초"}, {"w": "transportation", "m": "수송"}, {"w": "fin", "m": "지느러미"}, {"w": "remaining", "m": "남아 있는"}, {"w": "temple", "m": "사원"}, {"w": "holy", "m": "신성한"}, {"w": "pray", "m": "기도하다"}, {"w": "violent", "m": "폭력적인"}, {"w": "struggle", "m": "싸움"}, {"w": "defeat", "m": "쳐부수다"}, {"w": "neighboring", "m": "이웃의"}, {"w": "regular", "m": "정기적인"}, {"w": "depression", "m": "우울증"}, {"w": "intense", "m": "강렬한"}, {"w": "athlete", "m": "운동선수"}, {"w": "distance", "m": "거리"}, {"w": "author", "m": "저자"}, {"w": "improve", "m": "향상시키다"}, {"w": "insomnia", "m": "불면증"}, {"w": "beneficial", "m": "이로운"}, {"w": "donate", "m": "기부하다"}, {"w": "cause", "m": "명분"}, {"w": "moderation", "m": "적당함"}], "4": [{"w": "bean", "m": "콩"}, {"w": "seed", "m": "씨"}, {"w": "dense", "m": "밀도가 높은"}, {"w": "flavorful", "m": "풍미 있는"}, {"w": "sort", "m": "분류하다"}, {"w": "tell", "m": "말하다"}, {"w": "contain", "m": "~이 들어있다"}, {"w": "remove", "m": "제거하다"}, {"w": "separately", "m": "따로"}, {"w": "extra", "m": "추가의"}, {"w": "labor", "m": "노동"}, {"w": "sign language", "m": "수화"}, {"w": "component", "m": "요소"}, {"w": "facial expression", "m": "얼굴 표정"}, {"w": "misbelief", "m": "오해"}, {"w": "independently", "m": "독립적으로"}, {"w": "deaf", "m": "청각 장애가 있는"}, {"w": "entirely", "m": "완전히"}, {"w": "when it comes to", "m": "~에 관한 한"}, {"w": "resemble", "m": "닮다"}, {"w": "have in common", "m": "공통점을 지니다"}, {"w": "necessarily", "m": "반드시"}, {"w": "representation", "m": "묘사"}, {"w": "anniversary", "m": "기념일"}, {"w": "overall", "m": "대체로"}, {"w": "issue", "m": "주제"}, {"w": "proper", "m": "적절한"}, {"w": "obey", "m": "따르다"}, {"w": "fairly", "m": "상당히"}, {"w": "abbreviation", "m": "약어"}, {"w": "stand for", "m": "~을 나타내다"}, {"w": "worth", "m": "~할 가치가 있는"}, {"w": "reminder", "m": "상기시키는 것"}, {"w": "chunk", "m": "덩어리"}, {"w": "lengthy", "m": "너무 긴"}, {"w": "population", "m": "인구"}, {"w": "sum up", "m": "요약하다"}, {"w": "attempt", "m": "시도"}, {"w": "packaging", "m": "포장"}, {"w": "throw away", "m": "던지다"}, {"w": "organic", "m": "유기체의"}, {"w": "drawback", "m": "약점"}, {"w": "substitute", "m": "대체재"}, {"w": "rug", "m": "깔개"}, {"w": "height", "m": "키"}, {"w": "condition", "m": "상태"}, {"w": "average", "m": "평균의"}, {"w": "slightly", "m": "약간"}, {"w": "domestic animal", "m": "가축"}, {"w": "rare", "m": "드문"}, {"w": "classify", "m": "분류하다"}, {"w": "vulnerable", "m": "취약한"}, {"w": "extinction", "m": "멸종"}, {"w": "conservationist", "m": "환경 보호 활동가"}, {"w": "stand tall", "m": "우뚝 서다"}, {"w": "come up with", "m": "~을 생산하다"}, {"w": "fair trade", "m": "공정 거래"}, {"w": "ensure", "m": "반드시 ~이게 하다"}, {"w": "wage", "m": "임금"}, {"w": "struggle to-v", "m": "~하느라 애쓰다"}, {"w": "afford", "m": "~을 살[할] 여유가 되다"}, {"w": "ironic", "m": "모순적인"}, {"w": "get the most for", "m": "~을 최대한으로 활용하다"}, {"w": "intake", "m": "섭취량"}, {"w": "consume", "m": "소모하다"}, {"w": "nutritious", "m": "영양가가 높은"}, {"w": "excess", "m": "초과한"}, {"w": "tissue", "m": "조직"}, {"w": "stiffen", "m": "딱딱하게 하다"}, {"w": "flexible", "m": "유연성이 있는"}, {"w": "autonomous", "m": "자주적인"}, {"w": "vehicle", "m": "차량"}, {"w": "possibility", "m": "가능성"}, {"w": "driverless", "m": "운전자 없는"}, {"w": "crash into", "m": "~와 충돌하다"}, {"w": "ethics", "m": "윤리학"}, {"w": "recognize A from B", "m": "A와 B를 분별하다"}, {"w": "handle", "m": "다루다"}, {"w": "latest", "m": "최신의"}, {"w": "advance", "m": "전진"}, {"w": "birth rate", "m": "출생률"}, {"w": "retired", "m": "은퇴한"}, {"w": "professional", "m": "직업의"}, {"w": "carry out", "m": "수행하다"}, {"w": "employment", "m": "고용"}, {"w": "recruit", "m": "모집하다"}, {"w": "welfare", "m": "복지"}, {"w": "exotic", "m": "외국의"}, {"w": "souvenir", "m": "기념품"}, {"w": "illegal", "m": "불법적인"}, {"w": "unethical", "m": "비윤리적인"}, {"w": "abuse", "m": "학대하다"}, {"w": "cruel", "m": "잔혹한"}, {"w": "threatened", "m": "멸종할 위기에 직면한"}, {"w": "mistreat", "m": "학대하다"}, {"w": "district", "m": "지역"}, {"w": "proposal", "m": "제안"}, {"w": "grade", "m": "~의 성적을 매기다"}, {"w": "have an effect on", "m": "~에 영향을 주다"}, {"w": "academic", "m": "학업의"}, {"w": "factor", "m": "요인"}, {"w": "appearance", "m": "외모"}, {"w": "participation", "m": "참여"}, {"w": "permission", "m": "허가"}, {"w": "progress", "m": "진행"}, {"w": "household", "m": "가정의"}, {"w": "invest", "m": "투자하다"}, {"w": "extent", "m": "정도"}, {"w": "severe", "m": "심각한"}, {"w": "exporter", "m": "수출업자"}, {"w": "farm", "m": "양식하다"}, {"w": "ship", "m": "배로 나르다"}, {"w": "support", "m": "지지하다"}, {"w": "convince", "m": "설득하다"}, {"w": "consumer", "m": "소비자"}, {"w": "estimate", "m": "추정하다"}, {"w": "ruin", "m": "황폐하게 하다"}, {"w": "composer", "m": "작곡가"}, {"w": "shade", "m": "그늘"}, {"w": "device", "m": "장치"}, {"w": "detect", "m": "탐지하다"}, {"w": "rear", "m": "뒤쪽"}, {"w": "skull", "m": "두개골"}, {"w": "represent", "m": "대신하다"}, {"w": "perceive", "m": "인식하다"}, {"w": "go through", "m": "~을 겪다"}, {"w": "strap", "m": "띠로 매다"}, {"w": "suspicion", "m": "의심"}, {"w": "attack", "m": "공격하다"}, {"w": "protest", "m": "항의"}, {"w": "evolve", "m": "발전하다"}, {"w": "translate", "m": "번역하다"}, {"w": "adapt", "m": "적응하다"}], "5": [{"w": "ethnic", "m": "민족의"}, {"w": "minority", "m": "소수 (집단)"}, {"w": "appropriate", "m": "적절한"}, {"w": "educational", "m": "교육의"}, {"w": "immigrant", "m": "이민자"}, {"w": "access", "m": "접근하다"}, {"w": "resource", "m": "자원"}, {"w": "reasonable", "m": "합리적인"}, {"w": "life expectancy", "m": "기대수명"}, {"w": "perspective", "m": "관점"}, {"w": "illegal", "m": "불법의"}, {"w": "organize", "m": "조직하다"}, {"w": "environmental", "m": "환경의"}, {"w": "convention", "m": "회의"}, {"w": "generate", "m": "발생시키다"}, {"w": "emission", "m": "방출"}, {"w": "reduce", "m": "줄이다"}, {"w": "publicize", "m": "공표하다"}, {"w": "activist", "m": "운동가"}, {"w": "route", "m": "길"}, {"w": "participate", "m": "참여하다"}, {"w": "defend", "m": "방어하다"}, {"w": "release", "m": "방출하다"}, {"w": "chemical", "m": "(pl.) 화학 물질"}, {"w": "discourage", "m": "막다"}, {"w": "defensive", "m": "방어의"}, {"w": "fight off", "m": "~와 싸워 물리치다"}, {"w": "nutrient", "m": "영양소"}, {"w": "reproduction", "m": "생식"}, {"w": "toxic", "m": "유독성의"}, {"w": "lower", "m": "낮추다"}, {"w": "alert", "m": "민첩한"}, {"w": "prevent", "m": "막다"}, {"w": "wrist", "m": "손목"}, {"w": "workout", "m": "운동"}, {"w": "sharp", "m": "날카로운"}, {"w": "spatial", "m": "공간의"}, {"w": "awareness", "m": "자각"}, {"w": "heal", "m": "치료하다"}, {"w": "on one’s own", "m": "스스로"}, {"w": "scratch", "m": "긁다"}, {"w": "specific", "m": "특수한"}, {"w": "substance", "m": "물질"}, {"w": "shell", "m": "껍데기"}, {"w": "packaging", "m": "포장"}, {"w": "advancement", "m": "진보"}, {"w": "automobile", "m": "자동차"}, {"w": "avoid", "m": "피하다"}, {"w": "disturb", "m": "방해하다"}, {"w": "coworker", "m": "같이 일하는 사람"}, {"w": "disrupt", "m": "방해하다"}, {"w": "install", "m": "설치하다"}, {"w": "workload", "m": "업무량"}, {"w": "department", "m": "부서"}, {"w": "inspector", "m": "검사자"}, {"w": "inappropriate", "m": "부적절한"}, {"w": "so far", "m": "여태까지"}, {"w": "produce", "m": "농산물"}, {"w": "cleanliness", "m": "청결"}, {"w": "warn", "m": "경고하다"}, {"w": "rapid", "m": "급격한"}, {"w": "pace", "m": "속도"}, {"w": "admit", "m": "인정하다"}, {"w": "genetic engineering", "m": "유전 공학"}, {"w": "unborn", "m": "태어나지 않은"}, {"w": "ultimate", "m": "궁극적인"}, {"w": "aim", "m": "목표로 삼다"}, {"w": "potential", "m": "잠재적인"}, {"w": "impact", "m": "영향"}, {"w": "method", "m": "방법"}, {"w": "accelerate", "m": "가속하다"}, {"w": "accept", "m": "받아들이다"}, {"w": "waxy", "m": "밀랍 같은"}, {"w": "digestive organ", "m": "소화기관"}, {"w": "squid", "m": "오징어"}, {"w": "discharge", "m": "배출하다"}, {"w": "sticky", "m": "끈적거리는"}, {"w": "expose", "m": "노출시키다"}, {"w": "odor", "m": "냄새"}, {"w": "eventually", "m": "마침내"}, {"w": "retain", "m": "유지하다"}, {"w": "scent", "m": "향"}, {"w": "prestigious", "m": "명망 있는"}, {"w": "hold", "m": "열다"}, {"w": "annually", "m": "매년"}, {"w": "stage", "m": "상연하다"}, {"w": "host", "m": "주최하다"}, {"w": "consecutive", "m": "연속적인"}, {"w": "attendee", "m": "참석자"}, {"w": "virtually", "m": "사실상"}, {"w": "nerve", "m": "신경"}, {"w": "shine", "m": "빛을 비추다"}, {"w": "sensitive", "m": "민감한"}, {"w": "temperature", "m": "온도"}, {"w": "detect", "m": "감지하다"}, {"w": "particle", "m": "입자"}, {"w": "spice", "m": "향신료"}, {"w": "distant", "m": "먼"}, {"w": "interact", "m": "교류하다"}, {"w": "adapt", "m": "맞추다"}, {"w": "fit", "m": "적절하다"}, {"w": "trader", "m": "상인"}, {"w": "hometown", "m": "고향"}, {"w": "ingredient", "m": "재료"}, {"w": "mushroom", "m": "버섯"}, {"w": "walnut", "m": "호두"}, {"w": "accordingly", "m": "그런 이유로"}, {"w": "term", "m": "용어"}, {"w": "refugee", "m": "난민"}, {"w": "herd", "m": "이동하게 하다"}, {"w": "drought", "m": "가뭄"}, {"w": "struggle", "m": "투쟁하다"}, {"w": "desperately", "m": "절망적으로"}, {"w": "servant", "m": "하인"}, {"w": "fulfill", "m": "다하다"}, {"w": "follower", "m": "추종자"}, {"w": "reverse", "m": "뒤바꾸다"}, {"w": "obstacle", "m": "장애"}, {"w": "stand in one’s way", "m": "길을 막다"}, {"w": "align", "m": "~을 조정하다"}, {"w": "attain", "m": "이루다"}, {"w": "light", "m": "빛"}, {"w": "institute", "m": "시행하다"}, {"w": "approve", "m": "승인하다"}, {"w": "salary", "m": "급여"}, {"w": "initial", "m": "처음의"}, {"w": "automatic", "m": "자동의"}, {"w": "petition", "m": "신청서"}, {"w": "indicate", "m": "나타내다"}, {"w": "publicly", "m": "공개적으로"}, {"w": "vote", "m": "투표하다"}, {"w": "reserve", "m": "보유하다"}, {"w": "peer", "m": "동료"}, {"w": "ridiculous", "m": "터무니없는"}, {"w": "undeserving", "m": "받을 자격이 없는"}, {"w": "strike", "m": "파업하다"}, {"w": "manipulate", "m": "조종하다"}, {"w": "evaluate", "m": "평가하다"}], "6": [{"w": "court", "m": "궁정"}, {"w": "numerous", "m": "다수의"}, {"w": "scene", "m": "장면"}, {"w": "portrait", "m": "초상화"}, {"w": "dozens of", "m": "수십의"}, {"w": "realist", "m": "사실주의 예술가"}, {"w": "impressionist", "m": "인상주의 예술가"}, {"w": "model after", "m": "~을 본떠서 만들다"}, {"w": "admiration", "m": "감탄"}, {"w": "garbage", "m": "쓰레기"}, {"w": "sidewalk", "m": "인도"}, {"w": "sort through", "m": "자세히 살펴보다"}, {"w": "leftover", "m": "나머지의"}, {"w": "homeless", "m": "노숙자"}, {"w": "rejection", "m": "거절"}, {"w": "capitalism", "m": "자본주의"}, {"w": "protest", "m": "항의"}, {"w": "overproduction", "m": "과잉 생산"}, {"w": "overconsumption", "m": "과소비"}, {"w": "starvation", "m": "기아"}, {"w": "commute", "m": "통근 (거리)"}, {"w": "productivity", "m": "생산성"}, {"w": "depression", "m": "우울증"}, {"w": "flexible", "m": "신축성 있는"}, {"w": "adjust", "m": "조정하다"}, {"w": "option", "m": "선택"}, {"w": "preference", "m": "선호(도)"}, {"w": "employ", "m": "고용하다"}, {"w": "accurately", "m": "정확히"}, {"w": "predict", "m": "예측하다"}, {"w": "collaborative", "m": "공동의"}, {"w": "utilize", "m": "활용하다"}, {"w": "approach", "m": "접근법"}, {"w": "currently", "m": "현재"}, {"w": "calculate", "m": "계산하다"}, {"w": "pros and cons", "m": "찬반양론"}, {"w": "track", "m": "추적하다"}, {"w": "affect", "m": "영향을 미치다"}, {"w": "sadness", "m": "슬픔"}, {"w": "in particular", "m": "특히"}, {"w": "conduct", "m": "수행하다"}, {"w": "experiment", "m": "실험"}, {"w": "participant", "m": "참가자"}, {"w": "neutral", "m": "중립의"}, {"w": "possession", "m": "소유"}, {"w": "recognize", "m": "알아보다"}, {"w": "glance", "m": "흘긋 봄"}, {"w": "approximately", "m": "대략"}, {"w": "develop", "m": "개발하다"}, {"w": "degree", "m": "정도"}, {"w": "mild", "m": "가벼운"}, {"w": "severe", "m": "심한"}, {"w": "rely on", "m": "~에 의존하다"}, {"w": "visual", "m": "시각의"}, {"w": "clue", "m": "단서"}, {"w": "prey", "m": "먹이"}, {"w": "reflect", "m": "반사하다"}, {"w": "moth", "m": "나방"}, {"w": "advantage", "m": "유리한 점"}, {"w": "whisper", "m": "속삭이다"}, {"w": "strategy", "m": "전략"}, {"w": "predator", "m": "포식자"}, {"w": "rarely", "m": "드물게"}, {"w": "evolve", "m": "발달시키다"}, {"w": "overcome", "m": "극복하다"}, {"w": "edge", "m": "끝"}, {"w": "escape", "m": "탈출하다"}, {"w": "imposter", "m": "사기꾼"}, {"w": "phenomenon", "m": "현상"}, {"w": "celebrity", "m": "유명 인사"}, {"w": "occur", "m": "발생하다"}, {"w": "dishonest", "m": "정직하지 못한"}, {"w": "admire", "m": "선망하다"}, {"w": "constant", "m": "끊임없는"}, {"w": "anxiety", "m": "불안감"}, {"w": "reveal", "m": "폭로하다"}, {"w": "fake", "m": "가짜"}, {"w": "achieve", "m": "성취하다"}, {"w": "further", "m": "더 이상의"}, {"w": "responsibility", "m": "책임"}, {"w": "self-image", "m": "자아상"}, {"w": "intention", "m": "의도"}, {"w": "lobster", "m": "바닷가재"}, {"w": "extremely", "m": "극단적으로"}, {"w": "introduction", "m": "도입"}, {"w": "refrigerated", "m": "냉장의"}, {"w": "transportation", "m": "운송수단"}, {"w": "prior to", "m": "~에 앞서"}, {"w": "wash up on", "m": "~으로 밀어 올리다"}, {"w": "shore", "m": "해안"}, {"w": "view", "m": "~라고 생각하다"}, {"w": "treat", "m": "대접"}, {"w": "distinctive", "m": "뚜렷이 구별되는"}, {"w": "appearance", "m": "외관"}, {"w": "mate", "m": "짝짓기하다"}, {"w": "underbelly", "m": "하복부"}, {"w": "spot", "m": "점"}, {"w": "bite", "m": "물다"}, {"w": "poison", "m": "독"}, {"w": "regional", "m": "지역의"}, {"w": "tough", "m": "곤란한"}, {"w": "lay off", "m": "~을 해고하다"}, {"w": "recession", "m": "경기 후퇴"}, {"w": "slow", "m": "느린"}, {"w": "jobless rate", "m": "실업률"}, {"w": "profit", "m": "이익"}, {"w": "painful", "m": "고통스러운"}, {"w": "last", "m": "지속하다"}, {"w": "unpleasant", "m": "불쾌한"}, {"w": "nerve", "m": "신경"}, {"w": "overreact", "m": "과잉 반응하다"}, {"w": "blood vessel", "m": "혈관"}, {"w": "hire", "m": "고용하다"}, {"w": "investigation", "m": "조사"}, {"w": "examine", "m": "검사하다"}, {"w": "germ", "m": "세균"}, {"w": "isolate", "m": "고립시키다"}, {"w": "release", "m": "석방"}, {"w": "make a living", "m": "생계를 꾸리다"}, {"w": "authority", "m": "(pl.) 관계 당국"}, {"w": "imprison", "m": "수감하다"}, {"w": "term", "m": "용어"}, {"w": "jokingly", "m": "농담으로"}, {"w": "punish", "m": "처벌하다"}, {"w": "violate", "m": "위반하다"}, {"w": "contagious", "m": "전염성의"}, {"w": "dean", "m": "(대학의) 학과장"}, {"w": "respectful", "m": "존경심을 보이는"}, {"w": "assume", "m": "추정하다"}, {"w": "personality", "m": "성격"}, {"w": "completely", "m": "완전히"}, {"w": "degree", "m": "도"}, {"w": "get to know", "m": "알게 되다"}, {"w": "uncomfortable", "m": "불편한"}, {"w": "inappropriately", "m": "부적당하게"}, {"w": "presence", "m": "있음"}, {"w": "semester", "m": "학기"}, {"w": "decline", "m": "감소하다"}], "7": [{"w": "clue", "m": "단서"}, {"w": "cell", "m": "세포"}, {"w": "damage", "m": "손상"}, {"w": "related", "m": "~와 관련된"}, {"w": "production", "m": "생산"}, {"w": "pigment", "m": "색소"}, {"w": "chemical", "m": "화학 물질"}, {"w": "indicator", "m": "지표"}, {"w": "organization", "m": "조직"}, {"w": "rewarding", "m": "가치 있는"}, {"w": "be eager to-v", "m": "~을 열망하다"}, {"w": "encourage", "m": "격려하다"}, {"w": "enthusiasm", "m": "열정"}, {"w": "unofficial", "m": "비공식적인"}, {"w": "public relations", "m": "홍보"}, {"w": "rely on", "m": "의지하다"}, {"w": "misconception", "m": "오해"}, {"w": "represent", "m": "대표하다"}, {"w": "contribute to", "m": "~에 기여하다"}, {"w": "orientation", "m": "(목표하는) 방향"}, {"w": "complete", "m": "완료하다"}, {"w": "on one’s own", "m": "혼자서"}, {"w": "identify", "m": "확인하다"}, {"w": "switch", "m": "전환하다"}, {"w": "means", "m": "수단"}, {"w": "transport", "m": "수송"}, {"w": "fuel", "m": "연료"}, {"w": "pollution", "m": "오염"}, {"w": "hardly", "m": "거의 ~아니다"}, {"w": "aerobic exercise", "m": "유산소 운동"}, {"w": "joint", "m": "관절"}, {"w": "support", "m": "지탱하다"}, {"w": "frame", "m": "틀"}, {"w": "impact", "m": "영향"}, {"w": "strain", "m": "긴장"}, {"w": "long-term", "m": "장기적인"}, {"w": "cosmetic", "m": "(pl.) 화장품"}, {"w": "microplastic", "m": "미세 플라스틱"}, {"w": "lung", "m": "폐"}, {"w": "absorb", "m": "흡수하다"}, {"w": "ingest", "m": "삼키다"}, {"w": "constantly", "m": "끊임없이"}, {"w": "prediction", "m": "예측"}, {"w": "promotion", "m": "승진"}, {"w": "unappreciated", "m": "인정받지 못하는"}, {"w": "expectation", "m": "예상"}, {"w": "subconsciously", "m": "잠재의식적으로"}, {"w": "reverse", "m": "(정)반대"}, {"w": "rob A of B", "m": "A에게서 B를 빼앗다"}, {"w": "cardboard", "m": "판지"}, {"w": "fill A with B", "m": "A를 B로 채우다"}, {"w": "furnished", "m": "가구가 비치된"}, {"w": "detailed", "m": "상세한"}, {"w": "motivate", "m": "~에게 동기를 주다"}, {"w": "irregular", "m": "불규칙적인"}, {"w": "unpredictable", "m": "예측할 수 없는"}, {"w": "logical", "m": "논리적인"}, {"w": "count", "m": "수를 세다"}, {"w": "counterpart", "m": "상대방"}, {"w": "fundamental", "m": "기초적인"}, {"w": "infant", "m": "유아"}, {"w": "demonstrate", "m": "증명하다"}, {"w": "personnel", "m": "(전)직원"}, {"w": "permit", "m": "허락하다"}, {"w": "daycare", "m": "탁아소"}, {"w": "morale", "m": "사기"}, {"w": "content", "m": "만족한"}, {"w": "dynamic", "m": "활발한"}, {"w": "control", "m": "지배(권)"}, {"w": "book", "m": "예약하다"}, {"w": "available", "m": "구할 수 있는"}, {"w": "benefit", "m": "(~에서) 득을 보다"}, {"w": "guarantee", "m": "보장하다"}, {"w": "socially", "m": "사회적으로"}, {"w": "standard", "m": "기준"}, {"w": "impress", "m": "~에게 (깊은) 인상을 주다"}, {"w": "attractive", "m": "매력적인"}, {"w": "brilliant", "m": "빛나는"}, {"w": "plain", "m": "분명한"}, {"w": "navy", "m": "해군"}, {"w": "fleet", "m": "함대"}, {"w": "warship", "m": "군함"}, {"w": "imaginative", "m": "가상의"}, {"w": "disposal", "m": "처리"}, {"w": "acceptance", "m": "수용"}, {"w": "tow", "m": "끌다"}, {"w": "refuge", "m": "피난처"}, {"w": "wreck", "m": "난파선(의 잔해)"}, {"w": "recreational", "m": "오락적인"}, {"w": "submerge", "m": "가라앉히다"}, {"w": "habitat", "m": "서식지"}, {"w": "strip", "m": "옷을 벗다"}, {"w": "practice", "m": "실행"}, {"w": "employment", "m": "고용"}, {"w": "manual labor", "m": "육체 노동"}, {"w": "sector", "m": "부문"}, {"w": "beneficial", "m": "유익한"}, {"w": "utilize", "m": "이용하다"}, {"w": "architect", "m": "건축가"}, {"w": "reconsider", "m": "재고하다"}, {"w": "policy", "m": "정책"}, {"w": "conscious", "m": "의식 있는"}, {"w": "bring about", "m": "~을 가져오다"}, {"w": "tropical", "m": "열대의"}, {"w": "subtropical", "m": "아열대의"}, {"w": "clumsy", "m": "어설픈"}, {"w": "approach", "m": "다가가다"}, {"w": "suggest", "m": "제안하다"}, {"w": "indicator", "m": "지표"}, {"w": "display", "m": "전시하다"}, {"w": "mating", "m": "짝짓기"}, {"w": "mate", "m": "짝"}, {"w": "characteristic", "m": "특징"}, {"w": "severity", "m": "심각성"}, {"w": "routine", "m": "기계적 절차"}, {"w": "intensely", "m": "강렬하게"}, {"w": "interpret", "m": "해석하다"}, {"w": "intentional", "m": "의도적인"}, {"w": "insensitivity", "m": "무신경"}, {"w": "perception", "m": "인식"}, {"w": "anchor", "m": "닻을 내리다"}, {"w": "tendency", "m": "경향"}, {"w": "overvalue", "m": "과대평가하다"}, {"w": "set in place", "m": "자리잡게 하다"}, {"w": "adjust", "m": "조정하다"}, {"w": "estimate", "m": "추정하다"}, {"w": "multiply", "m": "곱하다"}, {"w": "in sequence", "m": "순서대로"}, {"w": "frequently", "m": "자주"}, {"w": "put to use", "m": "이용하다"}, {"w": "negotiation", "m": "협상"}, {"w": "significant", "m": "중요한"}, {"w": "perspective", "m": "관점"}, {"w": "calculate", "m": "계산하다"}, {"w": "initial", "m": "최초의"}], "8": [{"w": "come in contact with", "m": "~와 접촉하다"}, {"w": "throughout", "m": "~동안 내내"}, {"w": "conduct", "m": "수행하다"}, {"w": "eliminate", "m": "없애다"}, {"w": "in favor of", "m": "~의 이익이 되도록"}, {"w": "boarding school", "m": "기숙학교"}, {"w": "punish", "m": "처벌하다"}, {"w": "protect", "m": "보호하다"}, {"w": "dialect", "m": "방언"}, {"w": "method", "m": "방법"}, {"w": "surround A with B", "m": "A를 B로 둘러싸다"}, {"w": "end up", "m": "결국 (~하게) 되다"}, {"w": "reinforce", "m": "강화하다"}, {"w": "misconception", "m": "오해"}, {"w": "prejudice", "m": "편견"}, {"w": "in general", "m": "보통"}, {"w": "shake up", "m": "~을 흔들어 섞다"}, {"w": "insight", "m": "통찰력"}, {"w": "process", "m": "과정"}, {"w": "varied", "m": "다양한"}, {"w": "combination", "m": "조합"}, {"w": "characteristic", "m": "특징"}, {"w": "in terms of", "m": "~면에서"}, {"w": "friendliness", "m": "친선"}, {"w": "ecological", "m": "생태학적인"}, {"w": "feature", "m": "특징으로 삼다"}, {"w": "involve", "m": "~을 끌어들이다"}, {"w": "facility", "m": "설비"}, {"w": "operation", "m": "작업"}, {"w": "inmate", "m": "수감자"}, {"w": "release", "m": "~을 풀어주다"}, {"w": "commit", "m": "(죄"}, {"w": "pollen", "m": "꽃가루"}, {"w": "nectar", "m": "(꽃의) 꿀"}, {"w": "memorize", "m": "기억하다"}, {"w": "location", "m": "장소"}, {"w": "contain", "m": "~이 들어 있다"}, {"w": "variation", "m": "변화"}, {"w": "colony", "m": "(개미·벌 따위의) 집단"}, {"w": "primary", "m": "주된"}, {"w": "seek", "m": "찾다"}, {"w": "musical instrument", "m": "악기"}, {"w": "extend", "m": "연장되다"}, {"w": "brain wave", "m": "뇌파"}, {"w": "in response to", "m": "~에 반응하여"}, {"w": "comprehend", "m": "이해하다"}, {"w": "element", "m": "요소"}, {"w": "grade", "m": "성적"}, {"w": "life expectancy", "m": "기대 수명"}, {"w": "strengthen", "m": "강화하다"}, {"w": "auditory", "m": "청각의"}, {"w": "exception", "m": "예외"}, {"w": "risky", "m": "위험한"}, {"w": "injury", "m": "부상"}, {"w": "advanced", "m": "진보된"}, {"w": "structure", "m": "구조물"}, {"w": "signal", "m": "신호"}, {"w": "limb", "m": "사지"}, {"w": "link", "m": "관련(성)"}, {"w": "perceive", "m": "인지하다"}, {"w": "stimulus", "m": "(pl. stimuli) 자극"}, {"w": "abstract", "m": "추상적인"}, {"w": "vibrant", "m": "활기찬"}, {"w": "assume", "m": "추정하다"}, {"w": "to one’s advantage", "m": "~에게 유리하게"}, {"w": "purchase", "m": "구입하다"}, {"w": "choir", "m": "성가대"}, {"w": "opportunity", "m": "기회"}, {"w": "perform", "m": "연주하다"}, {"w": "scholarship", "m": "장학금"}, {"w": "racist", "m": "인종 차별주의자(의)"}, {"w": "organize", "m": "준비하다"}, {"w": "memorable", "m": "기억할 만한"}, {"w": "significant", "m": "중요한"}, {"w": "floating", "m": "떠 있는"}, {"w": "county", "m": "주(州)"}, {"w": "coast", "m": "연안"}, {"w": "operation", "m": "운행"}, {"w": "fund", "m": "자금을 제공하다"}, {"w": "government", "m": "정부"}, {"w": "fame", "m": "명성"}, {"w": "landscape", "m": "풍경"}, {"w": "portrayal", "m": "묘사"}, {"w": "urban", "m": "도시의"}, {"w": "cityscape", "m": "도시 풍경"}, {"w": "somber", "m": "침울한"}, {"w": "disturbing", "m": "불안하게 하는"}, {"w": "illustrate", "m": "설명하다"}, {"w": "figure", "m": "인물"}, {"w": "historian", "m": "역사가"}, {"w": "reflect", "m": "반영하다"}, {"w": "accurately", "m": "정확히"}, {"w": "hopelessness", "m": "절망"}, {"w": "prevalent", "m": "유행하는"}, {"w": "combine", "m": "결합하다"}, {"w": "therapy", "m": "치료"}, {"w": "magnetize", "m": "자기를 띠게 하다"}, {"w": "promote", "m": "촉진하다"}, {"w": "relieve", "m": "덜다"}, {"w": "concept", "m": "개념"}, {"w": "influence", "m": "영향을 미치다"}, {"w": "organ", "m": "(생물) 기관"}, {"w": "nervous", "m": "불안해 하는"}, {"w": "cure", "m": "치료하다"}, {"w": "ignore", "m": "무시하다"}, {"w": "athlete", "m": "운동선수"}, {"w": "undergo", "m": "받다"}, {"w": "soreness", "m": "아픔"}, {"w": "setting", "m": "환경"}, {"w": "ancient", "m": "고대의"}, {"w": "gravel", "m": "자갈"}, {"w": "preserve", "m": "지키다"}, {"w": "place", "m": "놓다"}, {"w": "indoors", "m": "실내에서"}, {"w": "artificial", "m": "인공의"}, {"w": "outdoors", "m": "실외에서"}, {"w": "commercial", "m": "상업의"}, {"w": "disapproval", "m": "반감"}, {"w": "tolerant", "m": "관대한"}, {"w": "go through", "m": "~을 살펴보다"}, {"w": "phase", "m": "단계"}, {"w": "opposite", "m": "다른 편의"}, {"w": "absolutely", "m": "전적으로"}, {"w": "protest", "m": "항의하다"}, {"w": "attraction", "m": "매력"}, {"w": "fade", "m": "바래다"}, {"w": "consequence", "m": "결과"}, {"w": "permanent", "m": "영구적인"}, {"w": "ranch", "m": "목장"}, {"w": "assign", "m": "맡기다"}, {"w": "diagram", "m": "도표"}, {"w": "construct", "m": "건설하다"}, {"w": "enthusiasm", "m": "열광"}, {"w": "distress", "m": "괴롭히다"}, {"w": "field trip", "m": "현장 학습"}, {"w": "pull aside", "m": "~을 옆으로 불러오다"}, {"w": "overlook", "m": "못 보고 넘어가다"}, {"w": "practical", "m": "현실적인"}, {"w": "rewrite", "m": "다시 쓰다"}], "9": [{"w": "appreciate", "m": "감사하다"}, {"w": "secretarial", "m": "비서의"}, {"w": "position", "m": "(일)자리"}, {"w": "manufacturing", "m": "제조(공업)"}, {"w": "attractive", "m": "매력적인"}, {"w": "firm", "m": "회사"}, {"w": "candidate", "m": "후보자"}, {"w": "eat out", "m": "외식하다"}, {"w": "lose track of", "m": "~을 놓치다"}, {"w": "dine", "m": "식사를 하다"}, {"w": "recommend", "m": "추천하다"}, {"w": "method", "m": "방법"}, {"w": "financial", "m": "재정(상)의"}, {"w": "support", "m": "부양하다"}, {"w": "retirement", "m": "은퇴"}, {"w": "leisure", "m": "한가한 시간"}, {"w": "benefit", "m": "~에게 도움이 되다"}, {"w": "life expectancy", "m": "기대 수명"}, {"w": "accidentally", "m": "우연히"}, {"w": "medication", "m": "약"}, {"w": "poison", "m": "독살하다"}, {"w": "tablet", "m": "정제"}, {"w": "damage", "m": "손상을 주다"}, {"w": "red blood cell", "m": "적혈구"}, {"w": "veterinarian", "m": "수의사"}, {"w": "domestic", "m": "국내의"}, {"w": "violence", "m": "폭력"}, {"w": "harm", "m": "해치다"}, {"w": "financially", "m": "재정적으로"}, {"w": "court", "m": "법정"}, {"w": "circumstance", "m": "상황"}, {"w": "victim", "m": "피해자"}, {"w": "abuser", "m": "학대자"}, {"w": "report", "m": "알리다"}, {"w": "ruin", "m": "망치다"}, {"w": "dismay", "m": "경악하게 만들다"}, {"w": "access", "m": "접근하다"}, {"w": "electronic", "m": "전자의"}, {"w": "apparently", "m": "실제로"}, {"w": "intention", "m": "의도"}, {"w": "weaken", "m": "약화하다"}, {"w": "immune system", "m": "면역 체계"}, {"w": "take ... into consideration", "m": "~을 고려하다"}, {"w": "permission", "m": "허가"}, {"w": "display", "m": "전시하다"}, {"w": "watercolor", "m": "수채화"}, {"w": "passer-by", "m": "행인"}, {"w": "clever", "m": "영리한"}, {"w": "suggest", "m": "제안하다"}, {"w": "purchase", "m": "구매하다"}, {"w": "attract", "m": "끌어들이다"}, {"w": "amount", "m": "양"}, {"w": "relatively", "m": "비교적"}, {"w": "classic", "m": "고전"}, {"w": "trap", "m": "덫을 놓다"}, {"w": "sympathetic", "m": "동정심 있는"}, {"w": "cartoonist", "m": "만화가"}, {"w": "lovable", "m": "사랑스러운"}, {"w": "emerge", "m": "나타나다"}, {"w": "simultaneously", "m": "동시에"}, {"w": "creature", "m": "(pl.) 생물"}, {"w": "productive", "m": "생산적인"}, {"w": "satisfying", "m": "만족스러운"}, {"w": "interpersonal", "m": "대인 관계의"}, {"w": "intrapersonal", "m": "개인 내의"}, {"w": "assist", "m": "돕다"}, {"w": "consistently", "m": "일관되게"}, {"w": "self-aware", "m": "자기를 인식하는"}, {"w": "professionally", "m": "직업적으로"}, {"w": "ordinary", "m": "보통의"}, {"w": "calm", "m": "침착한"}, {"w": "volume", "m": "양"}, {"w": "knock over", "m": "넘어뜨리다"}, {"w": "attempt", "m": "시도하다"}, {"w": "rushing", "m": "격한"}, {"w": "underestimate", "m": "과소평가하다"}, {"w": "evenly", "m": "골고루"}, {"w": "distribute", "m": "분배하다"}, {"w": "increasingly", "m": "점점"}, {"w": "pension", "m": "연금"}, {"w": "demand", "m": "요구하다"}, {"w": "force", "m": "강요하다"}, {"w": "colleague", "m": "동료"}, {"w": "hold on to", "m": "~을 고수하다"}, {"w": "promote", "m": "촉진하다"}, {"w": "adverse", "m": "부정적인"}, {"w": "agriculture", "m": "농업"}, {"w": "pollination", "m": "수분(受粉)"}, {"w": "crop", "m": "(농)작물"}, {"w": "artificially", "m": "인위적으로"}, {"w": "environmentalist", "m": "환경 운동가"}, {"w": "corporation", "m": "기업"}, {"w": "feather", "m": "깃털"}, {"w": "unmoving", "m": "움직이지 않는"}, {"w": "resemble", "m": "닮다"}, {"w": "branch", "m": "나뭇가지"}, {"w": "feed on", "m": "~을 먹고 살다"}, {"w": "visible", "m": "(눈에) 보이는"}, {"w": "reflect", "m": "반사하다"}, {"w": "endangered", "m": "멸종 위기에 처한"}, {"w": "take a step", "m": "조치를 취하다"}, {"w": "retina", "m": "망막"}, {"w": "genetic", "m": "유전의"}, {"w": "tumor", "m": "종양"}, {"w": "radiation", "m": "방사능"}, {"w": "reflex", "m": "반사작용"}, {"w": "evident", "m": "분명한"}, {"w": "symptom", "m": "증상"}, {"w": "irritation", "m": "염증"}, {"w": "vision", "m": "시력"}, {"w": "gene", "m": "유전자"}, {"w": "imprison", "m": "투옥하다"}, {"w": "election", "m": "선거"}, {"w": "permit", "m": "허가하다"}, {"w": "jail", "m": "교도소"}, {"w": "cast a ballot", "m": "투표하다"}, {"w": "sentence", "m": "선고하다"}, {"w": "automatically", "m": "자동으로"}, {"w": "punishment", "m": "처벌"}, {"w": "conversely", "m": "반대로"}, {"w": "prohibition", "m": "금지"}, {"w": "inmate", "m": "수감자"}, {"w": "generation", "m": "세대"}, {"w": "transfer", "m": "옮기다"}, {"w": "acquire", "m": "습득하다"}, {"w": "quality", "m": "질"}, {"w": "functional", "m": "실용적인"}, {"w": "discourage", "m": "막다"}, {"w": "individuality", "m": "개성"}, {"w": "obedient", "m": "말을 잘 듣는"}, {"w": "mindlessly", "m": "분별 없이"}, {"w": "ineffective", "m": "효과적이지 못한"}, {"w": "as a whole", "m": "전체로서"}], "10": [{"w": "criticize", "m": "비판하다"}, {"w": "viewer", "m": "시청자"}, {"w": "commit", "m": "범하다"}, {"w": "violence", "m": "폭력"}, {"w": "indeed", "m": "실제로"}, {"w": "imply", "m": "암시하다"}, {"w": "assumption", "m": "가정"}, {"w": "rather", "m": "오히려"}, {"w": "frustrated", "m": "좌절한"}, {"w": "release", "m": "방출하다"}, {"w": "germ", "m": "세균"}, {"w": "illness", "m": "질병"}, {"w": "disturbing", "m": "충격적인"}, {"w": "chemical", "m": "(pl.) 화학물질"}, {"w": "water supply", "m": "상수도"}, {"w": "pollute", "m": "오염시키다"}, {"w": "recommend", "m": "권하다"}, {"w": "decrease", "m": "감소시키다"}, {"w": "benefit", "m": "~에게 이롭다"}, {"w": "regular", "m": "보통의"}, {"w": "remove", "m": "제거하다"}, {"w": "stunning", "m": "멋진"}, {"w": "unlikely", "m": "예상 밖의"}, {"w": "provincial", "m": "지방의"}, {"w": "instant", "m": "즉각적인"}, {"w": "sensation", "m": "세상을 떠들썩하게 하는 것"}, {"w": "line up", "m": "줄을 서다"}, {"w": "surround", "m": "둘러싸다"}, {"w": "cheer", "m": "환호하다"}, {"w": "attitude", "m": "태도"}, {"w": "thrill", "m": "감동시키다"}, {"w": "exploration", "m": "탐사"}, {"w": "erupt", "m": "폭발하다"}, {"w": "temporary", "m": "임시의"}, {"w": "shelter", "m": "피난처"}, {"w": "at a rate of", "m": "~의 속도로"}, {"w": "a series of", "m": "일련의"}, {"w": "harm", "m": "해를 끼치다"}, {"w": "multitask", "m": "다중 작업을 하다"}, {"w": "appealing", "m": "매력적인"}, {"w": "constantly", "m": "끊임없이"}, {"w": "switch", "m": "전환하다"}, {"w": "back and forth", "m": "왔다 갔다"}, {"w": "efficient", "m": "능률적인"}, {"w": "tempting", "m": "솔깃한"}, {"w": "better off", "m": "(처지·형편이) 더 나은"}, {"w": "relative", "m": "친척"}, {"w": "festivity", "m": "(pl.) 축제 행사"}, {"w": "reserve", "m": "지정하다"}, {"w": "honor", "m": "기리다"}, {"w": "consequently", "m": "따라서"}, {"w": "deceased", "m": "작고한"}, {"w": "literally", "m": "글자 그대로"}, {"w": "altar", "m": "제단"}, {"w": "beverage", "m": "음료"}, {"w": "manufacturer", "m": "제조업자"}, {"w": "deal with", "m": "~을 다루다"}, {"w": "insult", "m": "모욕하다"}, {"w": "at fault", "m": "(~에 대해) 잘못이 있는"}, {"w": "take apart", "m": "분해하다"}, {"w": "similar", "m": "비슷한"}, {"w": "familiar", "m": "익숙한"}, {"w": "inspire", "m": "영감을 주다"}, {"w": "compete", "m": "경쟁하다"}, {"w": "monologue", "m": "1인극"}, {"w": "political satire", "m": "정치 풍자"}, {"w": "offend", "m": "기분 상하게 하다"}, {"w": "numerous", "m": "수많은"}, {"w": "ban", "m": "금지하다"}, {"w": "corruption", "m": "타락"}, {"w": "promote", "m": "촉진하다"}, {"w": "call for", "m": "요구하다"}, {"w": "removal", "m": "제거"}, {"w": "parliament", "m": "의회"}, {"w": "solitary", "m": "혼자 있기를 좋아하는"}, {"w": "conclude", "m": "결론을 내리다"}, {"w": "bond", "m": "유대"}, {"w": "companion", "m": "동반자"}, {"w": "enclosed", "m": "에워싸인"}, {"w": "enclosure", "m": "울타리[담]를 친 장소"}, {"w": "eliminate", "m": "없애다"}, {"w": "trace", "m": "자취"}, {"w": "laboratory", "m": "실험실"}, {"w": "transplant", "m": "이식하다"}, {"w": "gene", "m": "유전자"}, {"w": "organism", "m": "유기체"}, {"w": "vice versa", "m": "반대로"}, {"w": "foreign", "m": "외래의"}, {"w": "reproduce", "m": "생식하다"}, {"w": "generation", "m": "세대"}, {"w": "valuable", "m": "가치 있는"}, {"w": "destroy", "m": "파괴하다"}, {"w": "cure", "m": "치료제"}, {"w": "discussion", "m": "논의"}, {"w": "evaluate", "m": "평가하다"}, {"w": "rating", "m": "평가"}, {"w": "external", "m": "외부의"}, {"w": "evaluator", "m": "평가자"}, {"w": "formula", "m": "공식"}, {"w": "compassion", "m": "동정심"}, {"w": "businesslike", "m": "사무적인"}, {"w": "substitute", "m": "대체물"}, {"w": "put together", "m": "모으다"}, {"w": "principal", "m": "교장"}, {"w": "pressure", "m": "압박"}, {"w": "play a role", "m": "역할을 맡다"}, {"w": "occupation", "m": "직업"}, {"w": "ethnic", "m": "인종의"}, {"w": "identify as", "m": "~라고 밝히다"}, {"w": "ethnicity", "m": "인종"}, {"w": "descent", "m": "출신"}, {"w": "equal", "m": "동일한"}, {"w": "pull over", "m": "차를 세우다"}, {"w": "security", "m": "보안"}, {"w": "luggage", "m": "짐"}, {"w": "arrest", "m": "체포하다"}, {"w": "robbery", "m": "강도질"}, {"w": "patrol", "m": "순찰을 돌다"}, {"w": "troublemaker", "m": "사고뭉치"}, {"w": "puzzled", "m": "당혹스러운"}, {"w": "speeding ticket", "m": "속도 위반 딱지"}, {"w": "robber", "m": "강도"}, {"w": "regulation", "m": "규제"}, {"w": "advantage", "m": "이점"}, {"w": "weird", "m": "이상한"}, {"w": "stereotype", "m": "고정관념"}, {"w": "pancreatic", "m": "췌장의"}, {"w": "extremely", "m": "극도로"}, {"w": "unusually", "m": "대단히"}, {"w": "detect", "m": "발견하다"}, {"w": "strip", "m": "가늘고 긴 조각"}, {"w": "alert", "m": "알리다"}, {"w": "microscopic", "m": "미세한"}, {"w": "diagnose", "m": "진단하다"}, {"w": "tumor", "m": "종양"}, {"w": "protein", "m": "단백질"}, {"w": "transform", "m": "변형시키다"}, {"w": "equipment", "m": "장비"}, {"w": "fair", "m": "박람회"}]};
+
+
+// ─── 회차 선택 화면 ───────────────────────────
+const SEL_KEY = 'vocab_cum_selected';
+let selected = new Set();
+
+// 저장된 선택 불러오기 (옵션)
+function loadSelection(){
+  try {
+    const s = localStorage.getItem(SEL_KEY);
+    if(s) selected = new Set(JSON.parse(s));
+  } catch(e){}
+}
+function saveSelection(){
+  try { localStorage.setItem(SEL_KEY, JSON.stringify([...selected])); } catch(e){}
+}
+
+function renderRounds(){
+  const grid = document.getElementById('round-grid');
+  grid.innerHTML = '';
+  for(let n=1; n<=10; n++){
+    const wrap = document.createElement('label');
+    wrap.className = 'round-chip';
+    wrap.innerHTML = `<input type="checkbox" value="${n}" ${selected.has(n)?'checked':''} onchange="toggleRound(${n})"><div class="chip-box">${n}회</div>`;
+    grid.appendChild(wrap);
+  }
+  updateSummary();
+}
+
+function toggleRound(n){
+  if(selected.has(n)) selected.delete(n); else selected.add(n);
+  saveSelection();
+  updateSummary();
+}
+
+function selectAll(){
+  selected = new Set([1,2,3,4,5,6,7,8,9,10]);
+  saveSelection();
+  renderRounds();
+}
+function clearAll(){
+  selected.clear();
+  saveSelection();
+  renderRounds();
+}
+
+function getDistribution(K){
+  // 60문제를 K개 회차에 균등 분배
+  const base = Math.floor(60/K);
+  const extra = 60 % K;
+  // 처음 extra개 회차는 base+1, 나머지는 base
+  const arr = [];
+  for(let i=0; i<K; i++) arr.push(i < extra ? base+1 : base);
+  return arr;
+}
+
+function updateSummary(){
+  const sum = document.getElementById('sel-summary');
+  const btn = document.getElementById('start-btn');
+  const K = selected.size;
+
+  if(K === 0){
+    sum.className = 'sel-summary warn';
+    sum.innerHTML = '⚠️ 회차를 1개 이상 선택해주세요.';
+    btn.disabled = true;
+    return;
+  }
+
+  // 선택된 회차들의 총 단어 수
+  const totalWords = [...selected].reduce((s,n)=>s+WORDS[n].length, 0);
+  if(totalWords < 60){
+    sum.className = 'sel-summary warn';
+    sum.innerHTML = `⚠️ 선택한 회차의 단어가 부족합니다 (${totalWords}개). 60문제를 만들 수 없어요.`;
+    btn.disabled = true;
+    return;
+  }
+
+  const dist = getDistribution(K);
+  const sortedRounds = [...selected].sort((a,b)=>a-b);
+  const detail = sortedRounds.map((r,i)=>`${r}회 ${dist[i]}문`).join(' · ');
+
+  sum.className = 'sel-summary';
+  sum.innerHTML = `<strong>${K}개 회차 선택됨</strong> · 총 60문제 (영→한 30 + 한→영 30)<br><span style="font-size:12px;opacity:.85">${detail}</span>`;
+  btn.disabled = false;
+}
+
+// 시작할 때 초기화
+loadSelection();
+renderRounds();
+
+// ─── 문제 생성 ────────────────────────────────
+function shuffle(arr){
+  for(let i=arr.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function generateQuestions(selectedRounds){
+  // 1. 선택 회차들에서 균등하게 단어 추출
+  const sorted = [...selectedRounds].sort((a,b)=>a-b);
+  const dist = getDistribution(sorted.length);
+  const picked = [];  // {w, m, round}
+  sorted.forEach((r, i)=>{
+    const pool = WORDS[r].slice();
+    shuffle(pool);
+    const take = pool.slice(0, dist[i]).map(x=>({...x, round:r}));
+    picked.push(...take);
+  });
+
+  // 2. 전체 셔플 후 앞 30개는 영→한, 뒤 30개는 한→영
+  shuffle(picked);
+  const enKoWords = picked.slice(0, 30);
+  const koEnWords = picked.slice(30, 60);
+
+  // 3. 오답 풀: 모든 선택 회차의 단어들
+  const allMeanings = picked.map(w=>w.m);
+  const allWords = picked.map(w=>w.w);
+
+  const questions = [];
+
+  // 영→한 30문제
+  enKoWords.forEach((target, i)=>{
+    const wrongPool = [...new Set(allMeanings.filter(m => m !== target.m))];
+    shuffle(wrongPool);
+    const wrongs = wrongPool.slice(0, 4);
+    const choices = shuffle([...wrongs, target.m]);
+    questions.push({
+      type:'en_ko', n:i+1, prompt:target.w, round:target.round,
+      question:`"${target.w}"의 뜻으로 알맞은 것은?`,
+      choices, answer:choices.indexOf(target.m)
+    });
+  });
+
+  // 한→영 30문제
+  koEnWords.forEach((target, i)=>{
+    const wrongPool = [...new Set(allWords.filter(w => w !== target.w))];
+    shuffle(wrongPool);
+    const wrongs = wrongPool.slice(0, 4);
+    const choices = shuffle([...wrongs, target.w]);
+    questions.push({
+      type:'ko_en', n:i+31, prompt:target.m, round:target.round,
+      question:`"${target.m}"에 해당하는 영어 단어는?`,
+      choices, answer:choices.indexOf(target.w)
+    });
+  });
+
+  return questions;
+}
+
+// ─── 등급 ───────────────────────────────
+const GRADES=[
+  {min:54,g:"S",label:"S — 최우수",msg:"완벽에 가까운 암기력입니다! 🎉"},
+  {min:48,g:"A",label:"A — 우수",msg:"단어 암기가 잘 됐습니다!"},
+  {min:36,g:"B",label:"B — 양호",msg:"조금 더 반복 암기가 필요해요."},
+  {min:24,g:"C",label:"C — 보통",msg:"어휘리스트를 다시 한 번 복습하세요."},
+  {min:0,g:"D",label:"D — 부족",msg:"단어장부터 차근차근 다시 외워보세요."}
+];
+
+let studentName='', selectedRounds=[], Q=[], ans=[], cur=0;
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');}
+function goHome(){document.getElementById('name-in').value='';show('landing');}
+
+function startQuiz(){
+  studentName=document.getElementById('name-in').value.trim();
+  if(!studentName){alert('이름을 입력해주세요.');return;}
+  if(selected.size===0){alert('회차를 선택해주세요.');return;}
+
+  selectedRounds = [...selected].sort((a,b)=>a-b);
+  Q = generateQuestions(selectedRounds);
+  ans = new Array(TOTAL).fill(-1);
+  cur = 0;
+
+  document.getElementById('qz-name').textContent=studentName;
+  document.getElementById('qz-title').textContent = `누적 테스트 · ${selectedRounds.join(',')}회`;
+  render(0);
+  show('quiz');
+}
+
+function render(i){
+  const q=Q[i];
+  const pct=Math.round(i/TOTAL*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-fill').className='prog-fill '+(q.type==='en_ko'?'fill-en':'fill-ko');
+  document.getElementById('prog-txt').textContent=(i+1)+' / '+TOTAL;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('qz-cnt').textContent=(i+1)+'/'+TOTAL;
+
+  const badge=document.getElementById('q-badge');
+  if(q.type==='en_ko'){badge.textContent='영어 → 한국어';badge.className='type-badge badge-en';}
+  else{badge.textContent='한국어 → 영어';badge.className='type-badge badge-ko';}
+
+  const pb=document.getElementById('prompt-box');
+  if(q.type==='en_ko'){
+    pb.innerHTML=`<div class="prompt-word">${q.prompt}</div><div class="prompt-hint">이 단어의 뜻은?</div><div class="prompt-round">출처: ${q.round}회</div>`;
+  }else{
+    pb.innerHTML=`<div class="prompt-meaning">${q.prompt}</div><div class="prompt-hint">이 뜻에 해당하는 영어 단어는?</div><div class="prompt-round">출처: ${q.round}회</div>`;
+  }
+
+  const el=document.getElementById('choices');
+  el.innerHTML='';
+  q.choices.forEach((c,ci)=>{
+    const b=document.createElement('button');
+    b.className='choice'+(ans[i]===ci?' sel':'');
+    b.textContent=c;
+    b.onclick=()=>pick(i,ci);
+    el.appendChild(b);
+  });
+
+  document.getElementById('btn-prev').disabled=i===0;
+  document.getElementById('btn-next').textContent=i===TOTAL-1?'제출 →':'다음 →';
+}
+
+function pick(qi,ci){
+  ans[qi]=ci;
+  document.getElementById('choices').querySelectorAll('.choice').forEach((b,i)=>{
+    b.classList.toggle('sel',i===ci);
+  });
+}
+
+function nav(d){cur=Math.max(0,Math.min(TOTAL-1,cur+d));render(cur);}
+
+function navNext(){
+  if(cur===TOTAL-1){
+    const empty=ans.filter(a=>a===-1).length;
+    if(empty>0&&!confirm(`${empty}문항을 풀지 않았습니다. 제출할까요?`))return;
+    submit();
+  }else{nav(1);}
+}
+
+async function submit(){
+  const score=ans.filter((a,i)=>a===Q[i].answer).length;
+  const enOk=Q.slice(0,30).filter((q,i)=>ans[i]===q.answer).length;
+  const koOk=Q.slice(30,60).filter((q,i)=>ans[i+30]===q.answer).length;
+  const pct=Math.round(score/TOTAL*100);
+  const grade=GRADES.find(g=>score>=g.min);
+
+  document.getElementById('res-name').textContent=studentName+'님의 결과';
+  document.getElementById('res-score').textContent=score;
+  document.getElementById('res-grade').textContent=grade.label;
+  document.getElementById('res-msg').textContent=grade.msg;
+  document.getElementById('res-rounds').textContent=`응시 회차: ${selectedRounds.join('회 · ')}회`;
+  document.getElementById('st-ok').textContent=score;
+  document.getElementById('st-ng').textContent=TOTAL-score;
+  document.getElementById('st-en').textContent=enOk+'/30';
+  document.getElementById('st-ko').textContent=koOk+'/30';
+
+  const rv=document.getElementById('review');rv.innerHTML='';
+  let ngCount=0;
+  Q.forEach((q,i)=>{
+    if(ans[i]!==q.answer){
+      ngCount++;
+      const d=document.createElement('div');
+      d.className='rv-item rv-ng';
+      d.innerHTML=`<span class="rv-icon">✗</span>
+        <div class="rv-body">
+          <strong>${i+1}번</strong> <em>${q.prompt}</em>
+          <div class="rv-ans">내 답: ${ans[i]>=0?q.choices[ans[i]]:'미응답'} → 정답: ${q.choices[q.answer]}</div>
+          <div class="rv-round">출처: ${q.round}회</div>
+        </div>`;
+      rv.appendChild(d);
+    }
+  });
+  if(ngCount===0)rv.innerHTML='<div style="text-align:center;padding:1.5rem;color:#7c3aed;font-weight:600">전부 정답! 🎉</div>';
+
+
+  // 재시험/합격 안내
+  if(pct >= 80){
+    document.getElementById('pass-box').style.display='block';
+    document.getElementById('retake-box').style.display='none';
+  } else {
+    document.getElementById('pass-box').style.display='none';
+    document.getElementById('retake-box').style.display='block';
+  }
+
+  show('result');
+
+  const stEl=document.getElementById('save-st');
+  stEl.innerHTML='<span class="spinner"></span>점수 저장 중...';
+  try{
+    const payload={name:studentName,score,total:TOTAL,pct,grade:grade.g,enOk,koOk,rounds:selectedRounds,date:new Date().toLocaleString('ko-KR'),ts:Date.now(),testId:'vocab_cumulative'};
+    const r=await fetch(FIREBASE_URL+'/results.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    stEl.innerHTML=r.ok?'<span style="color:var(--purple)">✓ 점수 저장 완료</span>':'저장 실패';
+  }catch(e){stEl.textContent='저장 실패: '+e.message;}
+}
+
+function openModal(){document.getElementById('adm-pw').value='';document.getElementById('pw-err').textContent='';document.getElementById('modal').style.display='flex';setTimeout(()=>document.getElementById('adm-pw').focus(),100);}
+function closeModal(){document.getElementById('modal').style.display='none';}
+document.getElementById('adm-pw').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
+function checkPw(){
+  if(document.getElementById('adm-pw').value===ADMIN_PW){closeModal();loadAdmin();}
+  else document.getElementById('pw-err').textContent='비밀번호가 올바르지 않습니다.';
+}
+
+async function loadAdmin(){
+  show('admin');
+  const listEl=document.getElementById('adm-list');
+  const statsEl=document.getElementById('adm-stats');
+  listEl.innerHTML='<div class="empty"><span class="spinner"></span>불러오는 중...</div>';
+  try{
+    const r=await fetch(FIREBASE_URL+'/results.json');
+    const data=await r.json();
+    if(!data){listEl.innerHTML='<div class="empty">아직 응시한 학생이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const results=Object.values(data).filter(r=>r&&r.name&&r.score!==undefined&&r.testId==='vocab_cumulative').sort((a,b)=>b.score-a.score);
+    if(!results.length){listEl.innerHTML='<div class="empty">아직 응시한 학생이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const avg=(results.reduce((s,r)=>s+(Number(r.score)||0),0)/results.length).toFixed(1);
+    statsEl.innerHTML=`<div class="stat"><div class="stat-n">${results.length}</div><div class="stat-l">응시 인원</div></div>
+      <div class="stat"><div class="stat-n">${avg}</div><div class="stat-l">평균</div></div>
+      <div class="stat"><div class="stat-n">${results[0].score}</div><div class="stat-l">최고점</div></div>
+      <div class="stat"><div class="stat-n blue">${results[results.length-1].score}</div><div class="stat-l">최저점</div></div>`;
+    listEl.innerHTML='';
+    results.forEach((r,i)=>{
+      const gc=r.pct>=90?'s':r.pct>=80?'a':r.pct>=60?'b':'c';
+      const gl=r.pct>=90?'S':r.pct>=80?'A':r.pct>=60?'B':'C';
+      const roundsTxt = r.rounds && r.rounds.length ? '응시 회차: '+r.rounds.join(',')+'회' : '';
+      const row=document.createElement('div');row.className='admin-row';
+      row.innerHTML=`<div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:#9ca3af;min-width:20px">${i+1}</span>
+        <div><div class="a-name">${r.name}</div><div class="a-date">${r.date||''}</div><div class="a-rounds">${roundsTxt}</div></div></div>
+        <div style="display:flex;align-items:center"><span class="a-score">${r.score}점</span><span class="rank r${gc}">${gl}</span></div>`;
+      listEl.appendChild(row);
+    });
+  }catch(e){listEl.innerHTML='<div class="empty">데이터 불러오기 실패</div>';}
+}
+
+async function confirmClear(){
+  if(!confirm('누적 테스트 기록을 삭제하시겠습니까?'))return;
+  const r=await fetch(FIREBASE_URL+'/results.json');
+  const data=await r.json();
+  if(!data)return;
+  for(const[k,v]of Object.entries(data)){
+    if(v&&v.testId==='vocab_cumulative')await fetch(FIREBASE_URL+'/results/'+k+'.json',{method:'DELETE'});
+  }
+  loadAdmin();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadingLab</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f7f8fc;--bg2:#fff;--bg3:#eef1f6;--text:#1a1d23;--text2:#5a6070;--text3:#8e95a5;--accent:#4f46e5;--accent2:#7c3aed;--accent-light:#eef2ff;--success:#10b981;--success-bg:#ecfdf5;--danger:#ef4444;--danger-bg:#fef2f2;--border:#e5e7eb;--radius:12px;--radius-sm:8px;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 6px rgba(0,0,0,.07);--shadow-lg:0 10px 15px rgba(0,0,0,.1)}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);background:rgba(255,255,255,.92)}
+.nav-inner{display:flex;justify-content:space-between;align-items:center}
+.nav-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--accent)}
+.nav-logo span{color:var(--accent2)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.nav-user{font-size:13px;color:var(--text2);background:var(--bg3);padding:6px 14px;border-radius:20px}
+button{font-family:'Noto Sans KR',sans-serif;padding:10px 20px;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;background:var(--bg3);color:var(--text)}
+button:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover{box-shadow:0 4px 12px rgba(79,70,229,.4)}
+.btn-danger{background:var(--danger-bg);color:var(--danger)}
+.btn-sm{padding:6px 14px;font-size:13px}
+.btn-ghost{background:transparent;color:var(--text2)}
+.btn-ghost:hover{background:var(--bg3)}
+.tabs{display:flex;gap:4px;background:var(--bg3);padding:4px;border-radius:var(--radius-sm);width:fit-content;flex-wrap:wrap}
+.tab{padding:8px 20px;border-radius:6px;font-size:13px;font-weight:500;background:transparent;color:var(--text2);cursor:pointer;border:none}
+.tab.active{background:var(--bg2);color:var(--accent);box-shadow:var(--shadow)}
+.card{background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);padding:24px;margin-bottom:20px}
+.card-hover{transition:all .2s;cursor:pointer}
+.card-hover:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--accent)}
+input[type=text],input[type=password],input[type=number],select,textarea{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text);font-size:14px;font-family:'Noto Sans KR',sans-serif;transition:all .2s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+textarea{resize:vertical}
+.label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text2)}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:repeat(3,1fr)}
+.flex{display:flex}.flex-between{justify-content:space-between;align-items:center}.flex-gap{gap:12px}
+.mb-8{margin-bottom:8px}.mb-16{margin-bottom:16px}.mb-24{margin-bottom:24px}
+.level-card{padding:32px;border-radius:var(--radius);text-align:center;cursor:pointer;transition:all .3s}
+.level-card:hover:not(.locked){transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.level-card.locked{opacity:.5;cursor:not-allowed}
+.lv1{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1e40af}
+.lv2{background:linear-gradient(135deg,#fce7f3,#fbcfe8);color:#9d174d}
+.lv3{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#065f46}
+.reading-layout{display:grid;grid-template-columns:1fr 280px;gap:24px}
+.article-box{line-height:1.9;font-size:15px;white-space:pre-wrap}
+.q-option{padding:12px 16px;background:var(--bg);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:8px;display:flex;align-items:center;border:1px solid transparent;transition:all .15s;font-size:14px}
+.q-option:hover{border-color:var(--accent);background:var(--accent-light)}
+.q-option input{margin-right:10px;accent-color:var(--accent)}
+.q-option.selected{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:500}
+.vocab-item{padding:10px 0;border-bottom:1px solid var(--border)}.vocab-item:last-child{border-bottom:none}
+.vocab-word{font-weight:600;color:var(--accent);font-size:14px}
+.vocab-meaning{font-size:12px;color:var(--text2);margin-top:2px}
+.article-row{padding:16px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;transition:all .15s}
+.article-row:hover{background:var(--accent-light)}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+.modal-content{background:var(--bg2);border-radius:var(--radius);padding:32px;max-width:800px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.loading{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.score-circle{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto 16px}
+.info-tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.tag-blue{background:#dbeafe;color:#1d4ed8}.tag-green{background:#d1fae5;color:#065f46}.tag-red{background:#fee2e2;color:#991b1b}.tag-yellow{background:#fef3c7;color:#92400e}.tag-purple{background:#ede9fe;color:#6d28d9}
+.list-item{padding:16px;border-bottom:1px solid var(--border)}.list-item:last-child{border-bottom:none}
+.api-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 12px;border-radius:20px}
+.api-on{background:#d1fae5;color:#065f46}.api-off{background:#fee2e2;color:#991b1b}
+.progress-bar{width:100%;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width .3s}
+.step-indicator{display:flex;gap:8px;justify-content:center;margin-bottom:32px}
+.step-dot{width:40px;height:6px;border-radius:3px;background:var(--bg3);transition:all .3s}
+.step-dot.active{background:var(--accent);width:60px}.step-dot.done{background:var(--success)}
+.day-step{display:flex;align-items:center;gap:12px;padding:16px;border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all .2s;border:1px solid var(--border)}
+.day-step:hover{border-color:var(--accent)}
+.day-step.completed{background:var(--success-bg);border-color:var(--success)}
+.day-step.current{background:var(--accent-light);border-color:var(--accent)}
+.day-step.locked{opacity:.5;cursor:not-allowed}
+.step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.flashcard{width:100%;max-width:400px;height:220px;margin:0 auto 24px;perspective:1000px;cursor:pointer}
+.flashcard-inner{position:relative;width:100%;height:100%;text-align:center;transition:transform .6s;transform-style:preserve-3d}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg)}
+.flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-shadow:var(--shadow-md)}
+.flashcard-front{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.flashcard-back{background:var(--bg2);border:2px solid var(--accent);transform:rotateY(180deg)}
+.flashcard-word{font-size:28px;font-weight:700;margin-bottom:8px}
+.flashcard-hint{font-size:13px;opacity:.7}
+.flashcard-meaning{font-size:24px;font-weight:600;color:var(--accent)}
+.match-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:600px;margin:0 auto}
+.match-card{padding:16px 8px;border-radius:var(--radius-sm);text-align:center;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border:2px solid var(--border);user-select:none;min-height:60px;display:flex;align-items:center;justify-content:center}
+.match-card:hover{border-color:var(--accent)}
+.match-card.selected{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
+.match-card.matched{border-color:var(--success);background:var(--success-bg);color:var(--success);cursor:default}
+.match-card.wrong{border-color:var(--danger);background:var(--danger-bg);animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}.reading-layout{grid-template-columns:1fr}.match-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const S={get(k){try{return JSON.parse(localStorage.getItem('rl3_'+k))}catch{return null}},set(k,v){localStorage.setItem('rl3_'+k,JSON.stringify(v))}};
+
+function getQuestionPrompt(articleNum){
+const common=`Q1 [주제 파악]: "다음 글의 주제(또는 제목)로 가장 적절한 것은?"
+- 보기 4개를 모두 한국어로 작성. 정답 1개 + 오답 3개.`;
+const sets={
+1:`${common}
+
+Q2 [내용 일치]: "다음 글의 내용과 일치하지 않는 것은?"
+- 보기 4개를 한국어로, 지문의 구체적 내용 반영. 거짓 1개 포함. 정답=거짓 인덱스.
+
+Q3 [빈칸 추론]: "다음 빈칸에 들어갈 말로 가장 적절한 것은?"
+- 지문에서 핵심 단어 포함 문장을 골라 그 단어를 ______로 바꿔 question에 제시.
+- 보기 4개는 영어 단어(정답1+오답3).
+
+Q4 [어법 판단]: "밑줄 친 ⓐ~ⓓ 중 어법상 틀린 것은?"
+- 지문에서 문장 하나를 골라 4개 표현에 ⓐⓑⓒⓓ 표시. 1개를 어법상 틀리게 변경.
+- question에 그 문장 포함. 보기는 ["ⓐ","ⓑ","ⓒ","ⓓ"].`,
+
+2:`${common}
+
+Q2 [글의 요지]: "다음 글의 요지로 가장 적절한 것은?"
+- 보기 4개를 한국어로. 글 전체의 핵심 메시지 파악. 정답1+오답3.
+
+Q3 [문장 삽입]: "주어진 문장이 들어가기에 가장 적절한 곳은?"
+- 지문에서 문장 하나를 뽑아 question에 "주어진 문장: [문장]"으로 제시.
+- 그 문장이 빠진 지문에서 ①②③④ 위치 표시하여 question에 포함.
+- 보기는 ["①","②","③","④"].
+
+Q4 [어휘 유의어]: "밑줄 친 단어와 의미가 가장 가까운 것은?"
+- 지문에서 중요한 단어 하나를 밑줄 쳐서 question에 문장과 함께 제시.
+- 보기 4개는 영어 단어(유의어 정답1+오답3).`,
+
+3:`${common}
+
+Q2 [지칭 추론]: "밑줄 친 they(또는 it, this 등)가 가리키는 것은?"
+- 지문에서 대명사 포함 문장을 골라 밑줄 치고 question에 제시.
+- 보기 4개를 한국어로(정답1+오답3).
+
+Q3 [요약문 완성]: "다음 글의 내용을 한 문장으로 요약할 때, 빈칸 (A)와 (B)에 들어갈 말로 가장 적절한 것은?"
+- 글 전체를 요약하는 영어 문장을 만들되 핵심 단어 2개를 (A), (B)로 비워두세요.
+- question에 요약문 포함. 보기 4개는 "(A) word1 - (B) word2" 형식.
+
+Q4 [글의 순서]: "주어진 글 다음에 이어질 글의 순서로 가장 적절한 것은?"
+- 지문을 도입부 + (A)(B)(C) 세 단락으로 나누세요.
+- question에 도입부와 (A)(B)(C) 내용을 제시.
+- 보기는 ["(A)-(C)-(B)","(B)-(A)-(C)","(B)-(C)-(A)","(C)-(A)-(B)"].`
+};
+return sets[articleNum]||sets[1];
+}
+
+async function generateWithAI(articleText,articleNum){
+const apiKey=S.get('apikey');if(!apiKey)return null;
+const qPrompt=getQuestionPrompt(articleNum);
+const prompt=`당신은 한국 중학생용 영어 리딩 교재를 만드는 전문 출판 편집자입니다.
+아래 영어 지문을 읽고, 반드시 JSON 형식으로만 응답하세요. 설명이나 마크다운 없이 순수 JSON만 출력하세요.
+
+[지문]
+${articleText}
+
+[요구사항]
+1. vocabulary: 지문에서 중학생이 꼭 알아야 할 핵심 단어 8~12개. 한국어 뜻 포함. 관사/대명사/접속사 제외.
+2. questions: 아래 4가지 유형 각 1개씩. 보기 4개, answer는 정답 인덱스(0~3).
+
+${qPrompt}
+
+[출력 — 순수 JSON만]
+{"vocabulary":[{"word":"단어","meaning":"뜻"}],"questions":[{"question":"Q1...","options":["..."],"answer":0},{"question":"Q2...","options":["..."],"answer":0},{"question":"Q3...","options":["..."],"answer":0},{"question":"Q4...","options":["..."],"answer":0}]}`;
+try{
+const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2500,messages:[{role:"user",content:prompt}]})});
+if(!r.ok)return null;
+const data=await r.json();const text=data.content?.find(c=>c.type==="text")?.text||"";
+const m=text.match(/\{[\s\S]*\}/);
+if(m){const p=JSON.parse(m[0]);if(p.vocabulary&&p.questions&&p.questions.length===4)return p;}
+return null;
+}catch{return null;}
+}
+
+const STOP=new Set(['the','a','an','is','are','was','were','be','been','have','has','had','do','does','did','will','would','could','should','can','must','i','me','my','we','you','your','he','she','it','its','they','them','their','his','her','this','that','these','those','what','which','who','how','when','where','why','and','but','or','not','no','so','if','then','than','too','very','just','also','in','on','at','to','for','of','with','by','from','up','about','into','over','after','before','all','each','both','few','more','most','some','any','many','much','other','such','only','same','here','there','again','even','still','now','well','back','get','got','make','take','come','go','see','know','think','say','tell','give','find','look','want','use','work']);
+const DICT={'environment':'환경','plastic':'플라스틱','waste':'쓰레기','reduce':'줄이다','campaign':'캠페인','volunteer':'자원봉사자','community':'지역사회','technology':'기술','research':'연구','scientist':'과학자','health':'건강','education':'교육','government':'정부','society':'사회','climate':'기후','pollution':'오염','popular':'인기있는','tourist':'관광객','recommend':'추천하다','explore':'탐험하다','finally':'마침내','important':'중요한','especially':'특히','expensive':'비싼','impressive':'인상적인','dangerous':'위험한','difficult':'어려운','beautiful':'아름다운','amazing':'놀라운','survive':'생존하다','attention':'관심','experience':'경험하다','embarrassed':'당혹스러운','bacteria':'박테리아','sweat':'땀','cotton':'면','vinegar':'식초','harvest':'수확','massive':'거대한','efficient':'효율적인','sustainable':'지속가능한','modern':'현대의','ancient':'고대의','global':'세계적인','discover':'발견하다','invent':'발명하다'};
+function localExtract(t){const w=t.toLowerCase().match(/\b[a-z]+\b/g)||[];const v=[];const s=new Set();const f={};w.forEach(x=>{if(x.length>=4&&!STOP.has(x))f[x]=(f[x]||0)+1;});Object.entries(f).sort((a,b)=>b[1]-a[1]).forEach(([x])=>{if(DICT[x]&&!s.has(x)){v.push({word:x,meaning:DICT[x]});s.add(x);}});return v.slice(0,10);}
+function localQuestions(t,v){return[{question:'Q1. 다음 글의 주제로 가장 적절한 것은?',options:['글의 주요 내용','관련없는 주제','다른 주제','또 다른 주제'],answer:0},{question:'Q2. 내용과 일치하지 않는 것은?',options:['사실1','사실2','거짓','사실3'],answer:2},{question:'Q3. 빈칸에 들어갈 말은?',options:v[0]?[v[0].word,'x','y','z']:['a','b','c','d'],answer:0},{question:'Q4. 어법상 틀린 것은?',options:['ⓐ','ⓑ','ⓒ','ⓓ'],answer:2}];}
+
+function init(){if(!S.get('users'))S.set('users',{admin:{password:'admin123',role:'admin'},student1:{password:'student123',role:'student',level:1}});}
+let user=null,editing=null;
+let state={adminView:'students',studentView:'levels',selectedLevel:null,selectedDay:null,currentArticle:null,currentArticleIdx:null,answers:{},showResults:false,startTime:null,vocabPhase:null,vocabData:null};
+
+function render(){const app=document.getElementById('app');if(!user){app.innerHTML=renderLogin();return;}if(user.role==='admin')app.innerHTML=renderNav()+renderAdmin();else app.innerHTML=renderNav()+renderStudent();}
+
+function renderNav(){const h=!!S.get('apikey');return `<div class="nav"><div class="container nav-inner"><div class="nav-logo">Reading<span>Lab</span></div><div class="nav-right">${user.role==='admin'?`<span class="api-status ${h?'api-on':'api-off'}">${h?'✓ AI':'✕ AI'}</span>`:''}<div class="nav-user">${user.username} (${user.role==='admin'?'관리자':'Lv.'+user.level})</div><button class="btn-ghost btn-sm" onclick="logout()">로그아웃</button></div></div></div>`;}
+
+function renderLogin(){return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4f46e5,#7c3aed,#a855f7);"><div style="width:420px;padding:24px;"><div class="card" style="padding:40px;box-shadow:var(--shadow-lg);"><div style="text-align:center;margin-bottom:32px;"><div style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--accent);">Reading<span style="color:var(--accent2)">Lab</span></div><p style="font-size:14px;color:var(--text2);margin-top:8px;">영어 리딩 학습 플랫폼</p></div><div class="mb-16"><label class="label">사용자명</label><input type="text" id="username" placeholder="사용자명"></div><div class="mb-16"><label class="label">비밀번호</label><input type="password" id="password" placeholder="비밀번호"></div><div id="err" style="color:var(--danger);font-size:13px;margin-bottom:12px;display:none;"></div><button class="btn-primary" onclick="login()" style="width:100%;justify-content:center;padding:12px;">로그인</button><div style="margin-top:24px;padding:16px;background:var(--bg);border-radius:var(--radius-sm);font-size:12px;color:var(--text3);"><p style="font-weight:600;color:var(--text2);margin-bottom:6px;">데모 계정</p><p>관리자: admin / admin123</p><p>학생: student1 / student123</p></div></div></div></div>`;}
+
+function renderAdmin(){const v=state.adminView;return `<div class="container" style="padding:32px 24px 60px;"><div class="tabs mb-24">${['students','create','manage','progress','settings'].map(t=>`<div class="tab ${v===t?'active':''}" onclick="setAV('${t}')">${{students:'👥 학생',create:'➕ 기사 생성',manage:'📋 기사 목록',progress:'📊 학습 현황',settings:'⚙️ 설정'}[t]}</div>`).join('')}</div>${v==='students'?adminStudents():v==='create'?adminCreate():v==='manage'?adminManage():v==='progress'?adminProgress():v==='settings'?adminSettings():''}</div>${editing?editModal():''}`;}
+
+function adminStudents(){const u=S.get('users')||{};const s=Object.keys(u).filter(x=>u[x].role==='student');return `<div class="flex flex-between mb-16"><h2>학생 관리</h2><button class="btn-primary btn-sm" onclick="addStudent()">➕ 추가</button></div><div class="card" style="padding:0;overflow:hidden;">${s.map(x=>`<div class="list-item flex flex-between" style="padding:16px 24px;"><div><span style="font-weight:600;">${x}</span> <span class="info-tag tag-blue">Level ${u[x].level||1}</span></div><select onchange="setLevel('${x}',this.value)" style="width:auto;padding:6px 12px;">${[1,2,3].map(l=>`<option value="${l}" ${u[x].level===l?'selected':''}>Level ${l}</option>`).join('')}</select></div>`).join('')}</div>`;}
+
+function adminCreate(){const h=!!S.get('apikey');return `<h2>기사 생성</h2><div class="card">${h?`<div style="padding:12px 16px;background:var(--success-bg);border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px;color:var(--success);">✅ AI — Article 1,2,3마다 다른 유형의 문제가 자동 생성됩니다.</div>`:`<div style="padding:12px 16px;background:var(--danger-bg);border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px;color:var(--danger);">⚠️ API 키 없음. ⚙️ 설정에서 입력하세요.</div>`}<div class="grid grid-2 mb-16"><div><label class="label">레벨</label><select id="al"><option value="1">Level 1</option><option value="2">Level 2</option><option value="3">Level 3</option></select></div><div><label class="label">Day</label><input type="number" id="ad" min="1" max="30" value="1"></div></div><div class="mb-16"><label class="label">영어 기사</label><textarea id="ac" rows="12" placeholder="영어 기사를 붙여넣으세요."></textarea></div><div id="gen-status" style="display:none;padding:12px;background:var(--accent-light);border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px;color:var(--accent);display:none;align-items:center;gap:8px;"><span class="loading"></span><span id="gen-msg">생성 중...</span></div><button class="btn-primary" id="create-btn" onclick="createArt()" style="width:100%;justify-content:center;">✨ 자동 생성</button></div>`;}
+
+function adminManage(){const a=S.get('articles')||{};return `<h2>기사 목록</h2>${[1,2,3].map(l=>{const la=a['level'+l]||{};const ds=Object.keys(la).sort((a,b)=>parseInt(a.replace('day',''))-parseInt(b.replace('day','')));return `<div class="card mb-16"><h3 class="mb-16">Level ${l}</h3>${ds.length===0?'<p style="color:var(--text3);">기사 없음</p>':ds.map(d=>`<div class="mb-16"><div style="font-weight:600;font-size:14px;color:var(--accent);margin-bottom:8px;">${d.replace('day','Day ')} <span class="info-tag tag-blue">${la[d].length}/3</span></div>${la[d].map((art,i)=>`<div class="article-row"><div style="flex:1;min-width:0;"><div style="font-weight:500;font-size:14px;">${art.title} ${art.aiGenerated?'<span class="info-tag tag-green">AI</span>':'<span class="info-tag tag-yellow">로컬</span>'}</div><div style="font-size:12px;color:var(--text3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${art.content.substring(0,80)}...</div></div><div class="flex flex-gap" style="flex-shrink:0;"><button class="btn-sm" onclick="openEdit(${l},'${d}',${i})">✏️</button><button class="btn-sm btn-danger" onclick="deleteArt(${l},'${d}',${i})">🗑️</button></div></div>`).join('')}</div>`).join('')}</div>`;}).join('')}`;}
+
+function adminProgress(){const u=S.get('users')||{};const s=Object.keys(u).filter(x=>u[x].role==='student');const p=S.get('progress')||{};return `<h2>학습 현황</h2>${s.map(x=>{const sp=p[x]||[];return `<div class="card mb-16"><h3 class="mb-16">${x} <span class="info-tag tag-blue">Level ${u[x].level||1}</span></h3>${sp.length===0?'<p style="color:var(--text3);">기록 없음</p>':sp.map(i=>`<div style="padding:12px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:8px;"><div class="flex flex-between mb-8"><span style="font-weight:500;font-size:13px;">Lv${i.level}·Day${i.day}·${i.title}</span><span style="font-size:12px;color:var(--text3);">${Math.floor(i.timeSpent/60)}분${i.timeSpent%60}초</span></div><span class="info-tag tag-green">${i.correctAnswers}/${i.totalQuestions}</span>${i.wrongQuestions?.length>0?`<span class="info-tag tag-red" style="margin-left:4px;">틀린:Q${i.wrongQuestions.join(',Q')}</span>`:''}${i.type==='vocab'?'<span class="info-tag tag-purple" style="margin-left:4px;">단어</span>':''}</div>`).join('')}</div>`;}).join('')}`;}
+
+function adminSettings(){const k=S.get('apikey')||'';const m=k?k.substring(0,10)+'...'+k.substring(k.length-4):'';return `<h2>⚙️ AI 설정</h2><div class="card"><h3 class="mb-16">API Key</h3><p style="font-size:14px;color:var(--text2);margin-bottom:16px;">API 키 입력 시 Article 1,2,3마다 <strong>다른 유형</strong>의 출판사 수준 문제가 생성됩니다.</p>${k?`<div style="padding:12px;background:var(--success-bg);border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px;color:var(--success);">✓ ${m}</div>`:''}<div class="mb-16"><label class="label">API Key</label><input type="text" id="apikey-input" placeholder="sk-ant-..."></div><div class="flex flex-gap"><button class="btn-primary" onclick="saveApiKey()">💾 저장</button>${k?`<button class="btn-danger" onclick="S.set('apikey',null);render()">삭제</button><button onclick="testApiKey()">🔌 테스트</button>`:''}</div></div><div class="card"><h3 class="mb-8">Article별 문제 유형</h3><table style="width:100%;font-size:13px;border-collapse:collapse;"><tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:10px;">유형</th><th style="text-align:center;padding:10px;">Article 1</th><th style="text-align:center;padding:10px;">Article 2</th><th style="text-align:center;padding:10px;">Article 3</th></tr><tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">Q1</td><td style="text-align:center;">주제 파악</td><td style="text-align:center;">주제 파악</td><td style="text-align:center;">주제 파악</td></tr><tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">Q2</td><td style="text-align:center;color:var(--accent);">내용 일치</td><td style="text-align:center;color:var(--danger);">글의 요지</td><td style="text-align:center;color:var(--success);">지칭 추론</td></tr><tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">Q3</td><td style="text-align:center;color:var(--accent);">빈칸 추론</td><td style="text-align:center;color:var(--danger);">문장 삽입</td><td style="text-align:center;color:var(--success);">요약문 완성</td></tr><tr><td style="padding:10px;">Q4</td><td style="text-align:center;color:var(--accent);">어법 판단</td><td style="text-align:center;color:var(--danger);">어휘 유의어</td><td style="text-align:center;color:var(--success);">글의 순서</td></tr></table></div>`;}
+
+function editModal(){const{article}=editing;return `<div class="modal" onclick="if(event.target===this)closeEdit()"><div class="modal-content"><div class="flex flex-between mb-24"><h2 style="margin:0;">기사 수정</h2><button class="btn-ghost" onclick="closeEdit()">✕</button></div><div class="mb-16"><label class="label">제목</label><input type="text" id="et" value="${article.title}"></div><div class="mb-16"><label class="label">내용</label><textarea id="ec" rows="10">${article.content}</textarea></div><div class="flex flex-gap"><button class="btn-primary" onclick="saveEdit()" style="flex:1;justify-content:center;">💾 저장</button><button onclick="closeEdit()" style="flex:1;justify-content:center;">취소</button></div></div></div>`;}
+
+function getCompletedArticles(l,d){return S.get('done_'+user.username+'_'+l+'_'+d)||[];}
+function markArticleDone(l,d,i){const done=getCompletedArticles(l,d);if(!done.includes(i)){done.push(i);S.set('done_'+user.username+'_'+l+'_'+d,done);}}
+
+function renderStudent(){const v=state.studentView;if(v==='reading'&&state.currentArticle)return state.showResults?studentResults():studentReading();if(v==='vocab')return studentVocab();return `<div class="container" style="padding:32px 24px 60px;">${v==='levels'?studentLevels():v==='days'?studentDays():v==='daysteps'?studentDaySteps():''}</div>`;}
+
+function studentLevels(){return `<div style="background:linear-gradient(135deg,#4f46e5,#7c3aed,#a855f7);margin:0 -24px 40px;padding:60px 24px;"><div class="container"><h1 style="font-family:'Playfair Display',serif;font-size:36px;color:#fff;margin-bottom:8px;">📖 오늘의 리딩</h1><p style="color:rgba(255,255,255,.85);">레벨을 선택하세요!</p></div></div><div class="grid grid-3">${[1,2,3].map(l=>`<div class="level-card card-hover lv${l} ${l>user.level?'locked':''}" onclick="${l<=user.level?'selectLevel('+l+')':''}"><span style="font-size:40px;display:block;margin-bottom:12px;">${['📗','📘','📕'][l-1]}</span><span style="font-size:20px;font-weight:600;">Level ${l}</span><span style="font-size:13px;opacity:.7;margin-top:4px;">${l>user.level?'🔒':['기초','중급','고급'][l-1]}</span></div>`).join('')}</div>`;}
+
+function studentDays(){const a=S.get('articles')||{};const la=a['level'+state.selectedLevel]||{};const ds=Object.keys(la).sort((a,b)=>parseInt(a.replace('day',''))-parseInt(b.replace('day','')));return `<div class="flex flex-between mb-24"><h2>Level ${state.selectedLevel}</h2><button class="btn-ghost" onclick="backTo('levels')">← 뒤로</button></div><div class="grid grid-3">${ds.map(d=>{const done=getCompletedArticles(state.selectedLevel,d);const t=la[d].length;const all=done.length>=t&&t>=3;return `<div class="card card-hover" style="text-align:center;padding:32px;${all?'border-color:var(--success);':''}" onclick="selectDay('${d}')"><div style="font-size:32px;margin-bottom:8px;">${all?'✅':'📅'}</div><div style="font-weight:600;">${d.replace('day','Day ')}</div><div style="font-size:13px;color:var(--text3);">${done.length}/${t}</div></div>`;}).join('')}</div>`;}
+
+function studentDaySteps(){const a=S.get('articles')||{};const da=a['level'+state.selectedLevel]?.[state.selectedDay]||[];const done=getCompletedArticles(state.selectedLevel,state.selectedDay);const allDone=done.length>=da.length&&da.length>=3;const vDone=S.get('vocabdone_'+user.username+'_'+state.selectedLevel+'_'+state.selectedDay);return `<div class="flex flex-between mb-24"><h2>Level ${state.selectedLevel} · ${state.selectedDay.replace('day','Day ')}</h2><button class="btn-ghost" onclick="backTo('days')">← 뒤로</button></div><div style="max-width:600px;margin:0 auto;"><div class="step-indicator mb-24">${[...da.map((_,i)=>done.includes(i)),allDone].map((d,i)=>`<div class="step-dot ${d?'done':i===(done.length<da.length?done.length:da.length)?'active':''}"></div>`).join('')}</div>${da.map((art,idx)=>{const isDone=done.includes(idx);const isNext=!isDone&&(idx===0||done.includes(idx-1));return `<div class="day-step ${isDone?'completed':isNext?'current':'locked'}" onclick="${isDone||isNext?'openArticle('+idx+')':''}"><div class="step-num" style="background:${isDone?'var(--success)':isNext?'var(--accent)':'var(--bg3)'};color:${isDone||isNext?'#fff':'var(--text3)'};">${isDone?'✓':idx+1}</div><div><div style="font-weight:600;font-size:14px;">${art.title}</div><div style="font-size:12px;color:var(--text3);">${isDone?'완료':'기사 읽기 + 문제 풀기'}</div></div></div>`;}).join('')}<div class="day-step ${allDone?(vDone?'completed':'current'):'locked'}" onclick="${allDone&&!vDone?'startVocab()':''}"><div class="step-num" style="background:${vDone?'var(--success)':allDone?'var(--accent2)':'var(--bg3)'};color:${vDone||allDone?'#fff':'var(--text3)'};">${vDone?'✓':'★'}</div><div><div style="font-weight:600;font-size:14px;">📝 단어 액티비티</div><div style="font-size:12px;color:var(--text3);">${vDone?'완료':allDone?'플래시카드 → 매칭 → 테스트':'기사 3개 완료 후 열림'}</div></div></div></div>`;}
+
+function studentReading(){const art=state.currentArticle;return `<div class="container" style="padding:32px 24px 60px;"><div class="flex flex-between mb-24"><h2 style="margin:0;">${art.title}</h2><button class="btn-ghost" onclick="backTo('daysteps')">← 뒤로</button></div><div class="reading-layout"><div><div class="card mb-24"><div class="article-box">${art.content}</div></div><div class="card"><h3 class="mb-16">문제</h3>${art.questions.map((q,qi)=>`<div style="padding:20px 0;border-bottom:${qi<art.questions.length-1?'1px solid var(--border)':'none'};"><p style="font-weight:600;margin-bottom:12px;font-size:14px;line-height:1.7;">${q.question.replace(/\\n/g,'<br>')}</p>${q.options.map((o,oi)=>`<div class="q-option ${state.answers[qi]===oi?'selected':''}" onclick="answer(${qi},${oi})"><input type="radio" name="q${qi}" ${state.answers[qi]===oi?'checked':''}><span>${o}</span></div>`).join('')}</div>`).join('')}<button class="btn-primary" onclick="submitQuiz()" style="width:100%;justify-content:center;margin-top:16px;">답안 제출</button></div></div><div><div class="card sidebar"><h3 style="margin-bottom:16px;">📝 주요 단어</h3>${art.vocabulary.map(v=>`<div class="vocab-item"><div class="vocab-word">${v.word}</div><div class="vocab-meaning">${v.meaning}</div></div>`).join('')}</div></div></div></div>`;}
+
+function studentResults(){const art=state.currentArticle;const c=art.questions.filter((q,i)=>state.answers[i]===q.answer).length;const t=art.questions.length;const p=Math.round(c/t*100);return `<div class="container" style="padding:60px 24px;"><div class="card" style="max-width:500px;margin:0 auto;text-align:center;padding:48px;"><div class="score-circle" style="background:${p>=75?'var(--success-bg)':'var(--danger-bg)'};color:${p>=75?'var(--success)':'var(--danger)'};">${c}/${t}</div><h2 style="margin-bottom:8px;">${art.title} 완료!</h2><p style="color:var(--text2);margin-bottom:32px;">${p}점</p><button class="btn-primary" onclick="backTo('daysteps')" style="width:100%;justify-content:center;">다음 단계로</button></div></div>`;}
+
+/* === VOCAB ACTIVITY === */
+function startVocab(){const a=S.get('articles')||{};const da=a['level'+state.selectedLevel]?.[state.selectedDay]||[];const allV=[];const seen=new Set();da.forEach(art=>(art.vocabulary||[]).forEach(v=>{if(!seen.has(v.word)){allV.push(v);seen.add(v.word);}}));state.vocabData={words:allV,idx:0,flipped:false,matchPairs:[],matchSel:null,matchDone:new Set(),testQ:null,testA:{},score:null};state.vocabPhase='flashcard';state.studentView='vocab';render();}
+
+function studentVocab(){const vd=state.vocabData;const ph=state.vocabPhase;const tw=vd.words.length;let content='';
+if(ph==='flashcard'){const w=vd.words[vd.idx];content=`<div style="text-align:center;margin-bottom:16px;"><p style="font-size:14px;color:var(--text2);">${vd.idx+1} / ${tw}</p></div><div class="progress-bar"><div class="progress-fill" style="width:${(vd.idx+1)/tw*100}%"></div></div><div class="flashcard ${vd.flipped?'flipped':''}" onclick="flipCard()"><div class="flashcard-inner"><div class="flashcard-front"><div class="flashcard-word">${w.word}</div><div class="flashcard-hint">클릭하여 뜻 보기</div></div><div class="flashcard-back"><div class="flashcard-meaning">${w.meaning}</div><div style="font-size:14px;color:var(--text2);margin-top:8px;">${w.word}</div></div></div></div><div class="flex flex-gap" style="justify-content:center;"><button ${vd.idx===0?'disabled':''} onclick="prevCard()">← 이전</button>${vd.idx<tw-1?`<button class="btn-primary" onclick="nextCard()">다음 →</button>`:`<button class="btn-primary" onclick="goMatch()">매칭 게임 →</button>`}</div>`;}
+else if(ph==='matching'){const p=vd.matchPairs;content=`<div class="progress-bar"><div class="progress-fill" style="width:${vd.matchDone.size/p.length*100}%"></div></div><p style="text-align:center;font-size:14px;color:var(--text2);margin-bottom:24px;">단어와 뜻을 짝지어 보세요! (${vd.matchDone.size/2}/${p.length/2})</p><div class="match-grid">${p.map((item,i)=>{const d=vd.matchDone.has(i);const s=vd.matchSel===i;return `<div class="match-card ${d?'matched':s?'selected':''}" onclick="${d?'':`matchClick(${i})`}">${d?'✓':item.text}</div>`;}).join('')}</div>${vd.matchDone.size===p.length?`<div style="text-align:center;margin-top:24px;"><button class="btn-primary" onclick="goTest()">단어 테스트 →</button></div>`:''}`;}
+else if(ph==='test'){const tq=vd.testQ;content=`<div class="progress-bar"><div class="progress-fill" style="width:${Object.keys(vd.testA).length/tq.length*100}%"></div></div>${tq.map((q,qi)=>`<div class="card mb-16"><p style="font-weight:600;margin-bottom:12px;">${qi+1}. "${q.word}"의 뜻은?</p>${q.options.map((o,oi)=>`<div class="q-option ${vd.testA[qi]===oi?'selected':''}" onclick="vtAnswer(${qi},${oi})"><input type="radio" name="vq${qi}" ${vd.testA[qi]===oi?'checked':''}><span>${o}</span></div>`).join('')}</div>`).join('')}<button class="btn-primary" onclick="submitVT()" style="width:100%;justify-content:center;">결과 확인</button>`;}
+else if(ph==='result'){const sc=vd.score;content=`<div style="text-align:center;"><div class="score-circle" style="background:${sc.pct>=80?'var(--success-bg)':'var(--danger-bg)'};color:${sc.pct>=80?'var(--success)':'var(--danger)'};">${sc.c}/${sc.t}</div><h2 style="margin-bottom:8px;">단어 테스트 완료!</h2><p style="color:var(--text2);margin-bottom:32px;">${sc.pct}점${sc.pct>=80?' 🎉':''}</p><button class="btn-primary" onclick="finishVocab()" style="width:100%;justify-content:center;">완료</button></div>`;}
+return `<div class="container" style="padding:32px 24px 60px;"><div class="flex flex-between mb-24"><h2 style="margin:0;">📝 단어 액티비티</h2><button class="btn-ghost" onclick="backTo('daysteps')">← 뒤로</button></div><div class="step-indicator mb-24">${['flashcard','matching','test','result'].map(p=>`<div class="step-dot ${p===ph?'active':['flashcard','matching','test','result'].indexOf(p)<['flashcard','matching','test','result'].indexOf(ph)?'done':''}"></div>`).join('')}</div><div style="text-align:center;margin-bottom:24px;"><span class="info-tag tag-purple">${{flashcard:'1단계: 플래시카드',matching:'2단계: 매칭 게임',test:'3단계: 단어 테스트',result:'결과'}[ph]}</span></div><div style="max-width:650px;margin:0 auto;">${content}</div></div>`;}
+
+function flipCard(){state.vocabData.flipped=!state.vocabData.flipped;render();}
+function nextCard(){state.vocabData.idx++;state.vocabData.flipped=false;render();}
+function prevCard(){state.vocabData.idx--;state.vocabData.flipped=false;render();}
+function goMatch(){const w=state.vocabData.words.slice(0,8);const p=[];w.forEach(v=>{p.push({text:v.word,type:'w',id:v.word});p.push({text:v.meaning,type:'m',id:v.word});});p.sort(()=>Math.random()-.5);state.vocabData.matchPairs=p;state.vocabData.matchSel=null;state.vocabData.matchDone=new Set();state.vocabPhase='matching';render();}
+function matchClick(i){const vd=state.vocabData;if(vd.matchDone.has(i))return;if(vd.matchSel===null){vd.matchSel=i;render();return;}if(vd.matchSel===i){vd.matchSel=null;render();return;}const a=vd.matchPairs[vd.matchSel],b=vd.matchPairs[i];if(a.id===b.id&&a.type!==b.type){vd.matchDone.add(vd.matchSel);vd.matchDone.add(i);vd.matchSel=null;render();}else{vd.matchSel=null;const cards=document.querySelectorAll('.match-card');if(cards[i])cards[i].classList.add('wrong');setTimeout(()=>{if(cards[i])cards[i].classList.remove('wrong');render();},400);}}
+function goTest(){const w=state.vocabData.words;const am=w.map(x=>x.meaning);const tq=w.map(v=>{const wr=am.filter(m=>m!==v.meaning).sort(()=>Math.random()-.5).slice(0,3);const opts=[v.meaning,...wr].sort(()=>Math.random()-.5);return{word:v.word,options:opts,answer:opts.indexOf(v.meaning)};});state.vocabData.testQ=tq;state.vocabData.testA={};state.vocabPhase='test';render();}
+function vtAnswer(qi,oi){state.vocabData.testA[qi]=oi;render();}
+function submitVT(){const vd=state.vocabData;if(Object.keys(vd.testA).length<vd.testQ.length)return alert('모든 문제에 답하세요');let c=0;vd.testQ.forEach((q,i)=>{if(vd.testA[i]===q.answer)c++;});const t=vd.testQ.length;const pct=Math.round(c/t*100);vd.score={c,t,pct};const pr=S.get('progress')||{};if(!pr[user.username])pr[user.username]=[];pr[user.username].push({level:state.selectedLevel,day:state.selectedDay,title:'단어 액티비티',timeSpent:0,correctAnswers:c,totalQuestions:t,wrongQuestions:[],type:'vocab',timestamp:Date.now()});S.set('progress',pr);state.vocabPhase='result';render();}
+function finishVocab(){S.set('vocabdone_'+user.username+'_'+state.selectedLevel+'_'+state.selectedDay,true);backTo('daysteps');}
+
+/* === HANDLERS === */
+function login(){const u=document.getElementById('username').value,p=document.getElementById('password').value;const users=S.get('users');if(users&&users[u]&&users[u].password===p){user={username:u,role:users[u].role,level:users[u].level||1};render();}else{const e=document.getElementById('err');e.textContent='잘못된 정보';e.style.display='block';}}
+function logout(){user=null;editing=null;state={adminView:'students',studentView:'levels',selectedLevel:null,selectedDay:null,currentArticle:null,currentArticleIdx:null,answers:{},showResults:false,startTime:null,vocabPhase:null,vocabData:null};render();}
+function setAV(v){state.adminView=v;editing=null;render();}
+function addStudent(){const u=prompt('학생 사용자명:');if(!u)return;const p=prompt('비밀번호:');if(!p)return;const users=S.get('users')||{};if(users[u])return alert('이미 존재');users[u]={password:p,role:'student',level:1};S.set('users',users);render();}
+function setLevel(u,l){const users=S.get('users');users[u].level=parseInt(l);S.set('users',users);render();}
+function saveApiKey(){const k=document.getElementById('apikey-input').value.trim();if(!k)return alert('키 입력');S.set('apikey',k);alert('✅ 저장됨');render();}
+async function testApiKey(){const k=S.get('apikey');if(!k)return alert('키 없음');try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:50,messages:[{role:"user",content:"Say OK"}]})});if(r.ok)alert('✅ 연결 성공!');else{const d=await r.json().catch(()=>({}));alert('❌ '+(d.error?.message||r.status));}}catch(e){alert('❌ '+e.message);}}
+async function createArt(){const level=document.getElementById('al').value,day=document.getElementById('ad').value,content=document.getElementById('ac').value;if(!content.trim())return alert('내용 입력');const a=S.get('articles')||{};const lk='level'+level,dk='day'+day;if(!a[lk])a[lk]={};if(!a[lk][dk])a[lk][dk]=[];if(a[lk][dk].length>=3)return alert('이미 3개');const num=a[lk][dk].length+1;const st=document.getElementById('gen-status');const btn=document.getElementById('create-btn');if(st)st.style.display='flex';if(btn)btn.disabled=true;const msg=document.getElementById('gen-msg');if(msg)msg.textContent='Article '+num+' 생성 중...';let result=null,ai=false;if(S.get('apikey')){result=await generateWithAI(content,num);if(result)ai=true;}if(!result){const v=localExtract(content);result={vocabulary:v,questions:localQuestions(content,v)};}a[lk][dk].push({title:'Article '+num,content,vocabulary:result.vocabulary,questions:result.questions,aiGenerated:ai});S.set('articles',a);document.getElementById('ac').value='';if(st)st.style.display='none';if(btn)btn.disabled=false;alert('✅ Article '+num+' 생성!\n단어:'+result.vocabulary.length+'개, 문제:4개'+(ai?' (AI)':''));render();}
+function openEdit(l,d,i){const a=S.get('articles')||{};editing={level:l,day:d,idx:i,article:JSON.parse(JSON.stringify(a['level'+l][d][i]))};render();}
+function closeEdit(){editing=null;render();}
+async function saveEdit(){if(!editing)return;const t=document.getElementById('et').value,c=document.getElementById('ec').value;const a=S.get('articles')||{};const{level,day,idx}=editing;const num=idx+1;let result=null,ai=false;if(S.get('apikey')){result=await generateWithAI(c,num);if(result)ai=true;}if(!result){const v=localExtract(c);result={vocabulary:v,questions:localQuestions(c,v)};}a['level'+level][day][idx]={title:t,content:c,vocabulary:result.vocabulary,questions:result.questions,aiGenerated:ai};S.set('articles',a);alert('수정 완료!');editing=null;render();}
+function deleteArt(l,d,i){if(!confirm('삭제?'))return;const a=S.get('articles')||{};a['level'+l][d].splice(i,1);if(a['level'+l][d].length===0)delete a['level'+l][d];S.set('articles',a);render();}
+function selectLevel(l){if(l>user.level)return;state.selectedLevel=l;state.studentView='days';render();}
+function selectDay(d){state.selectedDay=d;state.studentView='daysteps';render();}
+function openArticle(i){const a=S.get('articles')||{};state.currentArticle=a['level'+state.selectedLevel][state.selectedDay][i];state.currentArticleIdx=i;state.answers={};state.showResults=false;state.startTime=Date.now();state.studentView='reading';render();}
+function answer(qi,oi){state.answers[qi]=oi;render();}
+function backTo(v){state.studentView=v;if(v==='levels'){state.selectedLevel=null;state.selectedDay=null;}if(v==='days')state.selectedDay=null;state.currentArticle=null;state.answers={};state.showResults=false;state.vocabPhase=null;render();}
+function submitQuiz(){const art=state.currentArticle;if(Object.keys(state.answers).length<art.questions.length)return alert('모든 문제에 답하세요');const ts=Math.floor((Date.now()-state.startTime)/1000);let c=0;const w=[];art.questions.forEach((q,i)=>{if(state.answers[i]===q.answer)c++;else w.push(i+1);});markArticleDone(state.selectedLevel,state.selectedDay,state.currentArticleIdx);const pr=S.get('progress')||{};if(!pr[user.username])pr[user.username]=[];pr[user.username].push({level:state.selectedLevel,day:state.selectedDay,title:art.title,timeSpent:ts,correctAnswers:c,totalQuestions:art.questions.length,wrongQuestions:w,timestamp:Date.now()});S.set('progress',pr);state.showResults=true;render();}
+
+document.addEventListener('DOMContentLoaded',()=>{init();render();document.addEventListener('keypress',e=>{if(e.key==='Enter'&&!user)login();});});
+</script>
+</body>
+</html>
