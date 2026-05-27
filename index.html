@@ -401,6 +401,24 @@ function goBackFromTests(){
     openCat(curCat);
   }
 }
+
+
+// ═══════════════════════════════════════════════════════════════════
+// TERRYS_BRIDGE v2 (index) — 학생 이름을 sessionStorage에 저장만
+// 자식 페이지(시험 파일)들이 sessionStorage에서 가져갈 수 있게 함
+// ═══════════════════════════════════════════════════════════════════
+(function(){
+    var params = new URLSearchParams(location.search);
+    var s = params.get('student');
+    var sid = params.get('sid') || '';
+    if(!s) return;
+    try{
+        sessionStorage.setItem('terrys_embed_student', s);
+        if(sid) sessionStorage.setItem('terrys_embed_sid', sid);
+    }catch(e){}
+})();
+// ═══════════════════════════════════════════════════════════════════
+
 </script>
 </body>
 </html>

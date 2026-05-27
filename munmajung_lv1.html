@@ -981,6 +981,97 @@ renderGrid();
 })();
 // ═══════════════════════════════════════════════════════════════════
 
+
+
+// ═══════════════════════════════════════════════════════════════════
+// TERRYS_BRIDGE v2 — 테리스 학생 사이트(iframe) 연동
+// URL ?student=NAME 또는 sessionStorage에서 이름 가져옴 (탭 내 모든 페이지에서 살아있음)
+// 단독 접속(파라미터·세션 둘 다 없음) 시엔 기존 동작 그대로
+// ═══════════════════════════════════════════════════════════════════
+(function(){
+    var params = new URLSearchParams(location.search);
+    var urlStudent = params.get('student');
+    var urlSid = params.get('sid') || '';
+    // URL에 있으면 sessionStorage에 저장 (같은 탭의 모든 페이지가 공유)
+    if(urlStudent){
+        try{
+            sessionStorage.setItem('terrys_embed_student', urlStudent);
+            if(urlSid) sessionStorage.setItem('terrys_embed_sid', urlSid);
+        }catch(e){}
+    } else {
+        // URL에 없으면 sessionStorage에서 복원
+        try{
+            urlStudent = sessionStorage.getItem('terrys_embed_student');
+            urlSid = sessionStorage.getItem('terrys_embed_sid') || '';
+        }catch(e){}
+    }
+    if(!urlStudent) return; // 진짜 없으면 (단독 사용) 종료
+
+    function fillName(){
+        var ni = document.getElementById('name-in');
+        if(ni){
+            ni.value = urlStudent;
+            ni.style.display = 'none';
+            var lbl = document.querySelector('label[for="name-in"]');
+            if(!lbl && ni.previousElementSibling && ni.previousElementSibling.tagName === 'LABEL') lbl = ni.previousElementSibling;
+            if(lbl) lbl.style.display = 'none';
+        }
+    }
+    function hideAdminBtn(){
+        var btns = document.querySelectorAll('button');
+        for(var i=0;i<btns.length;i++){
+            var t = btns[i].textContent || '';
+            if(t.indexOf('관리자 로그인') !== -1) btns[i].style.display = 'none';
+        }
+    }
+    function ready(fn){
+        if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+        else fn();
+    }
+    ready(fillName); ready(hideAdminBtn);
+    // 안전망: openChapter / goHome 등이 name-in을 비워도 즉시 다시 채움
+    setInterval(function(){
+        var ni = document.getElementById('name-in');
+        if(ni && ni.value !== urlStudent) ni.value = urlStudent;
+    }, 200);
+
+    // Firebase POST 가로채기 → 부모창에 결과 전달
+    var FB_HOST = 'terrys-d643a-default-rtdb.firebaseio.com';
+    var origFetch = window.fetch.bind(window);
+    window.fetch = function(url, opts){
+        try{
+            if(typeof url === 'string' && url.indexOf(FB_HOST) !== -1
+               && opts && opts.method === 'POST' && opts.body){
+                var payload = JSON.parse(opts.body);
+                if(window.parent && window.parent !== window){
+                    var msg = {
+                        type:'TERRYS_QUIZ_RESULT',
+                        studentId: urlSid,
+                        studentName: urlStudent,
+                        testFile: (location.pathname.split('/').pop() || ''),
+                        payload: payload,
+                        Q:null, mcAns:null, saAns:null, ans:null,
+                        MC_COUNT:null, curCh:null, chapterTitle:null,
+                        selectedChs:null, selectedRounds:null
+                    };
+                    try{ if(window.Q) msg.Q = JSON.parse(JSON.stringify(window.Q)); }catch(e){}
+                    try{ if(window.mcAns) msg.mcAns = [].slice.call(window.mcAns); }catch(e){}
+                    try{ if(window.saAns) msg.saAns = [].slice.call(window.saAns); }catch(e){}
+                    try{ if(window.ans) msg.ans = [].slice.call(window.ans); }catch(e){}
+                    try{ if(typeof window.MC_COUNT === 'number') msg.MC_COUNT = window.MC_COUNT; }catch(e){}
+                    try{ if(typeof window.curCh !== 'undefined') msg.curCh = window.curCh; }catch(e){}
+                    try{ if(window.CHAPTERS && typeof window.curCh !== 'undefined' && window.CHAPTERS[window.curCh]) msg.chapterTitle = window.CHAPTERS[window.curCh].title; }catch(e){}
+                    try{ if(window.selectedChs) msg.selectedChs = [].slice.call(window.selectedChs); }catch(e){}
+                    try{ if(window.selectedRounds) msg.selectedRounds = [].slice.call(window.selectedRounds); }catch(e){}
+                    window.parent.postMessage(msg, '*');
+                }
+            }
+        }catch(e){}
+        return origFetch(url, opts);
+    };
+})();
+// ═══════════════════════════════════════════════════════════════════
+
 </script>
 </body>
 </html>
