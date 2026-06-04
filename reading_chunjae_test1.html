@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>본문 N제 변형 1~25 · New Ideas Bring Big Changes</title>
+<style>
+  :root{
+    --orange:#d97706; --orange-d:#b45309; --orange-l:#fef3c7;
+    --ink:#1f2937; --gray:#6b7280; --line:#e5e7eb; --bg:#fafaf9;
+    --ok:#059669; --ok-bg:#ecfdf5; --no:#dc2626; --no-bg:#fef2f2;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.7; padding:0 0 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px}
+  header{
+    background:linear-gradient(135deg,var(--orange),var(--orange-d));
+    color:#fff;padding:26px 16px 22px;text-align:center;margin-bottom:20px;
+    box-shadow:0 2px 10px rgba(180,83,9,.25)
+  }
+  header h1{font-size:1.25rem;font-weight:800;letter-spacing:-.3px}
+  header p{font-size:.85rem;opacity:.92;margin-top:4px}
+  .bar{
+    position:sticky;top:0;z-index:30;background:rgba(255,255,255,.95);
+    backdrop-filter:blur(6px);border-bottom:1px solid var(--line);
+    padding:10px 16px;display:flex;align-items:center;gap:12px;
+  }
+  .bar .prog{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+  .bar .prog>i{display:block;height:100%;width:0;background:var(--orange);transition:width .3s}
+  .bar .count{font-size:.82rem;color:var(--gray);font-weight:600;white-space:nowrap}
+  .name-row{margin:0 0 18px;display:flex;gap:8px;align-items:center}
+  .name-row label{font-weight:700;font-size:.9rem;white-space:nowrap}
+  .name-row input{
+    flex:1;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.95rem
+  }
+  .q{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:18px 18px 16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)
+  }
+  .q .num{
+    display:inline-block;background:var(--orange-l);color:var(--orange-d);
+    font-weight:800;font-size:.78rem;padding:3px 10px;border-radius:99px;margin-bottom:10px
+  }
+  .q .ask{font-weight:700;font-size:.98rem;margin-bottom:12px;word-break:keep-all}
+  .q .title{font-weight:700;color:var(--orange-d);font-size:.92rem;margin-bottom:6px}
+  .passage{
+    background:#fbfbf9;border:1px solid var(--line);border-left:3px solid var(--orange);
+    border-radius:8px;padding:12px 14px;font-size:.92rem;white-space:pre-wrap;
+    margin-bottom:12px;color:#374151
+  }
+  .given{
+    background:var(--orange-l);border-radius:8px;padding:10px 14px;font-size:.92rem;
+    margin-bottom:12px;font-style:italic
+  }
+  .summary{
+    background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:.92rem;
+    margin:10px 0;text-align:center;font-weight:500
+  }
+  .extra{font-size:.88rem;color:#4b5563;background:#f9fafb;border-radius:8px;
+    padding:10px 12px;margin-bottom:12px;white-space:pre-wrap}
+  .choices{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .choices li{
+    border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;
+    font-size:.93rem;display:flex;gap:9px;align-items:flex-start;transition:.15s;background:#fff
+  }
+  .choices li:hover{border-color:var(--orange);background:#fffdf7}
+  .choices li.sel{border-color:var(--orange);background:var(--orange-l);font-weight:600}
+  .choices li .ci{
+    flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--gray);
+    display:grid;place-items:center;font-size:.78rem;font-weight:700;color:var(--gray)
+  }
+  .choices li.sel .ci{background:var(--orange);border-color:var(--orange);color:#fff}
+  .sa-input{
+    width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+    font-size:.95rem;font-family:inherit
+  }
+  .sa-input:focus{outline:none;border-color:var(--orange)}
+  /* 채점 후 */
+  .choices li.correct{border-color:var(--ok);background:var(--ok-bg)}
+  .choices li.correct .ci{background:var(--ok);border-color:var(--ok);color:#fff}
+  .choices li.wrong{border-color:var(--no);background:var(--no-bg)}
+  .choices li.wrong .ci{background:var(--no);border-color:var(--no);color:#fff}
+  .verdict{margin-top:10px;font-weight:700;font-size:.88rem;display:flex;gap:6px;align-items:center}
+  .verdict.ok{color:var(--ok)} .verdict.no{color:var(--no)}
+  .expl{
+    margin-top:10px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;
+    padding:11px 13px;font-size:.88rem;color:#4b5563
+  }
+  .expl b{color:var(--orange-d)}
+  .sa-answer{margin-top:8px;font-size:.9rem}
+  .sa-answer .lab{font-weight:700;color:var(--ok)}
+  .submit{
+    display:block;width:100%;background:var(--orange);color:#fff;border:none;
+    padding:15px;border-radius:14px;font-size:1.05rem;font-weight:800;cursor:pointer;
+    margin-top:8px;box-shadow:0 3px 10px rgba(217,119,6,.3);transition:.15s
+  }
+  .submit:hover{background:var(--orange-d)}
+  .submit:disabled{opacity:.5;cursor:not-allowed}
+  .result{
+    background:linear-gradient(135deg,var(--orange),var(--orange-d));color:#fff;
+    border-radius:18px;padding:26px 20px;text-align:center;margin-bottom:18px;display:none
+  }
+  .result.show{display:block}
+  .result .score{font-size:2.6rem;font-weight:900;line-height:1}
+  .result .sub{opacity:.92;margin-top:8px;font-size:.95rem}
+  .result .detail{font-size:.85rem;opacity:.85;margin-top:4px}
+  .retry{
+    background:#fff;color:var(--orange-d);border:none;padding:10px 22px;border-radius:99px;
+    font-weight:700;cursor:pointer;margin-top:14px;font-size:.9rem
+  }
+  /* admin */
+  .admin-toggle{
+    position:fixed;bottom:16px;right:16px;z-index:50;background:#374151;color:#fff;
+    border:none;width:48px;height:48px;border-radius:50%;font-size:1.1rem;cursor:pointer;
+    box-shadow:0 3px 12px rgba(0,0,0,.3);opacity:.55
+  }
+  .admin-toggle:hover{opacity:1}
+  .admin-panel{
+    position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:none;
+    padding:20px;overflow-y:auto
+  }
+  .admin-panel.show{display:block}
+  .admin-box{
+    max-width:720px;margin:0 auto;background:#fff;border-radius:16px;padding:20px;
+  }
+  .admin-box h2{font-size:1.1rem;margin-bottom:4px}
+  .admin-box .hint{font-size:.82rem;color:var(--gray);margin-bottom:16px}
+  .admin-q{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+  .admin-q .aq-num{font-weight:800;color:var(--orange-d);font-size:.85rem}
+  .admin-q .aq-ask{font-size:.85rem;color:#4b5563;margin:4px 0 10px}
+  .admin-q label{display:block;font-size:.8rem;font-weight:700;margin:8px 0 4px;color:#374151}
+  .admin-q select,.admin-q textarea{
+    width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;
+    font-size:.88rem;font-family:inherit
+  }
+  .admin-q textarea{min-height:60px;resize:vertical}
+  .admin-actions{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;background:#fff;padding-top:10px}
+  .admin-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-weight:700;cursor:pointer;font-size:.92rem}
+  .btn-save{background:var(--orange);color:#fff}
+  .btn-close{background:var(--line);color:#374151}
+  .edited-flag{font-size:.72rem;color:var(--orange);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>본문 N제 변형 1~25</h1>
+  <p>3. New Ideas Bring Big Changes · 중2 영어</p>
+</header>
+
+<div class="bar">
+  <div class="prog"><i id="progBar"></i></div>
+  <span class="count" id="count">0 / 25</span>
+</div>
+
+<div class="wrap">
+  <div class="name-row">
+    <label>이름</label>
+    <input id="studentName" placeholder="이름을 입력하세요" autocomplete="off">
+  </div>
+
+  <div class="result" id="result">
+    <div class="score" id="scoreNum">0점</div>
+    <div class="sub" id="scoreSub"></div>
+    <div class="detail" id="scoreDetail"></div>
+    <button class="retry" onclick="location.reload()">다시 풀기</button>
+  </div>
+
+  <div id="quizArea"></div>
+
+  <button class="submit" id="submitBtn">채점하기</button>
+</div>
+
+<button class="admin-toggle" id="adminToggle" title="관리자">⚙</button>
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-box">
+    <h2>관리자 — 문항 편집</h2>
+    <p class="hint">정답과 오답해설을 직접 수정할 수 있습니다. 저장하면 이 브라우저에 반영되어 학생 화면에 바로 적용됩니다. (Firebase 연결 시 서버에 저장되도록 전환 가능)</p>
+    <div id="adminList"></div>
+    <div class="admin-actions">
+      <button class="btn-close" id="adminClose">닫기</button>
+      <button class="btn-save" id="adminSave">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 변형시험지 1~25번 — PDF 원문 그대로 전사 (변형 없음)
+// 출처: 본문 N제 3.New Ideas Bring Big Changes / 중2 영어 천재(소영순)
+// type: "mc" 객관식(choices c[], 정답 인덱스 a), "sa" 단답(정답 a, 허용답 accepts[])
+
+const PASSAGES = {
+  drone_control: `G: I saw that your drone passed through the rings. That was cool!
+M: Thanks. Do you want to try it?
+G: I'd love to. How can I fly the drone?
+M: You can use this controller.
+G: Could you explain more about it?
+M: Press the green button, and the drone goes up.
+G: I see. What's next?
+M: Press the red button, and it goes down.
+G: It works! Thank you so much.`,
+
+  safety_glass_full: `In 1903, a French scientist, Mr. Bénédictus, was experimenting with liquid plastic in a glass flask. He accidentally hit the glass flask, and it fell on the floor. Although the glass flask was broken into pieces, they still held together in the shape of the flask! How could this happen? The secret was the liquid plastic in the flask. This finding led to his invention of safety glass.`,
+
+  safety_glass_long: `In 1903, a French scientist, Mr. Bénédictus, was experimenting with liquid plastic in a glass flask. He accidentally hit the glass flask, and it fell on the floor. Although the glass flask was broken into pieces, they still held together in the shape of the flask! How could this happen? The secret was the liquid plastic in the flask. This finding led to his invention of safety glass. These days, we can find safety glass everywhere. For example, it is used for car windows. If there is a car accident, people are safer from sharp pieces of glass.`,
+
+  dry_cleaning_intro: `Can you clean your clothes without water? The answer is "yes." Dry cleaning uses oil to clean clothes. There's an interesting story about dry cleaning. In the 1800s, a factory worker in France spilled lamp oil on a tablecloth. The factory manager, Mr. Jolly, looked at the tablecloth and found something. The dirty spot on the tablecloth was cleaned by the lamp oil!`,
+
+  cookie_story: `In America, there was a famous cook, Ms. Wakefield. One day in 1938, she wanted to bake chocolate cookies. However, she didn't have enough time to melt chocolate. So, she cut a chocolate bar into small chips. Then, she mixed them with her dough and put the cookie dough into the oven. When Ms. Wakefield opened the oven, she found that the chips were not melted into the dough.`,
+
+  cookie_full: `A New Cookie Star: Chocolate Chip Cookies
+In America, there was a famous cook, Ms. Wakefield. One day in 1938, she wanted to bake chocolate cookies. However, she didn't have enough time to melt chocolate. So, she cut a chocolate bar into small chips. Then, she mixed them with her dough and put the cookie dough into the oven. When Ms. Wakefield opened the oven, she found that the chips were not melted into the dough. Although the chips remained in the cookies, she was not disappointed. Her new cookies were so delicious. She invented chocolate CHIP cookies!`,
+
+  drone_show: `B: What are you doing?
+G: I'm looking at a poster about a drone show.
+B: When does the drone show begin?
+G: It begins this Saturday near Hangang Park.
+B: Sounds interesting. (A) Could you explain more about it?
+G: Five hundred drones will fly in the sky for the beautiful performance.
+B: That's cool. I'm sure that the show will be exciting.`,
+
+  recorder: `Reporter: Juwon, you won the special prize in the invention contest. Great job!
+Juwon: Thank you. I'm proud of my invention.
+Reporter: What's your invention?
+Juwon: It's a recorder which doesn't bother other people.
+Reporter: How does it work? Could you explain more about it?
+Juwon: I connected headphones to the recorder with a simple device. The device sends the sound from the recorder to the headphones.
+Reporter: That's cool. When you wear the headphones, only you can hear the sound.
+Juwon: Right. People can play the recorder any time. I'm sure that this invention will be very helpful.`,
+
+  cookie_short10: `So, she cut a chocolate bar into small chips. Then, she mixed them with her dough and put the cookie dough into the oven. When Ms. Wakefield opened the oven, she found that the chips were not melted into the dough. Although the chips remained in the cookies, she was not disappointed. Her new cookies were so delicious.`,
+};
+
+const QUESTIONS = [
+  {
+    id: 1,
+    type: "mc",
+    q: "다음 글의 내용을 한 문장으로 요약하고자 한다. 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것은?",
+    passage: "drone_control",
+    summary: "To control the ____(A)____ of the drone, you need to use different ____(B)____.",
+    c: [
+      "(A) speed  (B) colors",
+      "(A) height  (B) buttons",
+      "(A) shape  (B) wings",
+      "(A) weight  (B) sticks",
+      "(A) battery  (B) lines"
+    ],
+    a: 1,
+    expl: "버튼을 눌러 드론을 오르내리게 하는 것이므로, 드론의 높이(height)를 조절하기 위해 다른 버튼(buttons)을 사용해야 한다는 내용이 적절하다. ① 속도-색상 ③ 모양-날개 ④ 무게-스틱 ⑤ 배터리-선"
+  },
+  {
+    id: 2,
+    type: "mc",
+    q: "글의 흐름으로 보아, 주어진 문장이 들어가기에 가장 적절한 곳은?",
+    given: "These wonderful inventions came by chance.",
+    passage_text: `The dirty spot on the tablecloth was cleaned by the lamp oil! ( ① ) His discovery led to a new way of cleaning clothes. ( ② ) Now, dry cleaning is widely used around the world. ( ③ ) When things go wrong, don't be disappointed. ( ④ ) Maybe you can be ( ⑤ ) the next amazing inventor.`,
+    c: ["①", "②", "③", "④", "⑤"],
+    a: 2,
+    expl: "주어진 문장은 앞에서 언급된 여러 발명 사례들을 아우르는 결론적인 문장이다. 드라이클리닝 이야기가 마무리되는 문장 ③ 뒤에 와서 \"이런 발명들은 우연히 왔다\"고 정리하고, 뒤따르는 교훈적인 문장 ③으로 이어지는 흐름이 적절하다."
+  },
+  {
+    id: 3,
+    type: "mc",
+    q: "다음 글의 내용과 일치하지 않는 것은?",
+    title: "Finding Safety in Glass: Safety Glass",
+    passage: "safety_glass_full",
+    c: [
+      "The scientist was not planning to break the flask.",
+      "The glass flask was made of liquid plastic from the start.",
+      "The broken pieces did not move away from each other.",
+      "The event in the laboratory happened in the early 1900s.",
+      "A specific material inside the bottle kept the glass in place."
+    ],
+    a: 1,
+    expl: "지문에 따르면 과학자는 유리 플라스크 안에서 액체 플라스틱을 가지고 실험 중이었던 것이지, 플라스크 자체가 처음부터 액체 플라스틱으로 만들어진 것은 아니므로 ②는 내용과 일치하지 않는다."
+  },
+  {
+    id: 4,
+    type: "mc",
+    q: "빈칸 (A)와 (B)에 들어갈 말로 가장 알맞게 짝지어진 것은?",
+    passage_text: `A: Who (A)_____ the vase?
+B: It (B)______ by the cat a moment ago.`,
+    c: [
+      "(A) broke  (B) has broken",
+      "(A) broke  (B) was broken",
+      "(A) was broken  (B) broke",
+      "(A) was broken  (B) was breaking",
+      "(A) was breaking  (B) was broken"
+    ],
+    a: 1,
+    expl: "(A) '누가 꽃병을 깨뜨렸는가?'라는 능동의 의미이며 과거의 일을 묻는 것이므로 과거형 broke가 적절하다. (B) 주어 it은 꽃병을 가리키며, 꽃병은 깨지는 대상이므로 수동태인 「be 동사 + 과거분사」가 필요하다. 'a moment ago'가 과거를 나타내므로 was broken이 와야 한다."
+  },
+  {
+    id: 5,
+    type: "mc",
+    q: "다음 글을 요약한 문장의 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것은?",
+    passage: "safety_glass_long",
+    summary: "Safety glass was invented by ____(A)____ and it helps keep people ____(B)____ in accidents.",
+    c: [
+      "(A) chance  (B) safe",
+      "(A) effort  (B) happy",
+      "(A) mistake  (B) healthy",
+      "(A) plan  (B) fast",
+      "(A) study  (B) strong"
+    ],
+    a: 0,
+    expl: "안전유리는 실험 중 실수로 플라스크를 떨어뜨린 '우연'에 의해 발명되었으며, 사고 시 사람들을 '안전'하게 지켜주는 역할을 하므로 빈칸 (A)에는 'chance', (B)에는 'safe'가 들어가는 것이 가장 적절하다. ② 노력-행복한 ③ 실수-건강한 ④ 계획-빠른 ⑤ 연구-강한"
+  },
+  {
+    id: 6,
+    type: "mc",
+    q: "글의 흐름으로 보아, 주어진 문장이 들어가기에 가장 적절한 곳은?",
+    given: "In the 1800s, a factory worker in France spilled lamp oil on a tablecloth.",
+    passage_text: `Can you clean your clothes without water? ( ① ) The answer is "yes." ( ② ) Dry cleaning uses oil to clean clothes. ( ③ ) There's an interesting story about dry cleaning. ( ④ ) The factory manager, Mr. Jolly, looked at the tablecloth and found something. ( ⑤ ) The dirty spot on the tablecloth was cleaned by the lamp oil!`,
+    c: ["①", "②", "③", "④", "⑤"],
+    a: 3,
+    expl: "주어진 문장은 드라이클리닝 일화의 본격적인 시작이다. 흥미로운 이야기가 있다는 문장 ④ 다음에 와서 사건의 발단(기름을 쏟음)을 알리고, 그 뒤에 매니저인 Jolly 씨가 등장하는 문장이 오는 흐름이 적절하다."
+  },
+  {
+    id: 7,
+    type: "mc",
+    q: "다음 중 'Though'의 쓰임이 문맥상 자연스럽지 않은 문장은?",
+    c: [
+      "Though the soup was delicious, I ate it all.",
+      "I want to go to the park, even though it's raining.",
+      "Though she is small, she is a great basketball player.",
+      "Though he is 70 years old, he still exercises every day.",
+      "Though the store was closed, there were some lights on inside."
+    ],
+    a: 0,
+    expl: "'비록 수프가 맛있었지만, 나는 그것을 다 먹었다.'라는 표현은 앞뒤 맥락이 상반되지 않으므로 어색하다. 수프가 맛있어서 다 먹은 것은 원인과 결과의 관계이므로 though를 because로 고쳐야 자연스럽다."
+  },
+  {
+    id: 8,
+    type: "mc",
+    q: "다음 글의 주제로 가장 적절한 것은?",
+    passage: "cookie_story",
+    c: [
+      "The history of American baking in the 1930s",
+      "A unique way to melt chocolate bars in an oven",
+      "How a time problem led to a new kind of cookie",
+      "The reason why Ms. Wakefield became a famous cook",
+      "Different types of dough used for making sweet snacks"
+    ],
+    a: 2,
+    expl: "초콜릿을 녹일 시간이 부족해서 초콜릿 바를 조각내어 넣은 우발적인 상황이 어떻게 새로운 쿠키의 탄생으로 이어졌는지를 다루는 글이다. 따라서 글의 주제로 가장 적절한 것은 ③ '시간 문제가 어떻게 새로운 종류의 쿠키로 이어졌는가'이다."
+  },
+  {
+    id: 9,
+    type: "mc",
+    q: "다음 글의 밑줄 친 (A)가 흐름상 시사하는 바로 가장 적절한 것은?",
+    passage: "drone_show",
+    underline: "(A) Could you explain more about it?",
+    c: [
+      "The boy wants to know the price of the poster.",
+      "The boy is not interested in the performance at all.",
+      "The boy wants to get more information about the show.",
+      "The boy thinks the girl is doing something very boring.",
+      "The boy already knows everything about the drone show."
+    ],
+    a: 2,
+    expl: "소년이 \"그것에 대해 더 설명해 줄 수 있니?\"라고 묻는 것은 여자가 보고 있는 드론 쇼에 대해 흥미를 느끼고 더 구체적인 정보를 얻고 싶어 함을 나타낸다. 따라서 정답은 ③ '소년은 쇼에 대해 더 많은 정보를 얻고 싶어 한다'이다."
+  },
+  {
+    id: 10,
+    type: "mc",
+    q: "다음 글의 내용으로 보아 추론할 수 없는 것은?",
+    passage: "cookie_short10",
+    c: [
+      "The oven's heat did not melt the chocolate chips all the way.",
+      "Ms. Wakefield thought the cookies were bad because the chips didn't melt.",
+      "Cutting the chocolate into chips was a fast way to get ready.",
+      "The result was not the same as Ms. Wakefield's first plan.",
+      "The good taste was more important than the way she made the cookies."
+    ],
+    a: 1,
+    expl: "지문에서 초콜릿 칩이 녹지 않았음에도 그녀는 '실망하지 않았다(not disappointed)'고 했으며 쿠키가 '매우 맛있었다(so delicious)'고 했으므로, 그녀가 쿠키가 형편없다고 생각했다는 ②는 잘못된 추론이다."
+  },
+  {
+    id: 11,
+    type: "sa",
+    q: "다음 문장에서 어법상 틀린 부분을 찾아 문장 전체를 바르게 고쳐 쓰시오.",
+    given: "The houses was build by the company.",
+    a: "The houses were built by the company.",
+    accepts: [
+      "the houses were built by the company.",
+      "the houses were built by the company",
+      "The houses were built by the company",
+      "The house was built by the company.",
+      "the house was built by the company.",
+      "The house was built by the company"
+    ],
+    expl: "주어(The houses)가 복수이므로 be동사는 were를 써야 하며, 수동태 'be+p.p.' 형태에 따라 build의 과거분사인 built를 써야 한다."
+  },
+  {
+    id: 12,
+    type: "mc",
+    q: "다음 글에 나타난 Ms. Wakefield의 심경 변화로 가장 적절한 것은?",
+    passage_text: `One day in 1938, she wanted to bake chocolate cookies. However, she didn't have enough time to melt chocolate. So, she cut a chocolate bar into small chips. When Ms. Wakefield opened the oven, she found that the chips were not melted into the dough. Although the chips remained in the cookies, she was not disappointed. Her new cookies were so delicious.`,
+    c: [
+      "excited → angry",
+      "worried → satisfied",
+      "bored → surprised",
+      "happy → lonely",
+      "tired → disappointed"
+    ],
+    a: 1,
+    expl: "초콜릿을 녹일 시간이 없어 쿠키가 제대로 만들어질지 걱정스러운 상황이었으나, 결과적으로 녹지 않은 초콜릿 조각이 들어간 쿠키가 매우 맛있어서 만족스러운 결과를 얻게 된 흐름이다. 따라서 정답은 ② '걱정되는 → 만족한'이다."
+  },
+  {
+    id: 13,
+    type: "sa",
+    q: "다음 글을 읽고, 요약문에서 글의 내용과 일치하지 않는 곳을 2개 찾아 바르게 고치시오. [형식: chocolate→time, on purpose→by chance 처럼 화살표로 쓰세요]",
+    passage: "cookie_full",
+    extra: `요약문: In 1938, Ms. Wakefield, a famous American cook, wanted to bake chocolate cookies. However, she didn't have enough chocolate, so she cut a chocolate bar into small chips and mixed them with her dough. When she opened the oven, the chips were not melted into the dough. As a result, she invented chocolate chip cookies on purpose.`,
+    a: "(1) chocolate → time  (2) on purpose → by chance",
+    accepts: [
+      "chocolate → time, on purpose → by chance",
+      "chocolate->time, on purpose->by chance",
+      "(1) chocolate→time (2) on purpose→by chance",
+      "chocolate → time / on purpose → by chance",
+      "time, by chance",
+      "(1) chocolate → time (2) on purpose → by chance"
+    ],
+    expl: "(1) Wakefield 씨는 초콜릿을 녹일 충분한 시간이 없었다고 하였으므로, 부족했던 것은 'chocolate(초콜릿)'이 아닌 'time(시간)'이다. (2) 초콜릿 조각들이 반죽에 녹아들지 않아서 초콜릿 칩 쿠키를 만들게 된 것이므로 'on purpose(의도적으로)'가 아니라 'by chance(우연히)' 발명한 것이다."
+  },
+  {
+    id: 14,
+    type: "mc",
+    q: "주어진 글의 빈칸에 들어갈 말로 가장 적절한 것은?",
+    title: "A New Cookie Star: Chocolate Chip Cookies",
+    passage_text: `In America, there was a famous cook, Ms. Wakefield. One day in 1938, she wanted to bake chocolate cookies. However, she didn't have enough time to melt chocolate. So, she cut a chocolate bar into small chips. Then, she mixed them with her dough and put the cookie dough into the oven. When Ms. Wakefield opened the oven, she found that the chips were not melted into the dough. Although the chips remained in the cookies, she was not disappointed. ________. She invented chocolate CHIP cookies!`,
+    c: [
+      "Her dough was too soft",
+      "Her oven was not working",
+      "Her new snack tasted great",
+      "Her kitchen was very messy",
+      "Her cookies were not popular"
+    ],
+    a: 2,
+    expl: "실망하지 않았던 이유가 쿠키가 매우 맛있었기 때문이라는 내용이 이어져야 하므로 정답은 ③ '그녀의 새로운 간식은 맛이 아주 좋았다'이다."
+  },
+  {
+    id: 15,
+    type: "mc",
+    q: "다음 글의 ①~⑤ 중 글의 흐름상 주어진 문장이 들어갈 위치로 가장 적절한 곳은?",
+    given: "When you wear the headphones, only you can hear the sound.",
+    passage_text: `Reporter: Juwon, you won the special prize in the invention contest. Great job! ( ① )
+Juwon: Thank you. I'm proud of my invention. ( ② )
+Reporter: What's your invention? ( ③ )
+Juwon: It's a recorder which doesn't bother other people. ( ④ )
+Reporter: How does it work? Could you explain more about it?
+Juwon: I connected headphones to the recorder with a simple device. The device sends the sound from the recorder to the headphones. ( ⑤ )
+Juwon: Right. People can play the recorder any time. I'm sure that this invention will be very helpful.`,
+    c: ["①", "②", "③", "④", "⑤"],
+    a: 4,
+    expl: "주원이 발명품의 원리(리코더에 헤드폰을 연결하여 소리를 전달함)를 설명한 뒤, 리포터가 그 설명을 듣고 헤드폰을 쓰면 본인만 소리를 들을 수 있겠다고 요약하여 확인하는 내용이 오는 것이 적절하다. 이에 대해 주원이 \"맞아요(Right)\"라고 긍정하며 답변을 이어가므로 주어진 문장의 위치는 ⑤이다."
+  },
+  {
+    id: 16,
+    type: "mc",
+    q: "다음 글의 밑줄 친 It's a recorder which doesn't bother other people.이 흐름상 시사하는 바로 가장 적절한 것은?",
+    passage: "recorder",
+    c: [
+      "It is a recorder that everyone can hear easily.",
+      "It is a device that makes the recorder sound louder.",
+      "It is a recorder that makes people feel uncomfortable.",
+      "It is a special recorder that can be played without making noise to others.",
+      "It is a new instrument that produces a different sound from a normal recorder."
+    ],
+    a: 3,
+    expl: "주원이가 발명한 리코더는 헤드폰을 연결하여 소리가 연주자에게만 들리게 설계되어 타인에게 방해가 되지 않는다는 특징을 가지고 있다. 따라서 밑줄 친 부분이 시사하는 바는 ④ '타인에게 소음을 내지 않고 연주될 수 있는 특별한 리코더이다'가 가장 적절하다."
+  },
+  {
+    id: 17,
+    type: "mc",
+    q: "다음 중 능동태 문장을 수동태로 바르게 전환하지 못한 것은?",
+    c: [
+      "Did the Wright brothers build the first airplane? → Was the first airplane built by the Wright brothers?",
+      "The chef cooked the special soup this morning. → The special soup was cooked by the chef this morning.",
+      "Shakespeare wrote many famous plays long ago. → Many famous plays were written by Shakespeare long ago.",
+      "Where did you lose your gold ring yesterday? → Where were your gold ring lost by you yesterday?",
+      "They didn't fix the broken computer last night. → The broken computer was not fixed by them last night."
+    ],
+    a: 3,
+    expl: "④ 수동태 문장의 주어인 'your gold ring'은 단수이므로, be동사는 were가 아닌 was가 되어야 한다. (Where was your gold ring lost...?) 나머지 문장들은 시제와 수 일치, 과거분사 형태가 모두 올바르게 전환되었다."
+  },
+  {
+    id: 18,
+    type: "mc",
+    q: "다음 글의 목적으로 가장 적절한 것은?",
+    passage_text: `B: What are you doing?
+G: I'm looking at a poster about a drone show.
+B: When does the drone show begin?
+G: It begins this Saturday near Hangang Park.
+B: Sounds interesting. Could you explain more about it?
+G: Five hundred drones will fly in the sky for the beautiful performance.
+B: That's cool. I'm sure that the show will be exciting.`,
+    c: [
+      "드론 쇼 장소를 변경하려고",
+      "드론 쇼 포스터를 그리려고",
+      "드론 쇼에 대한 정보를 공유하려고",
+      "드론 공연에 직접 참가하려고 신청하려고",
+      "드론 조종 방법을 친구에게 가르쳐 주려고"
+    ],
+    a: 2,
+    expl: "소년과 소녀가 드론 쇼의 시기, 장소, 규모에 대한 정보를 나누고 있으므로 글의 목적은 ③이다."
+  },
+  {
+    id: 19,
+    type: "mc",
+    q: "문맥상 빈칸에 들어가기에 가장 적절한 표현은?",
+    passage_text: `The windows were ____________ by Minho. He was at school all day.`,
+    c: ["breaking", "broken", "not break", "not broken", "broken not"],
+    a: 3,
+    expl: "민호가 하루 종일 학교에 있었으므로 창문을 깬 사람이 아니라는 부정이 필요하다. 수동태의 부정문은 「be동사 + not + 과거분사」의 순서로 작성하므로 not broken이 적절하다."
+  },
+  {
+    id: 20,
+    type: "mc",
+    q: "다음 글의 ①~⑤ 중, 아래 문장이 들어가기에 가장 적절한 곳은?",
+    given: "The scientist made a mistake and dropped the glass flask on the floor.",
+    passage_text: `In 1903, a French scientist, Mr. Bénédictus, was experimenting with liquid plastic in a glass flask. ( ① ) Although the glass flask was broken into pieces, they still held together in the shape of the flask! ( ② ) How could this happen? ( ③ ) The secret was the liquid plastic in the flask. ( ④ ) This finding led to his invention of safety glass. ( ⑤ ) These days, we can find safety glass everywhere.`,
+    c: ["①", "②", "③", "④", "⑤"],
+    a: 0,
+    expl: "주어진 문장은 실험 도중 발생한 사고 상황을 묘사한다. 실험 중이었다는 도입 문장 뒤인 ①에 위치하여 사고 발생을 알리고, 그 뒤에 깨졌지만 형태를 유지했다는 결과(문장)가 이어져야 인과 관계가 성립한다."
+  },
+  {
+    id: 21,
+    type: "sa",
+    q: "다음 글의 내용과 일치하도록, 표에서 잘못된 것을 2개 찾아 알맞게 고치시오. [형식: worker→manager 처럼 화살표로 쓰세요]",
+    passage_text: `Can you clean your clothes without water? The answer is "yes." Dry cleaning uses oil to clean clothes. There's an interesting story about dry cleaning. In the 1800s, a factory worker in France spilled lamp oil on a tablecloth. The factory manager, Mr. Jolly, looked at the tablecloth and found something. The dirty spot on the tablecloth was cleaned by the lamp oil! His discovery led to a new way of cleaning clothes. Now, dry cleaning is widely used around the world. These wonderful inventions came by chance. When things go wrong, don't be disappointed. Maybe you can be the next amazing inventor.`,
+    extra: `[표] Invention: Dry Cleaning / Where it was invented: France / Who invented it: Mr. Jolly / What the inventor's job was: A factory worker / What the inventor discovered: He discovered that water is effective in cleaning clothes.`,
+    a: "(1) worker → manager  (2) water → oil",
+    accepts: [
+      "worker → manager, water → oil",
+      "worker->manager, water->oil",
+      "(1) worker→manager (2) water→oil",
+      "worker → manager / water → oil",
+      "manager, oil",
+      "(1) worker → manager (2) water → oil"
+    ],
+    expl: "(1) 한 공장 노동자가 등유를 테이블보에 흘렸고, 공장 지배인인 Jolly 씨가 그것을 보았다고 했으므로 '발명자의 직업'은 'a factory manager(공장 지배인)'이 되어야 한다. 따라서 worker는 manager로 고쳐야 한다. (2) 등유를 쏟은 것으로 인해 얼룩이 지워졌고 드라이클리닝의 발명으로 이어졌으므로 '발명자가 발견한 것'은 '기름이 옷감을 세탁하는 데 효과적이라는 것'이 되어야 한다. 따라서 water는 oil로 고쳐야 한다."
+  },
+  {
+    id: 22,
+    type: "mc",
+    q: "다음 글의 ①~⑤ 중 흐름상 관계가 없는 문장은?",
+    title: "Finding Safety in Glass: Safety Glass",
+    passage_text: `In 1903, a French scientist, Mr. Bénédictus, was experimenting with liquid plastic in a glass flask. He accidentally hit the glass flask, and it fell on the floor. Although the glass flask was broken into pieces, they still held together in the shape of the flask! How could this happen? The secret was the liquid plastic in the flask. This finding led to his invention of safety glass. ① These days, we can find safety glass everywhere. ② For example, it is used for car windows. ③ Glass is very useful because we can see through it. ④ If there is a car accident, people are safer from sharp pieces of glass. ⑤ These wonderful inventions came by chance. When things go wrong, don't be disappointed. Maybe you can be the next amazing inventor.`,
+    c: ["①", "②", "③", "④", "⑤"],
+    a: 2,
+    expl: "안전 유리의 발견과 그 기능적 이점에 초점을 맞춘 글이다. 유리가 투명해서 속을 볼 수 있다는 일반적인 특징을 설명하는 ③은 \"안전\"이라는 핵심 속성이나 \"안전 유리의 발명\"이라는 주제와는 거리가 멀다."
+  },
+  {
+    id: 23,
+    type: "mc",
+    q: "다음 글의 빈칸에 들어갈 말로 가장 적절한 것은?",
+    title: "Finding Safety in Glass: Safety Glass",
+    passage_text: `In 1903, a French scientist, Mr. Bénédictus, was experimenting with liquid plastic in a glass flask. He accidentally hit the glass flask, and it fell on the floor. Although the glass flask was ________, they still held together in the shape of the flask! How could this happen? The secret was the liquid plastic in the flask.`,
+    c: [
+      "made of plastic",
+      "filled with water",
+      "broken into pieces",
+      "washed with lamp oil",
+      "kept in the oven"
+    ],
+    a: 2,
+    expl: "양보의 접속사 Although가 쓰여 플라스크가 깨졌음에도 형태를 유지했다는 대조적 상황을 나타내야 하므로 '산산조각 났다(broken into pieces)'가 적절하다."
+  },
+  {
+    id: 24,
+    type: "mc",
+    q: "다음 글을 읽고 답할 수 없는 질문은?",
+    passage_text: `These days, we can find safety glass everywhere. For example, it is used for car windows. If there is a car accident, people are safer from sharp pieces of glass.`,
+    c: [
+      "요즘 안전유리는 어디서 찾을 수 있는가?",
+      "안전유리가 사용되는 대표적인 예는 무엇인가?",
+      "자동차 사고 시 안전유리는 어떤 도움을 주는가?",
+      "안전유리를 처음으로 자동차에 도입한 회사는 어디인가?",
+      "사고 시 사람들은 무엇으로부터 더 안전해지는가?"
+    ],
+    a: 3,
+    expl: "지문에서 안전유리를 최초로 도입한 자동차 회사가 어디인지에 대한 정보는 언급되지 않았으므로 답할 수 없는 질문은 ④이다. ① 어디에서나, ② 자동차 창문, ③ 날카로운 파편으로부터 보호, ⑤ 날카로운 유리 조각으로부터의 안전을 지문에서 답으로 찾을 수 있다."
+  },
+  {
+    id: 25,
+    type: "mc",
+    q: "다음 글을 요약한 문장의 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것은?",
+    passage_text: `These wonderful inventions came by chance. When things go wrong, don't be disappointed. Maybe you can be the next amazing inventor.`,
+    summary: "Even when you make a ____(A)____, it could be a great chance to ____(B)____ something new.",
+    c: [
+      "(A) mistake  (B) invent",
+      "(A) plan  (B) change",
+      "(A) choice  (B) study",
+      "(A) promise  (B) clean",
+      "(A) success  (B) break"
+    ],
+    a: 0,
+    expl: "실수나 잘못된 상황이 새로운 발명의 기회가 될 수 있다는 내용이므로 빈칸 (A)에는 'mistake(실수)', (B)에는 'invent(발명하다)'가 들어가는 것이 가장 적절하다."
+  }
+];
+
+
+// ── admin 수정본(override) 적용 ──
+// 저장 위치: 현재는 메모리(세션). Firebase 연결 시 question_overrides/ 경로로 교체.
+var OVERRIDES = {};   // { id: { a:정답, expl:해설 } }
+
+function applyOverrides(){
+  QUESTIONS.forEach(function(q){
+    var ov = OVERRIDES[q.id];
+    if(ov){
+      if(ov.a !== undefined && ov.a !== null && ov.a !== '') {
+        if(q.type==='mc') q.a = parseInt(ov.a,10);
+        else q.a = ov.a;
+      }
+      if(ov.expl !== undefined && ov.expl !== '') q.expl = ov.expl;
+    }
+  });
+}
+
+// 정규화: 단답 채점용
+function norm(s){
+  return (s||'').toString().trim().toLowerCase()
+    .replace(/\s+/g,' ')
+    .replace(/[.\u3002]+$/,'')   // 끝의 마침표 제거
+    .replace(/[''`]/g,"'");
+}
+
+var PASSAGE_REF = PASSAGES;
+var graded = false;
+var answers = {};   // id -> 선택값(mc:index, sa:문자열)
+
+function passageHTML(q){
+  var html='';
+  if(q.title) html += '<div class="title">'+escapeHtml(q.title)+'</div>';
+  if(q.given) html += '<div class="given">'+escapeHtml(q.given)+'</div>';
+  var ptext = q.passage ? PASSAGE_REF[q.passage] : (q.passage_text||'');
+  if(ptext) html += '<div class="passage">'+escapeHtml(ptext)+'</div>';
+  if(q.underline) html += '<div class="given">밑줄: '+escapeHtml(q.underline)+'</div>';
+  if(q.extra) html += '<div class="extra">'+escapeHtml(q.extra)+'</div>';
+  if(q.summary) html += '<div class="summary">'+escapeHtml(q.summary)+'</div>';
+  return html;
+}
+function escapeHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function render(){
+  var area = document.getElementById('quizArea');
+  area.innerHTML = '';
+  QUESTIONS.forEach(function(q){
+    var div = document.createElement('div');
+    div.className='q'; div.id='q'+q.id;
+    var inner = '<span class="num">'+q.id+'번 · '+(q.type==='mc'?'객관식':'서답형')+'</span>';
+    inner += '<div class="ask">'+escapeHtml(q.q)+'</div>';
+    inner += passageHTML(q);
+    if(q.type==='mc'){
+      inner += '<ul class="choices" data-qid="'+q.id+'">';
+      q.c.forEach(function(c,i){
+        var mark = ['①','②','③','④','⑤'][i] || (i+1);
+        inner += '<li data-idx="'+i+'"><span class="ci">'+mark+'</span><span>'+escapeHtml(c)+'</span></li>';
+      });
+      inner += '</ul>';
+    } else {
+      inner += '<input class="sa-input" data-qid="'+q.id+'" placeholder="답을 입력하세요" autocomplete="off">';
+    }
+    inner += '<div class="fb" id="fb'+q.id+'"></div>';
+    div.innerHTML = inner;
+    area.appendChild(div);
+  });
+  // 이벤트
+  area.querySelectorAll('.choices li').forEach(function(li){
+    li.addEventListener('click', function(){
+      if(graded) return;
+      var ul = li.parentElement;
+      var qid = parseInt(ul.dataset.qid,10);
+      ul.querySelectorAll('li').forEach(function(x){x.classList.remove('sel')});
+      li.classList.add('sel');
+      answers[qid] = parseInt(li.dataset.idx,10);
+      updateProgress();
+    });
+  });
+  area.querySelectorAll('.sa-input').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      if(graded) return;
+      var qid = parseInt(inp.dataset.qid,10);
+      answers[qid] = inp.value;
+      updateProgress();
+    });
+  });
+}
+
+function updateProgress(){
+  var done = QUESTIONS.filter(function(q){
+    var v = answers[q.id];
+    return v !== undefined && v !== null && v !== '';
+  }).length;
+  document.getElementById('count').textContent = done+' / '+QUESTIONS.length;
+  document.getElementById('progBar').style.width = (done/QUESTIONS.length*100)+'%';
+}
+
+function checkSA(q, val){
+  var n = norm(val);
+  if(norm(q.a) === n) return true;
+  if(q.accepts){
+    for(var i=0;i<q.accepts.length;i++){ if(norm(q.accepts[i])===n) return true; }
+  }
+  return false;
+}
+
+function grade(){
+  graded = true;
+  var per = 100/QUESTIONS.length;
+  var correct = 0;
+  QUESTIONS.forEach(function(q){
+    var fb = document.getElementById('fb'+q.id);
+    var isOK = false;
+    if(q.type==='mc'){
+      var ul = document.querySelector('.choices[data-qid="'+q.id+'"]');
+      var chosen = answers[q.id];
+      ul.querySelectorAll('li').forEach(function(li){
+        var idx = parseInt(li.dataset.idx,10);
+        li.style.cursor='default';
+        if(idx===q.a) li.classList.add('correct');
+        if(idx===chosen && idx!==q.a) li.classList.add('wrong');
+      });
+      isOK = (chosen===q.a);
+    } else {
+      var inp = document.querySelector('.sa-input[data-qid="'+q.id+'"]');
+      inp.disabled = true;
+      isOK = checkSA(q, answers[q.id]||'');
+      inp.style.borderColor = isOK ? 'var(--ok)' : 'var(--no)';
+      inp.style.background = isOK ? 'var(--ok-bg)' : 'var(--no-bg)';
+    }
+    if(isOK) correct++;
+    var v = '<div class="verdict '+(isOK?'ok':'no')+'">'+(isOK?'✓ 정답':'✗ 오답')+'</div>';
+    if(q.type==='sa'){
+      v += '<div class="sa-answer"><span class="lab">모범답안:</span> '+escapeHtml(q.a)+'</div>';
+    }
+    if(q.expl){
+      v += '<div class="expl"><b>해설</b> · '+escapeHtml(q.expl)+'</div>';
+    }
+    fb.innerHTML = v;
+  });
+  var score = Math.round(correct*per);
+  var res = document.getElementById('result');
+  res.classList.add('show');
+  document.getElementById('scoreNum').textContent = score+'점';
+  document.getElementById('scoreSub').textContent =
+    (document.getElementById('studentName').value||'학생')+' · '+correct+'/'+QUESTIONS.length+' 정답';
+  document.getElementById('scoreDetail').textContent = '오답 문항의 해설을 아래에서 확인하세요';
+  document.getElementById('submitBtn').disabled = true;
+  res.scrollIntoView({behavior:'smooth'});
+  // (Firebase 연결 시: 여기서 점수를 scores/ 경로에 저장)
+}
+
+document.getElementById('submitBtn').addEventListener('click', function(){
+  var unanswered = QUESTIONS.filter(function(q){
+    var v=answers[q.id]; return v===undefined||v===null||v==='';
+  });
+  if(unanswered.length>0){
+    if(!confirm(unanswered.length+'개 문항이 비어 있습니다. 그래도 채점할까요?')) return;
+  }
+  grade();
+});
+
+// ── admin ──
+function buildAdmin(){
+  var list = document.getElementById('adminList');
+  list.innerHTML='';
+  QUESTIONS.forEach(function(q){
+    var d=document.createElement('div'); d.className='admin-q';
+    var h = '<div class="aq-num">'+q.id+'번 '+(q.type==='mc'?'(객관식)':'(서답형)')+'</div>';
+    h += '<div class="aq-ask">'+escapeHtml(q.q)+'</div>';
+    if(q.type==='mc'){
+      h += '<label>정답</label><select data-ed-a="'+q.id+'">';
+      q.c.forEach(function(c,i){
+        var mark=['①','②','③','④','⑤'][i]||(i+1);
+        h += '<option value="'+i+'"'+(i===q.a?' selected':'')+'>'+mark+' '+escapeHtml(c.slice(0,40))+'</option>';
+      });
+      h += '</select>';
+    } else {
+      h += '<label>정답(모범답안)</label><textarea data-ed-a="'+q.id+'">'+escapeHtml(q.a)+'</textarea>';
+    }
+    h += '<label>오답해설</label><textarea data-ed-expl="'+q.id+'">'+escapeHtml(q.expl||'')+'</textarea>';
+    d.innerHTML=h;
+    list.appendChild(d);
+  });
+}
+document.getElementById('adminToggle').addEventListener('click', function(){
+  buildAdmin();
+  document.getElementById('adminPanel').classList.add('show');
+});
+document.getElementById('adminClose').addEventListener('click', function(){
+  document.getElementById('adminPanel').classList.remove('show');
+});
+document.getElementById('adminSave').addEventListener('click', function(){
+  document.querySelectorAll('[data-ed-a]').forEach(function(el){
+    var id=parseInt(el.dataset.edA,10);
+    OVERRIDES[id]=OVERRIDES[id]||{};
+    OVERRIDES[id].a = el.value;
+  });
+  document.querySelectorAll('[data-ed-expl]').forEach(function(el){
+    var id=parseInt(el.dataset.edExpl,10);
+    OVERRIDES[id]=OVERRIDES[id]||{};
+    OVERRIDES[id].expl = el.value;
+  });
+  applyOverrides();
+  document.getElementById('adminPanel').classList.remove('show');
+  alert('저장되었습니다. 수정된 정답·해설이 채점에 반영됩니다.');
+});
+
+// init
+applyOverrides();
+render();
+updateProgress();
+</script>
+</body>
+</html>
