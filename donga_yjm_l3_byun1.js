@@ -10,7 +10,7 @@ window.QUIZ_DATA = {
       title: "3과 변형 1~25",
       sub: "What a Great Idea · 동아(윤정미) · 객관식22 + 서술형3",
       info: "객관식 22문항 + 서술형 3문항 · 100점",
-      db: "/scores/donga_yjm_l3_byun1.json",
+      db: "/results_reading_donga_yjm_l3_byun1.json",
       q: [
         {
           type: "mc", t: "GR", p: "어법 (괄호 안 적절한 표현)", pts: 4,
