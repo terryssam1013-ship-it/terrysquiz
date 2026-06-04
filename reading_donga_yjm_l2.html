@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>천재(소영순) 리딩 테스트</title>
+<style>
+:root{--orange:#d97706;--ol:#fef3c7;--od:#92400e;--green:#1a7350;--gl:#e1f5ee;--gd:#0f6e56;--red:#a32d2d;--rl:#faece7;--blue:#2563eb;--bl:#dbeafe;--bg:#f4f4f8;--card:#fff;--txt:#1a1a1a;--muted:#6b7280;--border:rgba(0,0,0,.1);--r:12px;--rs:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding:1rem}
+.wrap{max-width:700px;margin:0 auto}
+.screen{display:none}.screen.active{display:block}
+
+.hdr{background:var(--orange);color:#fff;border-radius:var(--r);padding:1.25rem 1.5rem;margin-bottom:1rem}
+.hdr-sub{font-size:12px;opacity:.8;margin-bottom:3px}
+.hdr-title{font-size:20px;font-weight:700}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:.75rem}
+
+/* Chapter list */
+.ch-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:10px;cursor:pointer;transition:all .18s}
+.ch-item:hover{border-color:var(--orange);box-shadow:0 4px 14px rgba(217,119,6,.12);transform:translateY(-2px)}
+.ch-num{width:44px;height:44px;border-radius:12px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0}
+.ch-info{flex:1}
+.ch-title{font-size:15px;font-weight:700;margin-bottom:2px}
+.ch-sub{font-size:12px;color:var(--muted)}
+.ch-arrow{font-size:20px;color:#d1d5db}
+
+label{font-size:14px;font-weight:500;display:block;margin-bottom:6px}
+input[type=text],input[type=password]{width:100%;padding:11px 14px;font-size:15px;border:1px solid var(--border);border-radius:var(--rs);background:#fff;color:var(--txt);margin-bottom:14px}
+input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(217,119,6,.12)}
+
+.btn{display:block;width:100%;padding:12px;font-size:15px;font-weight:600;border-radius:var(--rs);border:none;cursor:pointer;transition:all .15s}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-orange:hover{background:var(--od)}
+.btn-outline{background:#fff;color:var(--muted);border:1px solid var(--border);margin-top:8px;font-weight:500}
+.btn-outline:hover{background:#f9fafb}
+.btn-sm{padding:6px 13px;font-size:12px;width:auto;display:inline-block;border-radius:var(--rs);border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.info-box{background:var(--ol);border-radius:var(--rs);padding:.75rem;text-align:center}
+.info-n{font-size:20px;font-weight:700;color:var(--orange)}
+.info-l{font-size:11px;color:var(--od);margin-top:2px}
+
+.prog-wrap{margin-bottom:1.25rem}
+.prog-bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin:5px 0 3px}
+.prog-fill{height:100%;background:var(--orange);border-radius:3px;transition:width .3s}
+.prog-fill.sa-fill{background:var(--blue)}
+.prog-info{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+
+.q-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+.badge-rc{background:var(--ol);color:var(--od)}
+.badge-gr{background:var(--bl);color:#1d4ed8}
+.badge-sa{background:#fce7f3;color:#be185d}
+.q-point{font-size:11px;color:var(--muted);margin-bottom:8px}
+.q-pts{display:inline-block;font-size:11px;font-weight:700;background:var(--ol);color:var(--od);padding:2px 8px;border-radius:20px;margin-left:6px}
+
+/* 지문 박스 */
+.passage{background:#fffdf7;border:1px solid #f0e2c0;border-left:3px solid var(--orange);border-radius:var(--rs);padding:14px 16px;margin-bottom:1.1rem;font-size:14px;line-height:1.85;color:#3a3a3a}
+.passage-label{font-size:11px;font-weight:700;color:var(--od);margin-bottom:6px;letter-spacing:.03em}
+
+.q-text{font-size:15px;line-height:1.8;margin-bottom:1.25rem}
+.blank{display:inline-block;border-bottom:2.5px solid var(--orange);min-width:72px;text-align:center;color:var(--orange);font-weight:600;padding:0 4px}
+
+.choices{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.choice{text-align:left;padding:11px 14px;border:1px solid var(--border);border-radius:var(--rs);background:#fff;color:var(--txt);cursor:pointer;font-size:14px;line-height:1.6;transition:all .15s}
+.choice:hover{border-color:var(--orange);background:var(--ol)}
+.choice.sel{border-color:var(--orange);background:var(--ol);color:var(--od);font-weight:500}
+
+.sa-input-wrap{margin-bottom:1.25rem}
+.sa-input-label{font-size:13px;color:var(--muted);margin-bottom:6px}
+.sa-input{width:100%;padding:12px 14px;font-size:15px;border:1.5px solid var(--border);border-radius:var(--rs);background:#fff;color:var(--txt)}
+.sa-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.sa-blanks{display:flex;flex-wrap:wrap;gap:8px}
+.sa-blank-input{padding:10px 8px;font-size:15px;text-align:center;border:none;border-bottom:2.5px solid var(--blue);background:#f8fafc;border-radius:6px 6px 0 0;color:var(--txt);min-width:60px}
+.sa-blank-input:focus{outline:none;background:#eff6ff;border-bottom-color:var(--orange);box-shadow:0 2px 0 0 var(--orange)}
+
+.nav{display:flex;gap:8px}
+.nav-btn{flex:1;padding:11px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:#f9fafb;color:var(--muted);transition:all .15s}
+.nav-btn.primary{background:var(--orange);color:#fff;border-color:var(--orange)}
+.nav-btn:hover:not(:disabled){opacity:.85}
+.nav-btn:disabled{opacity:.35;cursor:not-allowed}
+
+.score-wrap{text-align:center;padding:1.5rem 0 1rem}
+.score-ring{width:130px;height:130px;border-radius:50%;background:var(--orange);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem;color:#fff}
+.score-num{font-size:42px;font-weight:700;line-height:1}
+.score-tot{font-size:14px;opacity:.8;margin-top:2px}
+.score-grade{font-size:22px;font-weight:700;color:var(--orange);margin-bottom:4px}
+.score-msg{font-size:13px;color:var(--muted)}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:.75rem 0}
+.stat{background:#f9fafb;border-radius:var(--rs);padding:.75rem;text-align:center;border:1px solid var(--border)}
+.stat-n{font-size:22px;font-weight:700;color:var(--orange)}
+.stat-n.red{color:var(--red)}
+.stat-n.blue{color:var(--blue)}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+
+.section-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:1.25rem 0 .5rem;padding-bottom:4px;border-bottom:1px solid #e5e7eb}
+.rv-item{display:flex;gap:10px;padding:12px;border-radius:var(--rs);border:1px solid transparent;margin-bottom:6px;font-size:13px;line-height:1.5;align-items:flex-start;cursor:pointer;transition:all .2s}
+.rv-item.ok{background:#f0fdf4;border-color:#bbf7d0}
+.rv-item.ng{background:#fef2f2;border-color:#fecaca}
+.rv-item:hover{opacity:.85}
+.rv-icon{font-size:15px;margin-top:1px;flex-shrink:0}
+.rv-body{flex:1}
+.rv-wrong{font-size:12px;color:var(--red);margin-top:3px}
+.detail-box{display:none;background:#fff;padding:12px;margin-top:10px;border-radius:var(--rs);border:1px solid var(--border);cursor:default;font-size:13px}
+.detail-box.active{display:block;animation:fadeIn .2s}
+.detail-q{line-height:1.7;margin-bottom:10px;color:var(--txt)}
+.detail-passage{background:#fffdf7;border:1px solid #f0e2c0;border-radius:6px;padding:9px 12px;margin-bottom:9px;font-size:12.5px;line-height:1.7;color:#555}
+.detail-c{padding:7px 11px;border-radius:5px;border:1px solid var(--border);margin-bottom:5px;background:#f9fafb;color:var(--muted)}
+.detail-c.is-ans{border-color:#16a34a;background:#f0fdf4;color:#166534;font-weight:600}
+.detail-c.is-wrong{border-color:#fca5a5;background:#fef2f2;color:#991b1b;text-decoration:line-through;opacity:.8}
+.detail-expl{background:#f0f4f1;border-radius:6px;padding:9px 12px;margin-top:8px;font-size:12.5px;line-height:1.7;color:#374151}
+.detail-expl b{color:var(--od)}
+.click-hint{font-size:11px;color:#9ca3af;font-weight:normal;margin-left:5px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+.adm-row-wrap{border-bottom:1px solid var(--border);padding:10px 0}
+.adm-row-wrap:last-child{border-bottom:none}
+.adm-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;cursor:pointer}
+.adm-details{display:none;background:#f9fafb;padding:12px;border-radius:var(--rs);margin-top:8px;border:1px solid var(--border)}
+.adm-details.active{display:block}
+.adm-wrong-item{padding:10px 8px;border-bottom:1px dashed #e5e7eb;font-size:13px;line-height:1.5;cursor:pointer;border-radius:5px;transition:background .2s}
+.adm-wrong-item:last-child{border-bottom:none}
+.adm-wrong-item:hover{background:#fdf6ec}
+.adm-rank{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+.rank-s{background:var(--ol);color:var(--od)}.rank-a{background:var(--bl);color:#1d4ed8}
+.rank-b{background:#fef3c7;color:#92400e}.rank-c{background:#fee2e2;color:#991b1b}
+.adm-name{font-weight:600;transition:color .2s}.adm-row:hover .adm-name{color:var(--orange)}
+.adm-date{font-size:11px;color:var(--muted);margin-top:2px}
+.adm-score{font-weight:700;color:var(--orange);font-size:15px;margin-right:8px}
+.empty{text-align:center;padding:2rem;color:var(--muted);font-size:14px}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem}
+.modal-box{background:#fff;border-radius:var(--r);padding:1.5rem;width:100%;max-width:340px;border:1px solid var(--border)}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:1rem}
+.modal-btns{display:flex;gap:8px;margin-top:1rem}
+.modal-btns button{flex:1;padding:10px;border-radius:var(--rs);font-size:14px;cursor:pointer;border:1px solid var(--border);background:#f9fafb;color:var(--txt)}
+.modal-btns button.ok{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:600}
+.err-msg{font-size:12px;color:var(--red);margin-top:4px;min-height:16px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(217,119,6,.2);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sa-tag{background:#fce7f3;color:#be185d;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;margin-right:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ── 평가지 선택 ── -->
+<div id="s-chapters" class="screen active">
+  <div class="hdr">
+    <div class="hdr-sub">테리스 리딩 테스트</div>
+    <div class="hdr-title">교과서별 리딩 평가</div>
+  </div>
+  <div class="card" style="padding:1rem 1.25rem">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">교과서·단원별 독해 평가입니다. 평가지를 선택하세요.</p>
+    <div id="ch-list"></div>
+  </div>
+  <div class="card" style="padding:1rem 1.25rem;margin-top:0">
+    <button class="btn btn-outline" style="margin-top:0" onclick="openAdminModal()">관리자 로그인</button>
+  </div>
+</div>
+
+<!-- ── 이름 입력 ── -->
+<div id="s-landing" class="screen">
+  <div class="hdr">
+    <div class="hdr-sub" id="land-sub"></div>
+    <div class="hdr-title" id="land-title"></div>
+  </div>
+  <div class="card">
+    <div class="info-grid">
+      <div class="info-box"><div class="info-n" id="land-tot">10</div><div class="info-l">총 문항</div></div>
+      <div class="info-box"><div class="info-n">100</div><div class="info-l">총 배점</div></div>
+      <div class="info-box"><div class="info-n" id="land-each">10점</div><div class="info-l">문항당</div></div>
+    </div>
+    <div id="land-info" style="background:#f8fafb;border-radius:var(--rs);padding:.75rem 1rem;font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.7"></div>
+    <input type="text" id="name-in" autocomplete="off" style="display:none">
+    <button class="btn btn-orange" onclick="startQuiz()">테스트 시작 →</button>
+    <button class="btn btn-outline" onclick="show('s-chapters')">← 평가지 목록으로</button>
+  </div>
+</div>
+
+<!-- ── 퀴즈 ── -->
+<div id="s-quiz" class="screen">
+  <div class="hdr hdr-row">
+    <div>
+      <div class="hdr-sub" id="qz-name"></div>
+      <div class="hdr-title" style="font-size:16px" id="qz-title"></div>
+    </div>
+    <span id="qz-cnt" style="font-size:13px;opacity:.85"></span>
+  </div>
+  <div class="card">
+    <div class="prog-wrap">
+      <div class="prog-info"><span id="prog-txt"></span><span id="prog-pct"></span></div>
+      <div class="prog-bar"><div id="prog-fill" class="prog-fill" style="width:0%"></div></div>
+    </div>
+    <span id="q-badge" class="q-badge badge-rc"></span>
+    <div class="q-point" id="q-point"></div>
+    <div id="q-passage"></div>
+    <div class="q-text" id="q-text"></div>
+    <div id="q-choices"></div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="nav(-1)">← 이전</button>
+      <button class="nav-btn primary" id="btn-next" onclick="navNext()">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 결과 ── -->
+<div id="s-result" class="screen">
+  <div class="hdr">
+    <div class="hdr-sub">테스트 완료</div>
+    <div class="hdr-title" id="res-name"></div>
+  </div>
+  <div class="card">
+    <div class="score-wrap">
+      <div class="score-ring" id="score-ring" onclick="toggleReview()" style="cursor:pointer"><span class="score-num" id="res-score"></span><span class="score-tot">/ 100</span></div>
+      <div class="score-grade" id="res-grade"></div>
+      <div class="score-msg" id="res-msg"></div>
+      <div id="review-hint" style="font-size:12px;color:var(--orange);font-weight:600;margin-top:10px;cursor:pointer" onclick="toggleReview()">👆 점수를 누르면 오답풀이가 열려요</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="st-ok"></div><div class="stat-l">정답</div></div>
+      <div class="stat"><div class="stat-n red" id="st-ng"></div><div class="stat-l">오답</div></div>
+      <div class="stat"><div class="stat-n blue" id="st-mc"></div><div class="stat-l">객관식</div></div>
+      <div class="stat"><div class="stat-n" id="st-sa"></div><div class="stat-l">주관식</div></div>
+    </div>
+    <div id="retake-box" style="display:none;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:14px 16px;margin:1rem 0;text-align:center;color:#991b1b;font-weight:600;font-size:14px;line-height:1.5">⚠️ <strong>80점 미만입니다.</strong><br><span style="font-weight:500;font-size:13px">지문을 다시 학습한 후 재응시해주세요.</span></div><div id="pass-box" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin:1rem 0;text-align:center;color:#166534;font-weight:600;font-size:14px">🎉 합격! 80점 이상 통과했습니다.</div>
+    <div id="save-status" style="font-size:12px;color:var(--muted);text-align:center;margin:.5rem 0"></div>
+    <div id="review-wrap" style="display:none">
+      <div class="section-lbl">문항별 결과 (클릭하면 지문·정답·해설 확인)</div>
+      <div id="review"></div>
+    </div>
+    <button class="btn btn-outline" style="margin-top:1rem" onclick="show('s-chapters')">평가지 목록으로</button>
+  </div>
+</div>
+
+<!-- ── 관리자 ── -->
+<div id="s-admin" class="screen">
+  <div class="hdr hdr-row">
+    <div><div class="hdr-sub">관리자 패널</div><div class="hdr-title" id="adm-title">학생 성적 현황</div></div>
+    <button class="btn-sm" onclick="confirmClear()">초기화</button>
+  </div>
+  <div class="card">
+    <div style="margin-bottom:1rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--muted)">평가지 선택</div>
+      <div id="adm-ch-btns" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr)" id="adm-stats"></div>
+    <div class="section-lbl">응시 학생 목록 (이름 클릭 → 오답 확인)</div>
+    <div id="adm-list"></div>
+    <button class="btn btn-outline" style="margin-top:1rem" onclick="show('s-chapters')">← 나가기</button>
+  </div>
+</div>
+</div>
+
+<div id="modal" class="modal-bg" style="display:none">
+  <div class="modal-box">
+    <h3>관리자 비밀번호</h3>
+    <input type="password" id="adm-pw" placeholder="비밀번호 입력"
+      style="width:100%;padding:10px 14px;font-size:15px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--txt)">
+    <div class="err-msg" id="pw-err"></div>
+    <div class="modal-btns">
+      <button onclick="closeModal()">취소</button>
+      <button class="ok" onclick="checkPw()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
+const ADMIN_PW = "terry2025";
+
+// ═══════════════════════════════════════════════════
+//  평가지별 문제 데이터
+//  - 각 문항: type "mc"(객관식) 또는 "sa"(서술형)
+//  - passage: 지문(HTML 가능). 같은 지문이 이어지면 동일 문자열을 넣으면
+//             퀴즈 화면에서 한 번만 노출됩니다.
+//  - mc: c(보기 배열) + a(정답 인덱스, 0부터)
+//  - sa: a(모범답안) + accepts(허용 답안 배열, 소문자/공백/마침표 무시)
+//  - expl: 해설(선택)
+//  - pts: 배점
+// ═══════════════════════════════════════════════════
+const PASSAGES = {
+  // 헨리 / 줄임말(BRT) 지문
+  brt: 'You need to know who you are talking to. Henry just sent the following text message to his mother. <br><em>"Mom, I want you to wait just a little longer. BRT."</em><br> Do you think Henry\'s mother correctly understood BRT? Probably not. You can use expressions like BRT (be right there), JK (just kidding), or LOL (laughing out loud) when you text your friends. However, be careful with such expressions when you text your teachers or parents. You need to understand that some of them may not know the meanings of such expressions.',
+  // Amy / Nari 전화 지문
+  amy: 'Sometimes, you need to pick up the phone. Amy just got the following text message from her best friend Nari. <br><em>"Did you really talk behind my back? I want you to apologize to me."</em><br> Amy wanted to text Nari and explain the situation, but she thought again. "Well, this is too much for a text," she said to herself and called Nari. Texting is okay for casual situations, but sometimes, you need to pick up the phone. This is because misunderstandings can easily happen when you text. Do you need to talk about sensitive issues with your friends? Then, don\'t text them. Call them instead.',
+  // 이모지 / Jisu 지문
+  emoji: 'You need to understand that people use emojis differently. Yesterday, Jisu gave a birthday gift to her little brother Jihoo. Later, she got the following text message. <br><em>"I loved your gift. Thanks a lot. 😊"</em><br> "Only one smiling face (😊)? I guess he didn\'t like my gift," Jisu thought. When we talk with someone, we use not only words but also facial expressions and body language. In texting, we use emojis instead. Sometimes, a little emoji like 😊 can speak louder than many words. The problem is that not everybody uses emojis in the same way. Some people like to use them a lot, and some don\'t. In addition, the same emojis can mean different things to different people.'
+};
+
+const CHAPTERS = {
+
+// ───────────────────────────────────────────────────
+1:{
+  title:"천재(소영순) Lesson 2 (시범)",
+  sub:"How Teens Talk Now · 본문 N제 25문항",
+  desc:"객관식 22문항 + 서술형 3문항 · 100점",
+  info:"📖 BRT 줄임말 · Amy와 Nari · 이모지 지문<br>객관식 22문항 + 서술형 3문항 · 문항당 4점",
+  db:"/results_reading_donga_yjm_l2.json",
+  q:[
+/* 1 */{type:"mc",n:1,t:"RC",p:"독해 · 문맥상 어휘 (A)(B)(C)",
+  passage:PASSAGES.brt,
+  q:'윗글의 (A), (B), (C) 안에서 문맥에 맞는 낱말로 가장 적절한 것을 고르시오.<br>(A) [correctly / currently] · (B) [careful / cheerful] · (C) [meanings / meetings]',
+  c:["① correctly — careful — meanings","② correctly — cheerful — meanings","③ correctly — careful — meetings","④ currently — cheerful — meetings","⑤ currently — careful — meanings"],a:0,
+  expl:"(A) \'올바르게\' 이해했는지 묻는 문맥이므로 correctly. (B) 표현에 \'주의해야\' 하므로 careful. (C) 표현의 \'의미\'를 모를 수 있으므로 meanings.",pts:4},
+/* 2 */{type:"mc",n:2,t:"RC",p:"독해 · 어휘 쓰임 틀린 개수",
+  q:'다음 글의 밑줄 친 (a)~(f) 중, 문맥상 낱말의 쓰임이 적절하지 <strong>않은</strong> 것은 모두 몇 개인가?<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">You can (a)<u>use</u> expressions like BRT, JK, or LOL when you text your (b)<u>parents</u>. However, be (c)<u>careful</u> with such expressions when you text your teachers or parents. You need to (d)<u>understand</u> that some of them may (e)<u>know</u> the (f)<u>meanings</u> of such expressions.</div>',
+  c:["① 2개","② 3개","③ 4개","④ 5개","⑤ 6개"],a:0,
+  expl:"(b) 줄임말은 parents가 아니라 friends에게 쓴다. (e) 의미를 \'모를 수도\'(may not know) 있다는 내용이어야 한다. 따라서 어색한 것은 2개.",pts:4},
+/* 3 */{type:"mc",n:3,t:"RC",p:"독해 · 이어질 행동 추론",
+  q:'다음 글의 마지막 문장 직후에 이어질 Nari의 행동으로 가장 적절한 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">Amy just got the following text message from her best friend Nari. "Did you really talk behind my back? I want you to apologize to me." Amy wanted to text Nari and explain the situation, but she thought again. "Well, this is too much for a text," she said to herself and called Nari.</div>',
+  c:["① Amy에게 왜 즉시 문자로 답하지 않았는지 묻는 문자를 보낸다.","② Amy가 보낸 문자 메시지를 무시하고 다른 친구에게 전화를 건다.","③ Amy가 건 전화를 받고 그녀의 설명을 듣기 시작한다.","④ Amy에게 사과할 기회를 주기 위해 그녀의 집으로 찾아간다.","⑤ Amy의 전화에 응답하지 않고 전화를 끊어버린다."],a:2,
+  expl:"Amy가 해명하려고 전화를 걸었으므로, Nari가 그 전화를 받고 설명을 듣기 시작하는 것이 가장 자연스럽다.",pts:4},
+/* 4 */{type:"mc",n:4,t:"RC",p:"독해 · 지시어 this",
+  passage:PASSAGES.amy,
+  q:'밑줄 친 <strong>"this"</strong>가 가리키는 것으로 가장 적절한 것을 고르시오. (… "Well, <u>this</u> is too much for a text" …)',
+  c:["① Nari asking for an apology without listening","② The long text message Amy planned to write","③ The difficult situation to explain by text","④ The angry feelings Amy had toward Nari","⑤ The hard work of typing a long explanation"],a:2,
+  expl:"this는 문자로 설명하기에 곤란하거나 복잡한 \'상황\'을 가리킨다.",pts:4},
+/* 5 */{type:"mc",n:5,t:"RC",p:"독해 · 화자 의도",
+  q:'다음 대화의 흐름으로 보아, 밑줄 친 질문에 담긴 소년의 의도로 가장 적절한 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">B: What\'s the biggest country in the world?<br>G: It\'s Russia. I know the smallest country, too. It\'s Vatican City.<br>B: <u>I\'m sorry, but what was the name of the smallest country again?</u><br>G: I said, "Vatican City."</div>',
+  c:["① He wants to know if the girl has actually visited the country.","② He doubts that Vatican City is really the smallest country.","③ He missed the name and is asking her to repeat it.","④ He is testing the girl to see if she knows the spelling.","⑤ He disagrees with her answer and wants to argue."],a:2,
+  expl:"이름을 놓쳐서 다시 말해달라고 요청하는 의도이다.",pts:4},
+/* 6 */{type:"mc",n:6,t:"RC",p:"독해 · 지시어 the situation",
+  q:'밑줄 친 (a)the situation이 다음 글에서 의미하는 바로 가장 적절한 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">Amy just got the following text message from her best friend Nari. "Did you really talk behind my back? I want you to apologize to me." Amy wanted to text Nari and explain (a)<u>the situation</u>, but she thought again. "Well, this is too much for a text," she said to herself and called Nari.</div>',
+  c:["① Nari가 Amy에게 사과를 요구하고 있다는 사실","② Amy가 Nari의 험담을 했는지에 대한 오해와 진실","③ Amy가 Nari에게 문자가 아닌 전화를 건 이유","④ 문자 메시지가 사람들 사이에 오해를 일으키는 방식","⑤ Nari가 Amy에게 매우 화가 나 있다는 감정 상태"],a:1,
+  expl:"the situation은 Amy가 정말 뒷담화를 했는지, 오해인지에 대한 전후 사정을 의미한다.",pts:4},
+/* 7 */{type:"mc",n:7,t:"RC",p:"독해 · 연결사 (A)(B)",
+  q:'다음 글의 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">You can use expressions like BRT, JK, or LOL when you text your friends. ___(A)___, be careful with such expressions when you text your teachers or parents. You need to understand that ___(B)___ some of them may not know the meanings of such expressions.</div>',
+  c:["① However — because","② However — if","③ Therefore — because","④ Therefore — if","⑤ For example — although"],a:0,
+  expl:"(A) 대상이 대조되며 전환되므로 However. (B) 주의해야 하는 \'이유\'이므로 because.",pts:4},
+/* 8 */{type:"mc",n:8,t:"RC",p:"독해 · 흐름상 어색한 것 (복수정답 ②③)",
+  q:'다음 글의 밑줄 친 ⓐ~ⓔ 중, 흐름상 어색한 것을 고르시오. <span style="font-size:12px;color:#6b7280">(원문은 복수정답 ②ⓑ·③ⓒ, 여기서는 ②ⓑ로 채점)</span><br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">Jisu gave a birthday gift to her brother. Later, she ⓐ<u>received</u> the text: "I loved your gift. Thanks a lot. 😊" "Only one smiling face? I guess he ⓑ<u>liked</u> my gift," Jisu ⓒ<u>doubted</u>. When we talk, we use not only words but also ⓓ<u>facial expressions</u> and body language. In texting, we use emojis ⓔ<u>instead</u>.</div>',
+  c:["① ⓐ","② ⓑ","③ ⓒ","④ ⓓ","⑤ ⓔ"],a:1,
+  expl:"(ⓑ) 이모지 하나뿐인 것을 보고 \'좋아하지 않았다(didn\\'t like)\'고 추측했어야 한다. (ⓒ) 추측 흐름상 doubted가 아니라 thought가 자연스럽다. 원문 복수정답.",pts:4},
+/* 9 */{type:"mc",n:9,t:"RC",p:"독해 · 함축 의미",
+  q:'밑줄 친 <strong>speak louder than many words</strong>가 문맥상 의미하는 바로 가장 적절한 것을 고르시오.',
+  passage:PASSAGES.emoji,
+  c:["① Speak with a loud voice.","② Show feelings better than long texts.","③ Cause more confusion than words.","④ Make a loud sound on the phone.","⑤ Show the exact meaning of words."],a:1,
+  expl:"작은 이모지 하나가 많은 단어보다 감정을 더 잘 전달할 수 있다는 뜻이다.",pts:4},
+/* 10 */{type:"mc",n:10,t:"RC",p:"독해 · 흐름상 적절하지 않은 것",
+  q:'다음 글의 밑줄 친 ⓐ~ⓔ 중 흐름상 적절하지 <strong>않은</strong> 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">… we use not only words but also ⓐ<u>facial</u> expressions and body language. In texting, we use emojis ⓑ<u>instead</u>. … can speak ⓒ<u>louder</u> than many words. … not everybody uses emojis in the ⓓ<u>same</u> way. … the same emojis can mean ⓔ<u>identical</u> things to different people.</div>',
+  c:["① ⓐ","② ⓑ","③ ⓒ","④ ⓓ","⑤ ⓔ"],a:4,
+  expl:"같은 이모지가 사람마다 \'다른(different)\' 것을 의미한다는 내용이어야 하므로 identical은 부적절.",pts:4},
+/* 11 */{type:"mc",n:11,t:"RC",p:"독해 · 글의 순서",
+  q:'주어진 글 다음에 이어질 글의 순서로 가장 적절한 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13px;line-height:1.7">Sometimes, you need to pick up the phone. Amy just got the following text message from her best friend Nari.<br>(A) "Well, this is too much for a text," she said and called Nari. …<br>(B) "Did you really talk behind my back? I want you to apologize to me."<br>(C) Amy wanted to text Nari and explain the situation, but she thought again.</div>',
+  c:["① (A) - (B) - (C)","② (B) - (A) - (C)","③ (B) - (C) - (A)","④ (C) - (A) - (B)","⑤ (C) - (B) - (A)"],a:2,
+  expl:"문자 내용(B) → 설명하려다 망설임(C) → 전화를 거는 결정(A) 순서가 자연스럽다.",pts:4},
+/* 12 */{type:"mc",n:12,t:"RC",p:"독해 · 함축 의미",
+  q:'밑줄 친 <strong>This is too much for a text</strong>가 의미하는 바로 가장 적절한 것을 고르시오.',
+  c:["① The text is too hard to understand.","② It costs too much money to send the text.","③ The problem is too serious to solve by text.","④ Nari is asking for too many things.","⑤ It takes too long to type the message."],a:2,
+  expl:"그 문제가 문자로 해결하기엔 너무 무겁거나 심각하다는 의미이다.",pts:4},
+/* 13 */{type:"mc",n:13,t:"RC",p:"독해 · 문맥상 어휘 (A)(B)(C)",
+  q:'다음 글의 (A), (B), (C) 안에서 문맥에 맞는 낱말로 가장 적절한 것을 고르시오.<br>(A) [language / movement] · (B) [instead / similarly] · (C) [problem / solution]',
+  c:["① language — instead — problem","② language — similarly — problem","③ language — instead — solution","④ movement — similarly — solution","⑤ movement — instead — problem"],a:0,
+  expl:"(A) 비언어적 의사소통이므로 body language. (B) 표정 대신 이모지를 쓰므로 instead. (C) 같은 방식으로 쓰지 않는 것은 problem.",pts:4},
+/* 14 */{type:"mc",n:14,t:"RC",p:"독해 · 글의 순서",
+  q:'주어진 글 다음에 이어질 글의 순서로 가장 적절한 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13px;line-height:1.7">You need to understand that people use emojis differently. Yesterday, Jisu gave a birthday gift to her little brother Jihoo.<br>(A) "Only one smiling face? I guess he didn\'t like my gift," Jisu thought. When we talk … facial expressions and body language.<br>(B) The problem is that not everybody uses emojis in the same way. …<br>(C) Later, she got the following text message. "I loved your gift. Thanks a lot. 😊"<br>(D) In texting, we use emojis instead. … speak louder than many words.</div>',
+  c:["① (A) - (C) - (B) - (D)","② (C) - (A) - (D) - (B)","③ (C) - (D) - (A) - (B)","④ (B) - (C) - (A) - (D)","⑤ (A) - (D) - (B) - (C)"],a:1,
+  expl:"선물 사건 → 감사 문자 받음(C) → Jisu의 반응(A) → 이모지 역할(D) → 사용이 사람마다 다름(B) 순서.",pts:4},
+/* 15 */{type:"mc",n:15,t:"RC",p:"독해 · 추론",
+  q:'다음 글을 읽고 추론할 수 있는 내용으로 가장 적절한 것을 고르시오.',
+  passage:PASSAGES.brt,
+  c:["① Short expressions are useful for everyone, including adults.","② Henry\'s mother understood the text message without any problem.","③ We need to consider the reader when using short expressions.","④ Using \"BRT\" is the most polite way to ask someone to wait.","⑤ Teachers and parents want to learn new slang words from students."],a:2,
+  expl:"문자를 보낼 때 읽는 사람을 고려해야 한다는 추론이 가장 적절하다.",pts:4},
+/* 16 */{type:"mc",n:16,t:"RC",p:"독해 · 함축 의미 (sensitive issues)",
+  q:'다음 글의 밑줄 친 (A)<u>sensitive issues</u>가 의미하는 바로 가장 적절한 것을 고르시오.',
+  passage:PASSAGES.amy,
+  c:["① Topics that are funny and make everyone laugh.","② Issues that are likely to cause hurt feelings or fights.","③ Information about homework and schedules.","④ Questions about where to eat lunch or dinner.","⑤ News about the latest celebrity gossip."],a:1,
+  expl:"오해를 부르거나 감정을 상하게 할 수 있는 민감한 주제를 뜻한다.",pts:4},
+/* 17 */{type:"mc",n:17,t:"RC",p:"독해 · 지시어 (a)~(e)",
+  q:'밑줄 친 (a)~(e)가 가리키는 것이 <strong>잘못된</strong> 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">W: Did (a)<u>you</u> sign up for the trip?<br>B: Yes. My last name is Juarez.<br>W: Excuse me? But I can\'t find (b)<u>your name</u> on the list. Can (c)<u>you</u> spell (d)<u>it</u> for me?<br>B: Sure. (e)<u>It</u>\'s J-u-a-r-e-z.</div>',
+  c:["① (a): 여행을 신청했는지 질문받은 소년","② (b): 소년의 이름(성)","③ (c): 철자를 말해달라고 요청받은 사람","④ (d): 여행 신청자 목록","⑤ (e): \'Juarez\'라는 이름의 철자"],a:3,
+  expl:"(d) it은 소년의 이름(성)의 철자를 묻는 것이므로 \'여행 신청자 목록\'이 아니다.",pts:4},
+/* 18 */{type:"mc",n:18,t:"RC",p:"독해 · 문맥상 어휘 (A)(B)(C)",
+  q:'다음 글의 (A), (B), (C) 안에서 문맥에 맞는 낱말로 가장 적절한 것을 고르시오.<br>(A) [apologize / analyze] · (B) [explain / exclaim] · (C) [casual / causal]',
+  c:["① apologize — explain — casual","② apologize — exclaim — casual","③ apologize — explain — causal","④ analyze — exclaim — causal","⑤ analyze — explain — casual"],a:0,
+  expl:"(A) \'사과\'하기를 원하므로 apologize. (B) 상황을 \'설명\'하므로 explain. (C) 격식 없는 상황이므로 casual.",pts:4},
+/* 19 */{type:"mc",n:19,t:"GR",p:"문법 · 어법상 어색한 것",
+  q:'다음 중 어법상 <strong>어색한</strong> 것을 고르시오.',
+  c:["① I want you to help me.","② Mom told me to clean my room.","③ My teacher asked us not to be late.","④ He wants his sister stay at home.","⑤ I would like you to join us."],a:3,
+  expl:"want는 목적격 보어로 to부정사를 취하므로 stay → to stay로 고쳐야 한다.",pts:4},
+/* 20 */{type:"mc",n:20,t:"RC",p:"독해 · 조언 적용",
+  q:'다음 글에 나타난 조언을 가장 잘 따르고 있는 사람을 고르시오.',
+  passage:PASSAGES.brt,
+  c:["① 시간을 절약하려 교장 선생님께 \"Thank you\" 대신 \"THX\"를 보내는 학생","② 할머니께 \"LOL\" 대신 \"Laughing out loud\"라고 완전히 풀어서 문자를 보내는 십 대","③ 어머니에게 모든 최신 속어를 가르치는 아들","④ 오해받는 것이 두려워 부모님께 절대 문자를 보내지 않는 딸","⑤ 친한 친구에게 문자로 비즈니스 영어를 연습하는 친구"],a:1,
+  expl:"상대가 이해하도록 줄임말을 풀어서 쓰는 ②가 조언을 가장 잘 따른 행동이다.",pts:4},
+/* 21 */{type:"mc",n:21,t:"RC",p:"독해 · 판단 기준 추론",
+  q:'다음 글에 나타난 Jisu의 생각("I guess he didn\'t like my gift")을 통해 추론할 수 있는 판단 기준으로 가장 적절한 것을 고르시오.',
+  passage:PASSAGES.emoji,
+  c:["① 지후가 \"Thanks a lot\"을 진심 없이 사용했다고 의심했다.","② 지후가 원래 감사를 잘 표현하지 않는 성격임을 알았다.","③ 😊 이모티콘이 \'불만\'을 의미하는 부정적 기호라고 해석했다.","④ 이모티콘의 사용 개수가 감정의 강도를 반영한다고 가정했다.","⑤ 지후가 선물보다 다른 것을 더 원했을 것이라고 짐작했다."],a:3,
+  expl:"이모티콘이 하나뿐인 것을 보고 좋아하지 않는다고 결론지었으므로, 개수가 감정의 강도를 반영한다고 가정한 것이다.",pts:4},
+/* 22 */{type:"mc",n:22,t:"RC",p:"독해 · 빈칸 추론",
+  q:'다음 글의 빈칸에 들어갈 말로 가장 적절한 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">… the same emojis can mean different things to different people. Therefore, relying solely on emojis ____________.</div>',
+  c:["① guarantees a quick answer from the receiver","② is the best way to show your deep feelings clearly","③ can cause misunderstandings about your real intention","④ helps improve your relationship with people of all ages","⑤ allows you to communicate without language problems"],a:2,
+  expl:"이모티콘에만 의존하면 의도와 다른 오해를 부를 수 있다는 내용이 논리적으로 적절하다.",pts:4},
+/* 23 (서술형) */{type:"sa",n:23,t:"서술형",p:"서술형 · 화법 전환",
+  q:'다음 두 문장의 의미가 같도록 빈칸에 알맞은 말을 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">"He said to me, \'Please close the door.\'"<br>= He <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:70px">&nbsp;</span> me <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:50px">&nbsp;</span> close the door.</div>',
+  a:"asked to",
+  accepts:["asked to","told to"],
+  expl:"부탁을 전달하므로 「asked + 목적어 + to부정사」 구조. asked me to close (told도 허용).",pts:4},
+/* 24 (서술형은 위치 고르기지만 객관식 보기 형태 → mc 처리) */{type:"mc",n:24,t:"RC",p:"독해 · 문장 위치",
+  q:'글의 흐름상 주어진 문장이 들어가기에 가장 적절한 곳을 고르시오.<br><br><div style="background:#fffbe6;border:1px solid #f0e2c0;padding:8px 12px;border-radius:6px;margin-top:8px;font-size:13.5px">Furthermore, an emoji can be understood differently by each person.</div><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">… we use not only words but also facial expressions and body language. ( ① ) In texting, we use emojis instead. ( ② ) Sometimes, a little emoji can speak louder than many words. ( ③ ) The problem is that not everybody uses emojis in the same way. ( ④ ) Some people like to use them a lot, and some don\'t. ( ⑤ )</div>',
+  c:["① ①","② ②","③ ③","④ ④","⑤ ⑤"],a:4,
+  expl:"빈도 차이를 언급한 뒤(④ 다음), \'게다가\' 해석의 차이를 덧붙이는 ⑤ 위치가 적절하다.",pts:4},
+/* 25 (서술형) */{type:"sa",n:25,t:"서술형",p:"서술형 · 우리말 서술 (이유)",
+  q:'다음 글을 읽고, 부모님이나 선생님에게 문자를 보낼 때 줄임말을 조심해야 하는 이유를 <strong>우리말로</strong> 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13px;line-height:1.7">… be careful with such expressions when you text your teachers or parents. You need to understand that some of them may not know the meanings of such expressions.</div><div style="font-size:12px;color:#6b7280;margin-top:8px">예시 답안: 부모님이나 선생님은 줄임말의 의미를 잘 모를 수 있기 때문이다.</div>',
+  a:"부모님이나 선생님은 줄임말의 의미를 잘 모를 수 있기 때문이다",
+  accepts:["부모님이나 선생님은 줄임말의 의미를 잘 모를 수 있기 때문이다","부모님이나 선생님이 줄임말의 의미를 모를 수 있기 때문이다","줄임말의 의미를 모를 수 있기 때문","의미를 모를 수 있기 때문","의미를 잘 모를 수 있어서","줄임말의 의미를 모를 수 있어서"],
+  expl:"some of them(부모님·선생님)이 such expressions(줄임말)의 의미를 모를 수 있다고 했으므로.",
+  sa_text:true, pts:4}
+]}
+
+};// end CHAPTERS
+
+// ═══════════════════════════════════════════════════
+//  등급 / 상태
+// ═══════════════════════════════════════════════════
+const GRADES=[{min:90,g:"S",label:"S — 최우수",msg:"완벽에 가까운 독해력입니다! 🎉"},{min:80,g:"A",label:"A — 우수",msg:"지문을 정확히 이해했습니다!"},{min:60,g:"B",label:"B — 양호",msg:"조금 더 복습이 필요해요."},{min:40,g:"C",label:"C — 보통",msg:"지문을 다시 꼼꼼히 읽어보세요."},{min:0,g:"D",label:"D — 부족",msg:"지문과 어휘를 처음부터 다시 학습하세요."}];
+
+let curCh=1, studentName='', answers=[], cur=0, TOTAL=0;
+let adminCurCh=1;
+
+// 현재 평가지의 객관식/서술형 개수 계산 헬퍼
+function counts(n){const Q=CHAPTERS[n].q;return{mc:Q.filter(q=>q.type==='mc').length,sa:Q.filter(q=>q.type==='sa').length,total:Q.length};}
+
+// ── 화면 전환 ────────────────────────────────────────
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ── 평가지 목록 렌더링 ───────────────────────────────
+function renderChapters(){
+  const el=document.getElementById('ch-list');
+  el.innerHTML='';
+  Object.keys(CHAPTERS).forEach(k=>{
+    const ch=CHAPTERS[k];
+    const d=document.createElement('div');d.className='ch-item';
+    d.onclick=()=>openChapter(parseInt(k));
+    d.innerHTML=`<div class="ch-num">📖</div><div class="ch-info"><div class="ch-title">${ch.title}</div><div class="ch-sub">${ch.sub}</div></div><span class="ch-arrow">›</span>`;
+    el.appendChild(d);
+  });
+}
+
+function openChapter(n){
+  curCh=n;
+  const ch=CHAPTERS[n];const c=counts(n);
+  document.getElementById('land-sub').textContent='테리스 리딩 테스트';
+  document.getElementById('land-title').textContent=ch.title;
+  document.getElementById('land-tot').textContent=c.total;
+  document.getElementById('land-each').textContent=Math.round(100/c.total)+'점';
+  document.getElementById('land-info').innerHTML=ch.info||`객관식 ${c.mc}문항 + 서술형 ${c.sa}문항`;
+  document.getElementById('name-in').value='';
+  show('s-landing');
+}
+
+// ── 퀴즈 시작 ───────────────────────────────────────
+function startQuiz(){
+  // 이름은 학생 로그인(TERRYS_BRIDGE)에서 자동으로 채워짐. 없으면 '학생'.
+  studentName=(document.getElementById('name-in').value||'').trim()||'학생';
+  const Q=CHAPTERS[curCh].q;
+  TOTAL=Q.length;
+  answers=Q.map(q=>q.type==='mc'?-1:'');
+  cur=0;
+  document.getElementById('qz-name').textContent=studentName;
+  document.getElementById('qz-title').textContent=CHAPTERS[curCh].title;
+  render(0);show('s-quiz');
+}
+
+// ── 렌더링 ──────────────────────────────────────────
+function render(i){
+  const Q=CHAPTERS[curCh].q;
+  const q=Q[i];
+  const pct=Math.round(i/TOTAL*100);
+  const pf=document.getElementById('prog-fill');
+  pf.style.width=pct+'%';
+  pf.className='prog-fill'+(q.type==='sa'?' sa-fill':'');
+  document.getElementById('prog-txt').textContent=(i+1)+' / '+TOTAL;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('qz-cnt').textContent=(i+1)+'/'+TOTAL;
+  const badge=document.getElementById('q-badge');
+  if(q.type==='sa'){badge.textContent='[서술형]';badge.className='q-badge badge-sa';}
+  else if(q.t==='GR'){badge.textContent='[문법]';badge.className='q-badge badge-gr';}
+  else{badge.textContent='[독해]';badge.className='q-badge badge-rc';}
+  document.getElementById('q-point').innerHTML=q.p+'<span class="q-pts">'+q.pts+'점</span>';
+
+  // 지문: 직전 문항과 같은 지문이면 생략 (한 번만 노출)
+  const pasEl=document.getElementById('q-passage');
+  const prev=i>0?Q[i-1]:null;
+  if(q.passage && (!prev || prev.passage!==q.passage)){
+    pasEl.innerHTML=`<div class="passage"><div class="passage-label">📖 지문</div>${q.passage}</div>`;
+  }else if(q.passage){
+    pasEl.innerHTML=`<div class="passage"><div class="passage-label">📖 지문 (앞과 동일)</div>${q.passage}</div>`;
+  }else{
+    pasEl.innerHTML='';
+  }
+
+  document.getElementById('q-text').innerHTML=q.q;
+  const el=document.getElementById('q-choices');el.innerHTML='';
+  if(q.type==='mc'){
+    const div=document.createElement('div');div.className='choices';
+    q.c.forEach((c,ci)=>{
+      const b=document.createElement('button');b.className='choice'+(answers[i]===ci?' sel':'');
+      b.innerHTML=c;b.onclick=()=>pickMC(i,ci);div.appendChild(b);});
+    el.appendChild(div);
+  }else{
+    if(q.sa_text){
+      // 우리말 서술형 등: 한 줄(여러 줄) 입력칸으로
+      if(Array.isArray(answers[i])) answers[i]=answers[i].join(' ');
+      const wrap=document.createElement('div');wrap.className='sa-input-wrap';
+      const lbl=document.createElement('div');lbl.className='sa-input-label';lbl.textContent='답을 쓰세요:';
+      const ta=document.createElement('textarea');ta.className='sa-input';ta.rows=2;
+      ta.placeholder='답을 입력하세요';ta.value=answers[i]||'';
+      ta.oninput=e=>{answers[i]=e.target.value;};
+      wrap.appendChild(lbl);wrap.appendChild(ta);el.appendChild(wrap);
+      setTimeout(()=>ta.focus(),50);
+    }else{
+    // 서술형: 정답 단어 수만큼 빈칸을 보여줌 (대문자·마침표·물음표 등은 단어 수에 미포함)
+    const words=saWords(q.a);
+    const n=words.length;
+    // 저장 형식: answers[i]는 칸별 입력 배열
+    if(!Array.isArray(answers[i])) answers[i]=new Array(n).fill('');
+    if(answers[i].length!==n) answers[i]=new Array(n).fill('').map((_,k)=>answers[i][k]||'');
+    const wrap=document.createElement('div');wrap.className='sa-input-wrap';
+    const lbl=document.createElement('div');lbl.className='sa-input-label';
+    lbl.textContent=`답을 쓰세요 · 빈칸 ${n}개 (한 칸에 한 단어씩)`;
+    wrap.appendChild(lbl);
+    const box=document.createElement('div');box.className='sa-blanks';
+    words.forEach((w,wi)=>{
+      const inp=document.createElement('input');inp.type='text';inp.className='sa-blank-input';
+      inp.value=answers[i][wi]||'';inp.setAttribute('data-wi',wi);
+      inp.autocomplete='off';inp.autocorrect='off';inp.spellcheck=false;
+      inp.style.width=Math.max(60,(w.length+2)*11)+'px';
+      inp.oninput=e=>{answers[i][wi]=e.target.value;};
+      inp.onkeydown=e=>{
+        if(e.key===' '){e.preventDefault();const nx=box.querySelectorAll('.sa-blank-input')[wi+1];if(nx)nx.focus();}
+        if(e.key==='Enter'){e.preventDefault();navNext();}
+      };
+      box.appendChild(inp);
+    });
+    wrap.appendChild(box);el.appendChild(wrap);
+    setTimeout(()=>{const f=box.querySelector('.sa-blank-input');if(f)f.focus();},50);
+    }
+  }
+  document.getElementById('btn-prev').disabled=i===0;
+  document.getElementById('btn-next').textContent=i===TOTAL-1?'제출 →':'다음 →';
+}
+
+function pickMC(qi,ci){
+  answers[qi]=ci;
+  document.getElementById('q-choices').querySelectorAll('.choice').forEach((b,j)=>b.classList.toggle('sel',j===ci));
+}
+function nav(d){cur=Math.max(0,Math.min(TOTAL-1,cur+d));render(cur);}
+function navNext(){
+  if(cur===TOTAL-1){
+    const Q=CHAPTERS[curCh].q;
+    const emp=answers.filter((a,i)=>Q[i].type==='mc'?a===-1:!saJoin(a).trim()).length;
+    if(emp>0&&!confirm(`${emp}문항을 아직 풀지 않았습니다. 제출하시겠습니까?`))return;
+    submit();
+  }else nav(1);
+}
+
+// 정답을 단어 토큰으로 분리 (구두점 제거 → 빈칸 개수 기준)
+function saWords(ans){
+  return String(ans)
+    .replace(/[.,?!;:"'()]/g,' ')   // 구두점 제거
+    .trim().split(/\s+/).filter(Boolean);
+}
+// 입력 정규화: 소문자 + 구두점 제거 + 공백 단일화
+function saNorm(x){
+  return String(x).toLowerCase().replace(/[.,?!;:"'()]/g,' ').trim().replace(/\s+/g,' ');
+}
+// 학생 답(빈칸 배열 또는 문자열)을 하나의 문자열로
+function saJoin(a){return Array.isArray(a)?a.join(' '):String(a||'');}
+
+function checkSA(s,q){
+  const sn=saNorm(saJoin(s));
+  // 우리말 서술형: 공백·구두점 무시하고, accepts 중 하나가 포함되면 인정
+  if(q.sa_text){
+    const norm=x=>String(x).replace(/[\s.,!?·]/g,'');
+    const stu=norm(saJoin(s));
+    if(!stu) return false;
+    return q.accepts.some(a=>{const an=norm(a);return stu.includes(an)||an.includes(stu);});
+  }
+  // accepts 목록과 비교 (구두점·대소문자 무시)
+  return q.accepts.some(a=>saNorm(a)===sn);
+}
+function isOK(q,i){return q.type==='mc'?answers[i]===q.a:checkSA(answers[i],q);}
+
+// 점수 클릭 → 오답풀이 토글
+function toggleReview(){
+  const w=document.getElementById('review-wrap');
+  const hint=document.getElementById('review-hint');
+  const open=w.style.display!=='none';
+  w.style.display=open?'none':'block';
+  hint.textContent=open?'👆 점수를 누르면 오답풀이가 열려요':'👆 점수를 누르면 오답풀이가 닫혀요';
+  if(!open) setTimeout(()=>w.scrollIntoView({behavior:'smooth',block:'start'}),60);
+}
+
+async function submit(){
+  const Q=CHAPTERS[curCh].q;
+  let mcScore=0,saScore=0;
+  Q.forEach((q,i)=>{if(isOK(q,i)){if(q.type==='mc')mcScore+=q.pts;else saScore+=q.pts;}});
+  const total=mcScore+saScore;
+  const grade=GRADES.find(g=>total>=g.min);
+  document.getElementById('res-name').textContent=studentName+'님의 결과 · '+CHAPTERS[curCh].title;
+  document.getElementById('res-score').textContent=total;
+  document.getElementById('res-grade').textContent=grade.label;
+  document.getElementById('res-msg').textContent=grade.msg;
+  const okCnt=Q.filter((q,i)=>isOK(q,i)).length;
+  document.getElementById('st-ok').textContent=okCnt;
+  document.getElementById('st-ng').textContent=TOTAL-okCnt;
+  document.getElementById('st-mc').textContent=mcScore+'점';
+  document.getElementById('st-sa').textContent=saScore+'점';
+  document.getElementById('retake-box').style.display=total<80?'block':'none';
+  document.getElementById('pass-box').style.display=total>=80?'block':'none';
+  // 오답풀이는 기본 숨김 — 점수 클릭 시 열림
+  document.getElementById('review-wrap').style.display='none';
+  document.getElementById('review-hint').style.display='block';
+
+  const rv=document.getElementById('review');rv.innerHTML='';
+  Q.forEach((q,i)=>{
+    const ok=isOK(q,i);
+    let choicesHtml='';
+    if(q.type==='mc'){const stuAns=answers[i];choicesHtml=q.c.map((c,ci)=>{let cls='detail-c';if(ci===q.a)cls+=' is-ans';else if(ci===stuAns)cls+=' is-wrong';return`<div class="${cls}">${c}</div>`;}).join('');}
+    else{const myAns=saJoin(answers[i]).trim();choicesHtml=`<div style="font-size:13px;margin-top:6px"><div style="padding:7px 11px;border-radius:5px;border:1px solid ${ok?'#16a34a':'#fca5a5'};background:${ok?'#f0fdf4':'#fef2f2'};color:${ok?'#166534':'#991b1b'};margin-bottom:5px">내 답: ${myAns||'(미응답)'}</div><div class="detail-c is-ans">정답: ${q.a}</div></div>`;}
+    const pasHtml=q.passage?`<div class="detail-passage">${q.passage}</div>`:'';
+    const explHtml=q.expl?`<div class="detail-expl"><b>해설</b> · ${q.expl}</div>`:'';
+    const wrongLine=!ok?(q.type==='mc'
+      ?`<div class="rv-wrong">내 답: ${answers[i]>=0?q.c[answers[i]].split(' ')[0]:'미응답'} → 정답: ${q.c[q.a].split(' ')[0]}</div>`
+      :`<div class="rv-wrong">내 답: ${saJoin(answers[i]).trim()||'미응답'} → 정답: ${q.a}</div>`):'';
+    const d=document.createElement('div');
+    d.className='rv-item '+(ok?'ok':'ng');
+    d.setAttribute('onclick',`document.getElementById('rv-det-${i}').classList.toggle('active')`);
+    d.innerHTML=`<span class="rv-icon">${ok?'✓':'✗'}</span><div class="rv-body"><div style="font-size:14px;margin-bottom:3px">${q.type==='sa'?'<span class="sa-tag">서술형</span>':''}<strong>${i+1}번</strong> ${q.p} · ${q.pts}점<span class="click-hint">(클릭 ▾)</span></div>${wrongLine}
+    <div class="detail-box" id="rv-det-${i}" onclick="event.stopPropagation()">${pasHtml}<div class="detail-q">${q.q}</div>${choicesHtml}${explHtml}</div></div>`;
+    rv.appendChild(d);
+  });
+  show('s-result');
+  const statusEl=document.getElementById('save-status');
+  statusEl.innerHTML='<span class="spinner"></span>점수 저장 중...';
+  try{
+    const payload={name:studentName,chapter:curCh,score:total,total:100,grade:grade.g,mcScore,saScore,answers:answers,date:new Date().toLocaleString('ko-KR'),ts:Date.now()};
+    const r=await fetch(FIREBASE_URL+CHAPTERS[curCh].db,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    statusEl.innerHTML=r.ok?'<span style="color:var(--green)">✓ 점수가 저장되었습니다</span>':'저장 실패 ('+r.status+')';
+  }catch(e){statusEl.textContent='저장 실패: '+e.message;}
+}
+
+// ── 관리자 ──────────────────────────────────────────
+function openAdminModal(){document.getElementById('adm-pw').value='';document.getElementById('pw-err').textContent='';document.getElementById('modal').style.display='flex';setTimeout(()=>document.getElementById('adm-pw').focus(),100);}
+function closeModal(){document.getElementById('modal').style.display='none';}
+document.getElementById('adm-pw').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
+function checkPw(){if(document.getElementById('adm-pw').value===ADMIN_PW){closeModal();initAdmin();}else document.getElementById('pw-err').textContent='비밀번호가 올바르지 않습니다.';}
+
+function initAdmin(){
+  show('s-admin');
+  const btns=document.getElementById('adm-ch-btns');btns.innerHTML='';
+  Object.keys(CHAPTERS).forEach(k=>{
+    const b=document.createElement('button');
+    b.style.cssText=`padding:7px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all .15s;font-weight:${adminCurCh==k?'700':'400'};background:${adminCurCh==k?'var(--orange)':'#f9fafb'};color:${adminCurCh==k?'#fff':'var(--txt)'}`;
+    b.textContent=CHAPTERS[k].title;b.onclick=()=>{adminCurCh=parseInt(k);initAdmin();};
+    btns.appendChild(b);
+  });
+  loadAdmin(adminCurCh);
+}
+
+async function loadAdmin(n){
+  const listEl=document.getElementById('adm-list');const statsEl=document.getElementById('adm-stats');
+  document.getElementById('adm-title').textContent=CHAPTERS[n].title+' 성적 현황';
+  listEl.innerHTML='<div class="empty"><span class="spinner"></span>불러오는 중...</div>';
+  try{
+    const r=await fetch(FIREBASE_URL+CHAPTERS[n].db);const data=await r.json();
+    if(!data){listEl.innerHTML='<div class="empty">아직 응시한 학생이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const results=Object.values(data).filter(r=>r&&r.name&&r.score!==undefined).sort((a,b)=>b.score-a.score);
+    if(!results.length){listEl.innerHTML='<div class="empty">유효한 응시 기록이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const avg=(results.reduce((s,r)=>s+(Number(r.score)||0),0)/results.length).toFixed(1);
+    statsEl.innerHTML=`<div class="stat"><div class="stat-n">${results.length}</div><div class="stat-l">응시 인원</div></div><div class="stat"><div class="stat-n">${avg}</div><div class="stat-l">평균 점수</div></div><div class="stat"><div class="stat-n">${results[0].score||0}</div><div class="stat-l">최고 점수</div></div>`;
+    listEl.innerHTML='';
+    const Q=CHAPTERS[n].q;
+    results.forEach((r,i)=>{
+      const gc=r.score>=90?'s':r.score>=80?'a':r.score>=60?'b':'c';const gl=r.score>=90?'S':r.score>=80?'A':r.score>=60?'B':'C';
+      let wrongs=[];
+      const ansArr=r.answers||[];
+      Q.forEach((q,idx)=>{
+        const a=ansArr[idx];
+        const ok=q.type==='mc'?a===q.a:checkSA(a==null?'':a,q);
+        if(ok)return;
+        if(q.type==='mc'){
+          let chHtml=q.c.map((c,ci)=>{let cls='detail-c';if(ci===q.a)cls+=' is-ans';else if(ci===a)cls+=' is-wrong';return`<div class="${cls}">${c}</div>`;}).join('');
+          const pasHtml=q.passage?`<div class="detail-passage">${q.passage}</div>`:'';
+          const explHtml=q.expl?`<div class="detail-expl"><b>해설</b> · ${q.expl}</div>`:'';
+          wrongs.push(`<div class="adm-wrong-item" onclick="document.getElementById('adm-det-${i}-${idx}').classList.toggle('active');event.stopPropagation()"><div style="display:flex;gap:8px"><span style="font-weight:700;flex-shrink:0;min-width:32px">${idx+1}번</span><div style="flex:1"><div style="margin-bottom:3px;font-weight:600">${q.p} <span class="click-hint">(클릭 ▾)</span></div>학생: <span style="color:var(--red);font-weight:600">${a>=0?q.c[a].split(' ')[0]:'미응답'}</span> → 정답: <span style="color:var(--green);font-weight:600">${q.c[q.a].split(' ')[0]}</span><div class="detail-box" id="adm-det-${i}-${idx}" onclick="event.stopPropagation()">${pasHtml}<div class="detail-q">${q.q}</div>${chHtml}${explHtml}</div></div></div></div>`);
+        }else{
+          wrongs.push(`<div class="adm-wrong-item"><div style="display:flex;gap:8px"><span class="sa-tag">서술형</span><span style="font-weight:700;flex-shrink:0;min-width:28px">${idx+1}번</span><div><div style="font-weight:600;margin-bottom:3px">${q.p}</div>학생: <span style="color:var(--red);font-weight:600">${saJoin(a).trim()||'미응답'}</span><br>정답: <span style="color:var(--green);font-weight:600">${q.a}</span></div></div></div>`);
+        }
+      });
+      const wrongHtml=`<div class="adm-details" id="detail-${i}"><div style="font-size:12px;font-weight:700;margin-bottom:10px">[틀린 문항]</div>${wrongs.length>0?wrongs.join(''):'<div style="color:var(--green);font-weight:600;text-align:center">모든 문제 정답! 🎉</div>'}</div>`;
+      const rowWrap=document.createElement('div');rowWrap.className='adm-row-wrap';
+      rowWrap.innerHTML=`<div class="adm-row" onclick="document.getElementById('detail-${i}').classList.toggle('active')"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--muted);min-width:20px">${i+1}</span><div><div class="adm-name">${r.name} <span style="font-size:11px;color:#9ca3af;font-weight:normal">(클릭)</span></div><div class="adm-date">${r.date||''}</div></div></div><div style="display:flex;align-items:center"><span class="adm-score">${r.score}점</span><span class="adm-rank rank-${gc}">${gl}</span><span style="color:#d1d5db;margin-left:8px;font-size:18px">▾</span></div></div>${wrongHtml}`;
+      listEl.appendChild(rowWrap);
+    });
+  }catch(e){listEl.innerHTML='<div class="empty">불러오기 실패: '+e.message+'</div>';}
+}
+
+async function confirmClear(){
+  if(!confirm(CHAPTERS[adminCurCh].title+' 기록을 모두 삭제하시겠습니까?'))return;
+  try{await fetch(FIREBASE_URL+CHAPTERS[adminCurCh].db,{method:'DELETE'});initAdmin();}catch(e){alert('삭제 실패: '+e.message);}
+}
+
+// 초기화
+renderChapters();
+
+
+// ═══════════════════════════════════════════════════════════════════
+// TERRYS_BRIDGE v2 — 테리스 학생 사이트(iframe) 연동
+// URL ?student=NAME 또는 sessionStorage에서 이름 가져옴
+// 단독 접속 시엔 기존 동작 그대로
+// ═══════════════════════════════════════════════════════════════════
+(function(){
+    var params = new URLSearchParams(location.search);
+    var urlStudent = params.get('student');
+    var urlSid = params.get('sid') || '';
+    if(urlStudent){
+        try{
+            sessionStorage.setItem('terrys_embed_student', urlStudent);
+            if(urlSid) sessionStorage.setItem('terrys_embed_sid', urlSid);
+        }catch(e){}
+    } else {
+        try{
+            urlStudent = sessionStorage.getItem('terrys_embed_student');
+            urlSid = sessionStorage.getItem('terrys_embed_sid') || '';
+        }catch(e){}
+    }
+    if(!urlStudent) return;
+
+    function fillName(){
+        var ni = document.getElementById('name-in');
+        if(ni){
+            ni.value = urlStudent;
+            ni.style.display = 'none';
+            var lbl = document.querySelector('label[for="name-in"]');
+            if(!lbl && ni.previousElementSibling && ni.previousElementSibling.tagName === 'LABEL') lbl = ni.previousElementSibling;
+            if(lbl) lbl.style.display = 'none';
+        }
+    }
+    function hideAdminBtn(){
+        var btns = document.querySelectorAll('button');
+        for(var i=0;i<btns.length;i++){
+            var t = btns[i].textContent || '';
+            if(t.indexOf('관리자 로그인') !== -1) btns[i].style.display = 'none';
+        }
+    }
+    function ready(fn){
+        if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+        else fn();
+    }
+    ready(fillName); ready(hideAdminBtn);
+    setInterval(function(){
+        var ni = document.getElementById('name-in');
+        if(ni && ni.value !== urlStudent) ni.value = urlStudent;
+    }, 200);
+
+    var FB_HOST = 'terrys-d643a-default-rtdb.firebaseio.com';
+    var origFetch = window.fetch.bind(window);
+    window.fetch = function(url, opts){
+        try{
+            if(typeof url === 'string' && url.indexOf(FB_HOST) !== -1
+               && opts && opts.method === 'POST' && opts.body){
+                var payload = JSON.parse(opts.body);
+                if(window.parent && window.parent !== window){
+                    var msg = {
+                        type:'TERRYS_QUIZ_RESULT',
+                        studentId: urlSid,
+                        studentName: urlStudent,
+                        testFile: (location.pathname.split('/').pop() || ''),
+                        payload: payload
+                    };
+                    window.parent.postMessage(msg, '*');
+                }
+            }
+        }catch(e){}
+        return origFetch(url, opts);
+    };
+})();
+// ═══════════════════════════════════════════════════════════════════
+</script>
+</body>
+</html>

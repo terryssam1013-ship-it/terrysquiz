@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>천재(소영순) 리딩 테스트</title>
+<style>
+:root{--orange:#d97706;--ol:#fef3c7;--od:#92400e;--green:#1a7350;--gl:#e1f5ee;--gd:#0f6e56;--red:#a32d2d;--rl:#faece7;--blue:#2563eb;--bl:#dbeafe;--bg:#f4f4f8;--card:#fff;--txt:#1a1a1a;--muted:#6b7280;--border:rgba(0,0,0,.1);--r:12px;--rs:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding:1rem}
+.wrap{max-width:700px;margin:0 auto}
+.screen{display:none}.screen.active{display:block}
+
+.hdr{background:var(--orange);color:#fff;border-radius:var(--r);padding:1.25rem 1.5rem;margin-bottom:1rem}
+.hdr-sub{font-size:12px;opacity:.8;margin-bottom:3px}
+.hdr-title{font-size:20px;font-weight:700}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:.75rem}
+
+/* Chapter list */
+.ch-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:10px;cursor:pointer;transition:all .18s}
+.ch-item:hover{border-color:var(--orange);box-shadow:0 4px 14px rgba(217,119,6,.12);transform:translateY(-2px)}
+.ch-num{width:44px;height:44px;border-radius:12px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0}
+.ch-info{flex:1}
+.ch-title{font-size:15px;font-weight:700;margin-bottom:2px}
+.ch-sub{font-size:12px;color:var(--muted)}
+.ch-arrow{font-size:20px;color:#d1d5db}
+
+label{font-size:14px;font-weight:500;display:block;margin-bottom:6px}
+input[type=text],input[type=password]{width:100%;padding:11px 14px;font-size:15px;border:1px solid var(--border);border-radius:var(--rs);background:#fff;color:var(--txt);margin-bottom:14px}
+input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(217,119,6,.12)}
+
+.btn{display:block;width:100%;padding:12px;font-size:15px;font-weight:600;border-radius:var(--rs);border:none;cursor:pointer;transition:all .15s}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-orange:hover{background:var(--od)}
+.btn-outline{background:#fff;color:var(--muted);border:1px solid var(--border);margin-top:8px;font-weight:500}
+.btn-outline:hover{background:#f9fafb}
+.btn-sm{padding:6px 13px;font-size:12px;width:auto;display:inline-block;border-radius:var(--rs);border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.info-box{background:var(--ol);border-radius:var(--rs);padding:.75rem;text-align:center}
+.info-n{font-size:20px;font-weight:700;color:var(--orange)}
+.info-l{font-size:11px;color:var(--od);margin-top:2px}
+
+.prog-wrap{margin-bottom:1.25rem}
+.prog-bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin:5px 0 3px}
+.prog-fill{height:100%;background:var(--orange);border-radius:3px;transition:width .3s}
+.prog-fill.sa-fill{background:var(--blue)}
+.prog-info{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+
+.q-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+.badge-rc{background:var(--ol);color:var(--od)}
+.badge-gr{background:var(--bl);color:#1d4ed8}
+.badge-sa{background:#fce7f3;color:#be185d}
+.q-point{font-size:11px;color:var(--muted);margin-bottom:8px}
+.q-pts{display:inline-block;font-size:11px;font-weight:700;background:var(--ol);color:var(--od);padding:2px 8px;border-radius:20px;margin-left:6px}
+
+/* 지문 박스 */
+.passage{background:#fffdf7;border:1px solid #f0e2c0;border-left:3px solid var(--orange);border-radius:var(--rs);padding:14px 16px;margin-bottom:1.1rem;font-size:14px;line-height:1.85;color:#3a3a3a}
+.passage-label{font-size:11px;font-weight:700;color:var(--od);margin-bottom:6px;letter-spacing:.03em}
+
+.q-text{font-size:15px;line-height:1.8;margin-bottom:1.25rem}
+.blank{display:inline-block;border-bottom:2.5px solid var(--orange);min-width:72px;text-align:center;color:var(--orange);font-weight:600;padding:0 4px}
+
+.choices{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.choice{text-align:left;padding:11px 14px;border:1px solid var(--border);border-radius:var(--rs);background:#fff;color:var(--txt);cursor:pointer;font-size:14px;line-height:1.6;transition:all .15s}
+.choice:hover{border-color:var(--orange);background:var(--ol)}
+.choice.sel{border-color:var(--orange);background:var(--ol);color:var(--od);font-weight:500}
+
+.sa-input-wrap{margin-bottom:1.25rem}
+.sa-input-label{font-size:13px;color:var(--muted);margin-bottom:6px}
+.sa-input{width:100%;padding:12px 14px;font-size:15px;border:1.5px solid var(--border);border-radius:var(--rs);background:#fff;color:var(--txt)}
+.sa-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.sa-blanks{display:flex;flex-wrap:wrap;gap:8px}
+.sa-blank-input{padding:10px 8px;font-size:15px;text-align:center;border:none;border-bottom:2.5px solid var(--blue);background:#f8fafc;border-radius:6px 6px 0 0;color:var(--txt);min-width:60px}
+.sa-blank-input:focus{outline:none;background:#eff6ff;border-bottom-color:var(--orange);box-shadow:0 2px 0 0 var(--orange)}
+
+.nav{display:flex;gap:8px}
+.nav-btn{flex:1;padding:11px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:#f9fafb;color:var(--muted);transition:all .15s}
+.nav-btn.primary{background:var(--orange);color:#fff;border-color:var(--orange)}
+.nav-btn:hover:not(:disabled){opacity:.85}
+.nav-btn:disabled{opacity:.35;cursor:not-allowed}
+
+.score-wrap{text-align:center;padding:1.5rem 0 1rem}
+.score-ring{width:130px;height:130px;border-radius:50%;background:var(--orange);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem;color:#fff}
+.score-num{font-size:42px;font-weight:700;line-height:1}
+.score-tot{font-size:14px;opacity:.8;margin-top:2px}
+.score-grade{font-size:22px;font-weight:700;color:var(--orange);margin-bottom:4px}
+.score-msg{font-size:13px;color:var(--muted)}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:.75rem 0}
+.stat{background:#f9fafb;border-radius:var(--rs);padding:.75rem;text-align:center;border:1px solid var(--border)}
+.stat-n{font-size:22px;font-weight:700;color:var(--orange)}
+.stat-n.red{color:var(--red)}
+.stat-n.blue{color:var(--blue)}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+
+.section-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:1.25rem 0 .5rem;padding-bottom:4px;border-bottom:1px solid #e5e7eb}
+.rv-item{display:flex;gap:10px;padding:12px;border-radius:var(--rs);border:1px solid transparent;margin-bottom:6px;font-size:13px;line-height:1.5;align-items:flex-start;cursor:pointer;transition:all .2s}
+.rv-item.ok{background:#f0fdf4;border-color:#bbf7d0}
+.rv-item.ng{background:#fef2f2;border-color:#fecaca}
+.rv-item:hover{opacity:.85}
+.rv-icon{font-size:15px;margin-top:1px;flex-shrink:0}
+.rv-body{flex:1}
+.rv-wrong{font-size:12px;color:var(--red);margin-top:3px}
+.detail-box{display:none;background:#fff;padding:12px;margin-top:10px;border-radius:var(--rs);border:1px solid var(--border);cursor:default;font-size:13px}
+.detail-box.active{display:block;animation:fadeIn .2s}
+.detail-q{line-height:1.7;margin-bottom:10px;color:var(--txt)}
+.detail-passage{background:#fffdf7;border:1px solid #f0e2c0;border-radius:6px;padding:9px 12px;margin-bottom:9px;font-size:12.5px;line-height:1.7;color:#555}
+.detail-c{padding:7px 11px;border-radius:5px;border:1px solid var(--border);margin-bottom:5px;background:#f9fafb;color:var(--muted)}
+.detail-c.is-ans{border-color:#16a34a;background:#f0fdf4;color:#166534;font-weight:600}
+.detail-c.is-wrong{border-color:#fca5a5;background:#fef2f2;color:#991b1b;text-decoration:line-through;opacity:.8}
+.detail-expl{background:#f0f4f1;border-radius:6px;padding:9px 12px;margin-top:8px;font-size:12.5px;line-height:1.7;color:#374151}
+.detail-expl b{color:var(--od)}
+.click-hint{font-size:11px;color:#9ca3af;font-weight:normal;margin-left:5px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+.adm-row-wrap{border-bottom:1px solid var(--border);padding:10px 0}
+.adm-row-wrap:last-child{border-bottom:none}
+.adm-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;cursor:pointer}
+.adm-details{display:none;background:#f9fafb;padding:12px;border-radius:var(--rs);margin-top:8px;border:1px solid var(--border)}
+.adm-details.active{display:block}
+.adm-wrong-item{padding:10px 8px;border-bottom:1px dashed #e5e7eb;font-size:13px;line-height:1.5;cursor:pointer;border-radius:5px;transition:background .2s}
+.adm-wrong-item:last-child{border-bottom:none}
+.adm-wrong-item:hover{background:#fdf6ec}
+.adm-rank{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+.rank-s{background:var(--ol);color:var(--od)}.rank-a{background:var(--bl);color:#1d4ed8}
+.rank-b{background:#fef3c7;color:#92400e}.rank-c{background:#fee2e2;color:#991b1b}
+.adm-name{font-weight:600;transition:color .2s}.adm-row:hover .adm-name{color:var(--orange)}
+.adm-date{font-size:11px;color:var(--muted);margin-top:2px}
+.adm-score{font-weight:700;color:var(--orange);font-size:15px;margin-right:8px}
+.empty{text-align:center;padding:2rem;color:var(--muted);font-size:14px}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem}
+.modal-box{background:#fff;border-radius:var(--r);padding:1.5rem;width:100%;max-width:340px;border:1px solid var(--border)}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:1rem}
+.modal-btns{display:flex;gap:8px;margin-top:1rem}
+.modal-btns button{flex:1;padding:10px;border-radius:var(--rs);font-size:14px;cursor:pointer;border:1px solid var(--border);background:#f9fafb;color:var(--txt)}
+.modal-btns button.ok{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:600}
+.err-msg{font-size:12px;color:var(--red);margin-top:4px;min-height:16px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(217,119,6,.2);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sa-tag{background:#fce7f3;color:#be185d;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;margin-right:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ── 평가지 선택 ── -->
+<div id="s-chapters" class="screen active">
+  <div class="hdr">
+    <div class="hdr-sub">테리스 리딩 테스트</div>
+    <div class="hdr-title">교과서별 리딩 평가</div>
+  </div>
+  <div class="card" style="padding:1rem 1.25rem">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">교과서·단원별 독해 평가입니다. 평가지를 선택하세요.</p>
+    <div id="ch-list"></div>
+  </div>
+  <div class="card" style="padding:1rem 1.25rem;margin-top:0">
+    <button class="btn btn-outline" style="margin-top:0" onclick="openAdminModal()">관리자 로그인</button>
+  </div>
+</div>
+
+<!-- ── 이름 입력 ── -->
+<div id="s-landing" class="screen">
+  <div class="hdr">
+    <div class="hdr-sub" id="land-sub"></div>
+    <div class="hdr-title" id="land-title"></div>
+  </div>
+  <div class="card">
+    <div class="info-grid">
+      <div class="info-box"><div class="info-n" id="land-tot">10</div><div class="info-l">총 문항</div></div>
+      <div class="info-box"><div class="info-n">100</div><div class="info-l">총 배점</div></div>
+      <div class="info-box"><div class="info-n" id="land-each">10점</div><div class="info-l">문항당</div></div>
+    </div>
+    <div id="land-info" style="background:#f8fafb;border-radius:var(--rs);padding:.75rem 1rem;font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.7"></div>
+    <input type="text" id="name-in" autocomplete="off" style="display:none">
+    <button class="btn btn-orange" onclick="startQuiz()">테스트 시작 →</button>
+    <button class="btn btn-outline" onclick="show('s-chapters')">← 평가지 목록으로</button>
+  </div>
+</div>
+
+<!-- ── 퀴즈 ── -->
+<div id="s-quiz" class="screen">
+  <div class="hdr hdr-row">
+    <div>
+      <div class="hdr-sub" id="qz-name"></div>
+      <div class="hdr-title" style="font-size:16px" id="qz-title"></div>
+    </div>
+    <span id="qz-cnt" style="font-size:13px;opacity:.85"></span>
+  </div>
+  <div class="card">
+    <div class="prog-wrap">
+      <div class="prog-info"><span id="prog-txt"></span><span id="prog-pct"></span></div>
+      <div class="prog-bar"><div id="prog-fill" class="prog-fill" style="width:0%"></div></div>
+    </div>
+    <span id="q-badge" class="q-badge badge-rc"></span>
+    <div class="q-point" id="q-point"></div>
+    <div id="q-passage"></div>
+    <div class="q-text" id="q-text"></div>
+    <div id="q-choices"></div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="nav(-1)">← 이전</button>
+      <button class="nav-btn primary" id="btn-next" onclick="navNext()">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 결과 ── -->
+<div id="s-result" class="screen">
+  <div class="hdr">
+    <div class="hdr-sub">테스트 완료</div>
+    <div class="hdr-title" id="res-name"></div>
+  </div>
+  <div class="card">
+    <div class="score-wrap">
+      <div class="score-ring" id="score-ring" onclick="toggleReview()" style="cursor:pointer"><span class="score-num" id="res-score"></span><span class="score-tot">/ 100</span></div>
+      <div class="score-grade" id="res-grade"></div>
+      <div class="score-msg" id="res-msg"></div>
+      <div id="review-hint" style="font-size:12px;color:var(--orange);font-weight:600;margin-top:10px;cursor:pointer" onclick="toggleReview()">👆 점수를 누르면 오답풀이가 열려요</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="st-ok"></div><div class="stat-l">정답</div></div>
+      <div class="stat"><div class="stat-n red" id="st-ng"></div><div class="stat-l">오답</div></div>
+      <div class="stat"><div class="stat-n blue" id="st-mc"></div><div class="stat-l">객관식</div></div>
+      <div class="stat"><div class="stat-n" id="st-sa"></div><div class="stat-l">주관식</div></div>
+    </div>
+    <div id="retake-box" style="display:none;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:14px 16px;margin:1rem 0;text-align:center;color:#991b1b;font-weight:600;font-size:14px;line-height:1.5">⚠️ <strong>80점 미만입니다.</strong><br><span style="font-weight:500;font-size:13px">지문을 다시 학습한 후 재응시해주세요.</span></div><div id="pass-box" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin:1rem 0;text-align:center;color:#166534;font-weight:600;font-size:14px">🎉 합격! 80점 이상 통과했습니다.</div>
+    <div id="save-status" style="font-size:12px;color:var(--muted);text-align:center;margin:.5rem 0"></div>
+    <div id="review-wrap" style="display:none">
+      <div class="section-lbl">문항별 결과 (클릭하면 지문·정답·해설 확인)</div>
+      <div id="review"></div>
+    </div>
+    <button class="btn btn-outline" style="margin-top:1rem" onclick="show('s-chapters')">평가지 목록으로</button>
+  </div>
+</div>
+
+<!-- ── 관리자 ── -->
+<div id="s-admin" class="screen">
+  <div class="hdr hdr-row">
+    <div><div class="hdr-sub">관리자 패널</div><div class="hdr-title" id="adm-title">학생 성적 현황</div></div>
+    <button class="btn-sm" onclick="confirmClear()">초기화</button>
+  </div>
+  <div class="card">
+    <div style="margin-bottom:1rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--muted)">평가지 선택</div>
+      <div id="adm-ch-btns" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr)" id="adm-stats"></div>
+    <div class="section-lbl">응시 학생 목록 (이름 클릭 → 오답 확인)</div>
+    <div id="adm-list"></div>
+    <button class="btn btn-outline" style="margin-top:1rem" onclick="show('s-chapters')">← 나가기</button>
+  </div>
+</div>
+</div>
+
+<div id="modal" class="modal-bg" style="display:none">
+  <div class="modal-box">
+    <h3>관리자 비밀번호</h3>
+    <input type="password" id="adm-pw" placeholder="비밀번호 입력"
+      style="width:100%;padding:10px 14px;font-size:15px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--txt)">
+    <div class="err-msg" id="pw-err"></div>
+    <div class="modal-btns">
+      <button onclick="closeModal()">취소</button>
+      <button class="ok" onclick="checkPw()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
+const ADMIN_PW = "terry2025";
+
+// ═══════════════════════════════════════════════════
+//  평가지별 문제 데이터
+//  - 각 문항: type "mc"(객관식) 또는 "sa"(서술형)
+//  - passage: 지문(HTML 가능). 같은 지문이 이어지면 동일 문자열을 넣으면
+//             퀴즈 화면에서 한 번만 노출됩니다.
+//  - mc: c(보기 배열) + a(정답 인덱스, 0부터)
+//  - sa: a(모범답안) + accepts(허용 답안 배열, 소문자/공백/마침표 무시)
+//  - expl: 해설(선택)
+//  - pts: 배점
+// ═══════════════════════════════════════════════════
+const PASSAGES = {
+  safetyGlass: 'In 1903, a French scientist, Mr. Bénédictus, was experimenting with liquid plastic in a glass flask. He accidentally hit the glass flask, and it fell on the floor. Although the glass flask was broken into pieces, they still held together in the shape of the flask! How could this happen? The secret was the liquid plastic in the flask. This finding led to his invention of safety glass. These days, we can find safety glass everywhere. For example, it is used for car windows. If there is a car accident, people are safer from sharp pieces of glass.',
+  eiffel: "W: Welcome to my science quiz show! I'm Isabel. Here is the first question. I'm sure that you can find the right answer. The Eiffel Tower gets taller during the summer. Is this true or false? 3, 2, 1. The answer is true! The Eiffel Tower is 330 m. In summer, the temperature of the Eiffel Tower goes up. When the metal gets hot, it becomes bigger. ____(A)____, the height of the tower becomes about 15 cm taller. ____(B)____, the metal cools down, and the height of the tower becomes shorter. Now, let's answer another question together!",
+  cookie: 'In America, there was a famous cook, Ms. Wakefield. One day in 1938, she wanted to bake chocolate cookies. ____(A)____, she didn\'t have enough time to melt chocolate. ____(B)____, she cut a chocolate bar into small chips. Then, she mixed them with her dough and put the cookie dough into the oven. When Ms. Wakefield opened the oven, she found that the chips were not melted into the dough. Although the chips remained in the cookies, she was not disappointed. Her new cookies were so delicious. She invented chocolate CHIP cookies!'
+};
+
+const CHAPTERS = {
+
+// ───────────────────────────────────────────────────
+1:{
+  title:"천재(소영순) Lesson 3",
+  sub:"New Ideas Bring Big Changes · 대표유형",
+  desc:"독해 8문항 + 서술형 2문항 · 100점",
+  info:"📖 안전유리·에펠탑·초콜릿칩 쿠키 지문<br>객관식 8문항 + 서술형 2문항",
+  db:"/results_reading_chunjae_l3.json",
+  q:[
+/* 1 */{type:"mc",n:1,t:"RC",p:"독해 · 내용 일치하지 않는 것",
+  passage:PASSAGES.safetyGlass,
+  q:'다음 글의 내용과 <strong>일치하지 않는</strong> 것을 고르시오.',
+  c:["① 한 과학자가 작업 중에 유리 플라스크를 떨어뜨렸다.","② 깨진 유리 조각들이 서로 분리되지 않았다.","③ 플라스크 안의 액체 플라스틱이 유리 조각들을 붙어 있게 했다.","④ 안전유리는 자동차 창문을 더 예쁘게 보이게 하려고 발명되었다.","⑤ 오늘날 사람들은 여러 곳에서 안전유리를 찾을 수 있다."],a:3,
+  expl:"안전유리는 사고 시 날카로운 파편으로부터 사람을 보호하기 위해 쓰인다고 했을 뿐, 창문을 예쁘게 보이려고 발명되었다는 내용은 없다.",pts:10},
+/* 2 */{type:"mc",n:2,t:"RC",p:"독해 · 내용 일치하지 않는 것 (추론)",
+  passage:PASSAGES.safetyGlass,
+  q:'다음 글의 내용으로 미루어 볼 때, 내용과 <strong>일치하지 않는</strong> 것을 고르시오.',
+  c:["① 일반 유리는 깨질 때 날카로운 조각이 생길 수 있다.","② 안전유리는 자동차 사고 시 부상 위험을 줄여준다.","③ 자동차 창문에는 사람을 보호하기 위한 장치가 있다.","④ 안전유리를 사용하면 자동차 사고 자체를 막을 수 있다.","⑤ 안전유리의 특징은 파편으로부터 사람을 보호하는 것이다."],a:3,
+  expl:"안전유리는 깨진 파편으로부터 사람을 보호해 부상을 줄여주는 것이지, 사고 발생 자체를 막는 것은 아니다.",pts:10},
+/* 3 */{type:"mc",n:3,t:"GR",p:"문법 · 수동태 → 능동태 전환",
+  q:'다음 수동태 문장을 능동태 문장으로 <strong>바르게</strong> 전환한 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">The famous novel was written by J.K. Rowling in 1997.</div>',
+  c:["① J.K. Rowling writes the famous novel in 1997.","② J.K. Rowling wrote the famous novel in 1997.","③ J.K. Rowling will write the famous novel in 1997.","④ J.K. Rowling will be written the famous novel in 1997.","⑤ J.K. Rowling was write the famous novel in 1997."],a:1,
+  expl:"수동태의 행위자(J.K. Rowling)를 주어로 쓰고, 시제가 과거(was written)이므로 동사는 과거형 wrote를 쓴다.",pts:10},
+/* 4 */{type:"mc",n:4,t:"RC",p:"독해 · 연결사 (A),(B) 찾기",
+  passage:PASSAGES.eiffel,
+  q:'윗글의 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것을 고르시오.',
+  c:["① So — In winter","② So — At first","③ But — In winter","④ But — In addition","⑤ For example — At first"],a:0,
+  expl:"(A)는 '금속이 뜨거워지면 커진다'는 원인의 결과를 나타내므로 So(그래서)가, (B)는 여름과 대조되는 시점이므로 In winter(겨울에는)가 적절하다.",pts:10},
+/* 5 */{type:"mc",n:5,t:"RC",p:"독해 · 연결사 (A),(B) 찾기",
+  passage:PASSAGES.cookie,
+  q:'윗글의 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것을 고르시오.',
+  c:["① However — So","② Instead — But","③ However — Then","④ Therefore — So","⑤ Instead — Then"],a:0,
+  expl:"쿠키를 구우려 했으나 초콜릿 녹일 시간이 없었다는 역접이므로 (A)에 However, 시간이 없어서 초콜릿 바를 잘랐다는 인과이므로 (B)에 So가 적절하다.",pts:10},
+/* 6 */{type:"mc",n:6,t:"RC",p:"독해 · 글의 주제 찾기",
+  passage:PASSAGES.safetyGlass,
+  q:'윗글의 <strong>주제</strong>로 가장 적절한 것을 고르시오.',
+  c:["① the history of French science","② how to experiment with liquid plastic","③ the accidental discovery of safety glass","④ reasons why glass flasks break easily","⑤ importance of safety in the laboratory"],a:2,
+  expl:"실수로 플라스크를 떨어뜨린 사건을 계기로 안전유리를 우연히 발견하게 된 과정을 다루므로 '안전유리의 우연한 발견'이 주제이다.",pts:10},
+/* 7 */{type:"mc",n:7,t:"RC",p:"독해 · 글의 요지 찾기",
+  passage:PASSAGES.cookie,
+  q:'윗글의 <strong>요지</strong>로 가장 적절한 것을 고르시오.',
+  c:["① 계획대로 되지 않은 일이 훌륭한 결과로 이어질 수 있다.","② 쿠키를 맛있게 구우려면 오븐의 온도를 잘 조절해야 한다.","③ 바쁜 요리사일수록 재료를 미리 준비하는 습관이 중요하다.","④ 유명한 요리사가 되기 위해서는 많은 실패를 경험해야 한다.","⑤ 초콜릿 칩 쿠키는 초콜릿을 충분히 녹였을 때 가장 맛이 좋다."],a:0,
+  expl:"초콜릿을 녹이려던 계획이 시간 부족으로 실패했으나 오히려 맛있는 초콜릿 칩 쿠키가 탄생했다는 내용이다.",pts:10},
+/* 8 */{type:"mc",n:8,t:"GR",p:"문법 · Although 어순 배열",
+  q:'다음 글의 흐름상 밑줄 친 우리말 (A)를 &lt;보기&gt;의 단어만을 사용하여 어법에 맞게 배열한 것을 고르시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">When Ms. Wakefield opened the oven, she found that the chips were not melted into the dough. (A)<u>비록 초콜릿 조각들이 쿠키에 남아 있긴 했지만</u>, she was not disappointed.</div><div style="font-size:12.5px;color:#6b7280;margin-top:8px">&lt;보기&gt; chips / although / in / remained / the / the / cookies</div>',
+  c:["① Although the chips remained the in cookies","② Although remained the chips in the cookies","③ Although the chips in the cookies remained","④ Although the chips remained in the cookies","⑤ Although in the cookies the chips remained"],a:3,
+  expl:"접속사 Although 뒤에 「주어(the chips) + 동사(remained) + 부사구(in the cookies)」 순서로 배열한다.",pts:10},
+/* 9 (서술형) */{type:"sa",n:9,t:"서술형",p:"서술형 · 수동태 전환",
+  q:'다음 문장을 <strong>수동형</strong>으로 바꾸어 쓰시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">Sam didn\'t write the letters.</div>',
+  a:"The letters were not written by Sam.",
+  accepts:["the letters were not written by sam.","the letters were not written by sam","the letters weren't written by sam.","the letters weren't written by sam"],
+  expl:"복수 주어(The letters)에 맞춰 be동사 과거 부정 were not을 쓰고 과거분사 written을 연결한다.",pts:10},
+/* 10 (서술형) */{type:"sa",n:10,t:"서술형",p:"서술형 · Although 영작",
+  q:'다음 상황을 읽고, &lt;조건&gt;에 맞게 빈칸을 채워 문장을 완성하시오.<br><br><div style="background:#f8fafb;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:13.5px;line-height:1.7">어제 영어 단어 시험을 위해 밤늦게까지 열심히 공부했다. 하지만 오늘 시험 결과는 생각보다 좋지 않았다.</div><div style="font-size:12.5px;color:#6b7280;margin-top:8px">&lt;조건&gt; \'비록 ~했지만\'의 의미를 가진 접속사를 포함할 것</div><div style="background:#fff;border:1px solid #e5e7eb;padding:10px 14px;border-radius:6px;margin-top:8px;font-size:14px">I got a poor grade on the test, <span style="display:inline-block;border-bottom:2px solid var(--blue);min-width:140px">&nbsp;</span>.</div>',
+  a:"though I studied hard for it",
+  accepts:["though i studied hard for it","although i studied hard for it","though i studied hard for the test","although i studied hard for the test","though i studied hard","although i studied hard"],
+  expl:"열심히 공부했음에도 성적이 좋지 않았다는 대조 상황을 양보의 접속사 though/although로 영작한다.",pts:10}
+]}
+
+};// end CHAPTERS
+
+// ═══════════════════════════════════════════════════
+//  등급 / 상태
+// ═══════════════════════════════════════════════════
+const GRADES=[{min:90,g:"S",label:"S — 최우수",msg:"완벽에 가까운 독해력입니다! 🎉"},{min:80,g:"A",label:"A — 우수",msg:"지문을 정확히 이해했습니다!"},{min:60,g:"B",label:"B — 양호",msg:"조금 더 복습이 필요해요."},{min:40,g:"C",label:"C — 보통",msg:"지문을 다시 꼼꼼히 읽어보세요."},{min:0,g:"D",label:"D — 부족",msg:"지문과 어휘를 처음부터 다시 학습하세요."}];
+
+let curCh=1, studentName='', answers=[], cur=0, TOTAL=0;
+let adminCurCh=1;
+
+// 현재 평가지의 객관식/서술형 개수 계산 헬퍼
+function counts(n){const Q=CHAPTERS[n].q;return{mc:Q.filter(q=>q.type==='mc').length,sa:Q.filter(q=>q.type==='sa').length,total:Q.length};}
+
+// ── 화면 전환 ────────────────────────────────────────
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ── 평가지 목록 렌더링 ───────────────────────────────
+function renderChapters(){
+  const el=document.getElementById('ch-list');
+  el.innerHTML='';
+  Object.keys(CHAPTERS).forEach(k=>{
+    const ch=CHAPTERS[k];
+    const d=document.createElement('div');d.className='ch-item';
+    d.onclick=()=>openChapter(parseInt(k));
+    d.innerHTML=`<div class="ch-num">📖</div><div class="ch-info"><div class="ch-title">${ch.title}</div><div class="ch-sub">${ch.sub}</div></div><span class="ch-arrow">›</span>`;
+    el.appendChild(d);
+  });
+}
+
+function openChapter(n){
+  curCh=n;
+  const ch=CHAPTERS[n];const c=counts(n);
+  document.getElementById('land-sub').textContent='테리스 리딩 테스트';
+  document.getElementById('land-title').textContent=ch.title;
+  document.getElementById('land-tot').textContent=c.total;
+  document.getElementById('land-each').textContent=Math.round(100/c.total)+'점';
+  document.getElementById('land-info').innerHTML=ch.info||`객관식 ${c.mc}문항 + 서술형 ${c.sa}문항`;
+  document.getElementById('name-in').value='';
+  show('s-landing');
+}
+
+// ── 퀴즈 시작 ───────────────────────────────────────
+function startQuiz(){
+  // 이름은 학생 로그인(TERRYS_BRIDGE)에서 자동으로 채워짐. 없으면 '학생'.
+  studentName=(document.getElementById('name-in').value||'').trim()||'학생';
+  const Q=CHAPTERS[curCh].q;
+  TOTAL=Q.length;
+  answers=Q.map(q=>q.type==='mc'?-1:'');
+  cur=0;
+  document.getElementById('qz-name').textContent=studentName;
+  document.getElementById('qz-title').textContent=CHAPTERS[curCh].title;
+  render(0);show('s-quiz');
+}
+
+// ── 렌더링 ──────────────────────────────────────────
+function render(i){
+  const Q=CHAPTERS[curCh].q;
+  const q=Q[i];
+  const pct=Math.round(i/TOTAL*100);
+  const pf=document.getElementById('prog-fill');
+  pf.style.width=pct+'%';
+  pf.className='prog-fill'+(q.type==='sa'?' sa-fill':'');
+  document.getElementById('prog-txt').textContent=(i+1)+' / '+TOTAL;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('qz-cnt').textContent=(i+1)+'/'+TOTAL;
+  const badge=document.getElementById('q-badge');
+  if(q.type==='sa'){badge.textContent='[서술형]';badge.className='q-badge badge-sa';}
+  else if(q.t==='GR'){badge.textContent='[문법]';badge.className='q-badge badge-gr';}
+  else{badge.textContent='[독해]';badge.className='q-badge badge-rc';}
+  document.getElementById('q-point').innerHTML=q.p+'<span class="q-pts">'+q.pts+'점</span>';
+
+  // 지문: 직전 문항과 같은 지문이면 생략 (한 번만 노출)
+  const pasEl=document.getElementById('q-passage');
+  const prev=i>0?Q[i-1]:null;
+  if(q.passage && (!prev || prev.passage!==q.passage)){
+    pasEl.innerHTML=`<div class="passage"><div class="passage-label">📖 지문</div>${q.passage}</div>`;
+  }else if(q.passage){
+    pasEl.innerHTML=`<div class="passage"><div class="passage-label">📖 지문 (앞과 동일)</div>${q.passage}</div>`;
+  }else{
+    pasEl.innerHTML='';
+  }
+
+  document.getElementById('q-text').innerHTML=q.q;
+  const el=document.getElementById('q-choices');el.innerHTML='';
+  if(q.type==='mc'){
+    const div=document.createElement('div');div.className='choices';
+    q.c.forEach((c,ci)=>{
+      const b=document.createElement('button');b.className='choice'+(answers[i]===ci?' sel':'');
+      b.innerHTML=c;b.onclick=()=>pickMC(i,ci);div.appendChild(b);});
+    el.appendChild(div);
+  }else{
+    // 서술형: 정답 단어 수만큼 빈칸을 보여줌 (대문자·마침표·물음표 등은 단어 수에 미포함)
+    const words=saWords(q.a);
+    const n=words.length;
+    // 저장 형식: answers[i]는 칸별 입력 배열
+    if(!Array.isArray(answers[i])) answers[i]=new Array(n).fill('');
+    if(answers[i].length!==n) answers[i]=new Array(n).fill('').map((_,k)=>answers[i][k]||'');
+    const wrap=document.createElement('div');wrap.className='sa-input-wrap';
+    const lbl=document.createElement('div');lbl.className='sa-input-label';
+    lbl.textContent=`답을 쓰세요 · 빈칸 ${n}개 (한 칸에 한 단어씩)`;
+    wrap.appendChild(lbl);
+    const box=document.createElement('div');box.className='sa-blanks';
+    words.forEach((w,wi)=>{
+      const inp=document.createElement('input');inp.type='text';inp.className='sa-blank-input';
+      inp.value=answers[i][wi]||'';inp.setAttribute('data-wi',wi);
+      inp.autocomplete='off';inp.autocorrect='off';inp.spellcheck=false;
+      inp.style.width=Math.max(60,(w.length+2)*11)+'px';
+      inp.oninput=e=>{answers[i][wi]=e.target.value;};
+      inp.onkeydown=e=>{
+        if(e.key===' '){e.preventDefault();const nx=box.querySelectorAll('.sa-blank-input')[wi+1];if(nx)nx.focus();}
+        if(e.key==='Enter'){e.preventDefault();navNext();}
+      };
+      box.appendChild(inp);
+    });
+    wrap.appendChild(box);el.appendChild(wrap);
+    setTimeout(()=>{const f=box.querySelector('.sa-blank-input');if(f)f.focus();},50);
+  }
+  document.getElementById('btn-prev').disabled=i===0;
+  document.getElementById('btn-next').textContent=i===TOTAL-1?'제출 →':'다음 →';
+}
+
+function pickMC(qi,ci){
+  answers[qi]=ci;
+  document.getElementById('q-choices').querySelectorAll('.choice').forEach((b,j)=>b.classList.toggle('sel',j===ci));
+}
+function nav(d){cur=Math.max(0,Math.min(TOTAL-1,cur+d));render(cur);}
+function navNext(){
+  if(cur===TOTAL-1){
+    const Q=CHAPTERS[curCh].q;
+    const emp=answers.filter((a,i)=>Q[i].type==='mc'?a===-1:!saJoin(a).trim()).length;
+    if(emp>0&&!confirm(`${emp}문항을 아직 풀지 않았습니다. 제출하시겠습니까?`))return;
+    submit();
+  }else nav(1);
+}
+
+// 정답을 단어 토큰으로 분리 (구두점 제거 → 빈칸 개수 기준)
+function saWords(ans){
+  return String(ans)
+    .replace(/[.,?!;:"'()]/g,' ')   // 구두점 제거
+    .trim().split(/\s+/).filter(Boolean);
+}
+// 입력 정규화: 소문자 + 구두점 제거 + 공백 단일화
+function saNorm(x){
+  return String(x).toLowerCase().replace(/[.,?!;:"'()]/g,' ').trim().replace(/\s+/g,' ');
+}
+// 학생 답(빈칸 배열 또는 문자열)을 하나의 문자열로
+function saJoin(a){return Array.isArray(a)?a.join(' '):String(a||'');}
+
+function checkSA(s,q){
+  const sn=saNorm(saJoin(s));
+  // accepts 목록과 비교 (구두점·대소문자 무시)
+  return q.accepts.some(a=>saNorm(a)===sn);
+}
+function isOK(q,i){return q.type==='mc'?answers[i]===q.a:checkSA(answers[i],q);}
+
+// 점수 클릭 → 오답풀이 토글
+function toggleReview(){
+  const w=document.getElementById('review-wrap');
+  const hint=document.getElementById('review-hint');
+  const open=w.style.display!=='none';
+  w.style.display=open?'none':'block';
+  hint.textContent=open?'👆 점수를 누르면 오답풀이가 열려요':'👆 점수를 누르면 오답풀이가 닫혀요';
+  if(!open) setTimeout(()=>w.scrollIntoView({behavior:'smooth',block:'start'}),60);
+}
+
+async function submit(){
+  const Q=CHAPTERS[curCh].q;
+  let mcScore=0,saScore=0;
+  Q.forEach((q,i)=>{if(isOK(q,i)){if(q.type==='mc')mcScore+=q.pts;else saScore+=q.pts;}});
+  const total=mcScore+saScore;
+  const grade=GRADES.find(g=>total>=g.min);
+  document.getElementById('res-name').textContent=studentName+'님의 결과 · '+CHAPTERS[curCh].title;
+  document.getElementById('res-score').textContent=total;
+  document.getElementById('res-grade').textContent=grade.label;
+  document.getElementById('res-msg').textContent=grade.msg;
+  const okCnt=Q.filter((q,i)=>isOK(q,i)).length;
+  document.getElementById('st-ok').textContent=okCnt;
+  document.getElementById('st-ng').textContent=TOTAL-okCnt;
+  document.getElementById('st-mc').textContent=mcScore+'점';
+  document.getElementById('st-sa').textContent=saScore+'점';
+  document.getElementById('retake-box').style.display=total<80?'block':'none';
+  document.getElementById('pass-box').style.display=total>=80?'block':'none';
+  // 오답풀이는 기본 숨김 — 점수 클릭 시 열림
+  document.getElementById('review-wrap').style.display='none';
+  document.getElementById('review-hint').style.display='block';
+
+  const rv=document.getElementById('review');rv.innerHTML='';
+  Q.forEach((q,i)=>{
+    const ok=isOK(q,i);
+    let choicesHtml='';
+    if(q.type==='mc'){const stuAns=answers[i];choicesHtml=q.c.map((c,ci)=>{let cls='detail-c';if(ci===q.a)cls+=' is-ans';else if(ci===stuAns)cls+=' is-wrong';return`<div class="${cls}">${c}</div>`;}).join('');}
+    else{const myAns=saJoin(answers[i]).trim();choicesHtml=`<div style="font-size:13px;margin-top:6px"><div style="padding:7px 11px;border-radius:5px;border:1px solid ${ok?'#16a34a':'#fca5a5'};background:${ok?'#f0fdf4':'#fef2f2'};color:${ok?'#166534':'#991b1b'};margin-bottom:5px">내 답: ${myAns||'(미응답)'}</div><div class="detail-c is-ans">정답: ${q.a}</div></div>`;}
+    const pasHtml=q.passage?`<div class="detail-passage">${q.passage}</div>`:'';
+    const explHtml=q.expl?`<div class="detail-expl"><b>해설</b> · ${q.expl}</div>`:'';
+    const wrongLine=!ok?(q.type==='mc'
+      ?`<div class="rv-wrong">내 답: ${answers[i]>=0?q.c[answers[i]].split(' ')[0]:'미응답'} → 정답: ${q.c[q.a].split(' ')[0]}</div>`
+      :`<div class="rv-wrong">내 답: ${saJoin(answers[i]).trim()||'미응답'} → 정답: ${q.a}</div>`):'';
+    const d=document.createElement('div');
+    d.className='rv-item '+(ok?'ok':'ng');
+    d.setAttribute('onclick',`document.getElementById('rv-det-${i}').classList.toggle('active')`);
+    d.innerHTML=`<span class="rv-icon">${ok?'✓':'✗'}</span><div class="rv-body"><div style="font-size:14px;margin-bottom:3px">${q.type==='sa'?'<span class="sa-tag">서술형</span>':''}<strong>${i+1}번</strong> ${q.p} · ${q.pts}점<span class="click-hint">(클릭 ▾)</span></div>${wrongLine}
+    <div class="detail-box" id="rv-det-${i}" onclick="event.stopPropagation()">${pasHtml}<div class="detail-q">${q.q}</div>${choicesHtml}${explHtml}</div></div>`;
+    rv.appendChild(d);
+  });
+  show('s-result');
+  const statusEl=document.getElementById('save-status');
+  statusEl.innerHTML='<span class="spinner"></span>점수 저장 중...';
+  try{
+    const payload={name:studentName,chapter:curCh,score:total,total:100,grade:grade.g,mcScore,saScore,answers:answers,date:new Date().toLocaleString('ko-KR'),ts:Date.now()};
+    const r=await fetch(FIREBASE_URL+CHAPTERS[curCh].db,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    statusEl.innerHTML=r.ok?'<span style="color:var(--green)">✓ 점수가 저장되었습니다</span>':'저장 실패 ('+r.status+')';
+  }catch(e){statusEl.textContent='저장 실패: '+e.message;}
+}
+
+// ── 관리자 ──────────────────────────────────────────
+function openAdminModal(){document.getElementById('adm-pw').value='';document.getElementById('pw-err').textContent='';document.getElementById('modal').style.display='flex';setTimeout(()=>document.getElementById('adm-pw').focus(),100);}
+function closeModal(){document.getElementById('modal').style.display='none';}
+document.getElementById('adm-pw').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
+function checkPw(){if(document.getElementById('adm-pw').value===ADMIN_PW){closeModal();initAdmin();}else document.getElementById('pw-err').textContent='비밀번호가 올바르지 않습니다.';}
+
+function initAdmin(){
+  show('s-admin');
+  const btns=document.getElementById('adm-ch-btns');btns.innerHTML='';
+  Object.keys(CHAPTERS).forEach(k=>{
+    const b=document.createElement('button');
+    b.style.cssText=`padding:7px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all .15s;font-weight:${adminCurCh==k?'700':'400'};background:${adminCurCh==k?'var(--orange)':'#f9fafb'};color:${adminCurCh==k?'#fff':'var(--txt)'}`;
+    b.textContent=CHAPTERS[k].title;b.onclick=()=>{adminCurCh=parseInt(k);initAdmin();};
+    btns.appendChild(b);
+  });
+  loadAdmin(adminCurCh);
+}
+
+async function loadAdmin(n){
+  const listEl=document.getElementById('adm-list');const statsEl=document.getElementById('adm-stats');
+  document.getElementById('adm-title').textContent=CHAPTERS[n].title+' 성적 현황';
+  listEl.innerHTML='<div class="empty"><span class="spinner"></span>불러오는 중...</div>';
+  try{
+    const r=await fetch(FIREBASE_URL+CHAPTERS[n].db);const data=await r.json();
+    if(!data){listEl.innerHTML='<div class="empty">아직 응시한 학생이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const results=Object.values(data).filter(r=>r&&r.name&&r.score!==undefined).sort((a,b)=>b.score-a.score);
+    if(!results.length){listEl.innerHTML='<div class="empty">유효한 응시 기록이 없습니다.</div>';statsEl.innerHTML='';return;}
+    const avg=(results.reduce((s,r)=>s+(Number(r.score)||0),0)/results.length).toFixed(1);
+    statsEl.innerHTML=`<div class="stat"><div class="stat-n">${results.length}</div><div class="stat-l">응시 인원</div></div><div class="stat"><div class="stat-n">${avg}</div><div class="stat-l">평균 점수</div></div><div class="stat"><div class="stat-n">${results[0].score||0}</div><div class="stat-l">최고 점수</div></div>`;
+    listEl.innerHTML='';
+    const Q=CHAPTERS[n].q;
+    results.forEach((r,i)=>{
+      const gc=r.score>=90?'s':r.score>=80?'a':r.score>=60?'b':'c';const gl=r.score>=90?'S':r.score>=80?'A':r.score>=60?'B':'C';
+      let wrongs=[];
+      const ansArr=r.answers||[];
+      Q.forEach((q,idx)=>{
+        const a=ansArr[idx];
+        const ok=q.type==='mc'?a===q.a:checkSA(a==null?'':a,q);
+        if(ok)return;
+        if(q.type==='mc'){
+          let chHtml=q.c.map((c,ci)=>{let cls='detail-c';if(ci===q.a)cls+=' is-ans';else if(ci===a)cls+=' is-wrong';return`<div class="${cls}">${c}</div>`;}).join('');
+          const pasHtml=q.passage?`<div class="detail-passage">${q.passage}</div>`:'';
+          const explHtml=q.expl?`<div class="detail-expl"><b>해설</b> · ${q.expl}</div>`:'';
+          wrongs.push(`<div class="adm-wrong-item" onclick="document.getElementById('adm-det-${i}-${idx}').classList.toggle('active');event.stopPropagation()"><div style="display:flex;gap:8px"><span style="font-weight:700;flex-shrink:0;min-width:32px">${idx+1}번</span><div style="flex:1"><div style="margin-bottom:3px;font-weight:600">${q.p} <span class="click-hint">(클릭 ▾)</span></div>학생: <span style="color:var(--red);font-weight:600">${a>=0?q.c[a].split(' ')[0]:'미응답'}</span> → 정답: <span style="color:var(--green);font-weight:600">${q.c[q.a].split(' ')[0]}</span><div class="detail-box" id="adm-det-${i}-${idx}" onclick="event.stopPropagation()">${pasHtml}<div class="detail-q">${q.q}</div>${chHtml}${explHtml}</div></div></div></div>`);
+        }else{
+          wrongs.push(`<div class="adm-wrong-item"><div style="display:flex;gap:8px"><span class="sa-tag">서술형</span><span style="font-weight:700;flex-shrink:0;min-width:28px">${idx+1}번</span><div><div style="font-weight:600;margin-bottom:3px">${q.p}</div>학생: <span style="color:var(--red);font-weight:600">${saJoin(a).trim()||'미응답'}</span><br>정답: <span style="color:var(--green);font-weight:600">${q.a}</span></div></div></div>`);
+        }
+      });
+      const wrongHtml=`<div class="adm-details" id="detail-${i}"><div style="font-size:12px;font-weight:700;margin-bottom:10px">[틀린 문항]</div>${wrongs.length>0?wrongs.join(''):'<div style="color:var(--green);font-weight:600;text-align:center">모든 문제 정답! 🎉</div>'}</div>`;
+      const rowWrap=document.createElement('div');rowWrap.className='adm-row-wrap';
+      rowWrap.innerHTML=`<div class="adm-row" onclick="document.getElementById('detail-${i}').classList.toggle('active')"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--muted);min-width:20px">${i+1}</span><div><div class="adm-name">${r.name} <span style="font-size:11px;color:#9ca3af;font-weight:normal">(클릭)</span></div><div class="adm-date">${r.date||''}</div></div></div><div style="display:flex;align-items:center"><span class="adm-score">${r.score}점</span><span class="adm-rank rank-${gc}">${gl}</span><span style="color:#d1d5db;margin-left:8px;font-size:18px">▾</span></div></div>${wrongHtml}`;
+      listEl.appendChild(rowWrap);
+    });
+  }catch(e){listEl.innerHTML='<div class="empty">불러오기 실패: '+e.message+'</div>';}
+}
+
+async function confirmClear(){
+  if(!confirm(CHAPTERS[adminCurCh].title+' 기록을 모두 삭제하시겠습니까?'))return;
+  try{await fetch(FIREBASE_URL+CHAPTERS[adminCurCh].db,{method:'DELETE'});initAdmin();}catch(e){alert('삭제 실패: '+e.message);}
+}
+
+// 초기화
+renderChapters();
+
+
+// ═══════════════════════════════════════════════════════════════════
+// TERRYS_BRIDGE v2 — 테리스 학생 사이트(iframe) 연동
+// URL ?student=NAME 또는 sessionStorage에서 이름 가져옴
+// 단독 접속 시엔 기존 동작 그대로
+// ═══════════════════════════════════════════════════════════════════
+(function(){
+    var params = new URLSearchParams(location.search);
+    var urlStudent = params.get('student');
+    var urlSid = params.get('sid') || '';
+    if(urlStudent){
+        try{
+            sessionStorage.setItem('terrys_embed_student', urlStudent);
+            if(urlSid) sessionStorage.setItem('terrys_embed_sid', urlSid);
+        }catch(e){}
+    } else {
+        try{
+            urlStudent = sessionStorage.getItem('terrys_embed_student');
+            urlSid = sessionStorage.getItem('terrys_embed_sid') || '';
+        }catch(e){}
+    }
+    if(!urlStudent) return;
+
+    function fillName(){
+        var ni = document.getElementById('name-in');
+        if(ni){
+            ni.value = urlStudent;
+            ni.style.display = 'none';
+            var lbl = document.querySelector('label[for="name-in"]');
+            if(!lbl && ni.previousElementSibling && ni.previousElementSibling.tagName === 'LABEL') lbl = ni.previousElementSibling;
+            if(lbl) lbl.style.display = 'none';
+        }
+    }
+    function hideAdminBtn(){
+        var btns = document.querySelectorAll('button');
+        for(var i=0;i<btns.length;i++){
+            var t = btns[i].textContent || '';
+            if(t.indexOf('관리자 로그인') !== -1) btns[i].style.display = 'none';
+        }
+    }
+    function ready(fn){
+        if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+        else fn();
+    }
+    ready(fillName); ready(hideAdminBtn);
+    setInterval(function(){
+        var ni = document.getElementById('name-in');
+        if(ni && ni.value !== urlStudent) ni.value = urlStudent;
+    }, 200);
+
+    var FB_HOST = 'terrys-d643a-default-rtdb.firebaseio.com';
+    var origFetch = window.fetch.bind(window);
+    window.fetch = function(url, opts){
+        try{
+            if(typeof url === 'string' && url.indexOf(FB_HOST) !== -1
+               && opts && opts.method === 'POST' && opts.body){
+                var payload = JSON.parse(opts.body);
+                if(window.parent && window.parent !== window){
+                    var msg = {
+                        type:'TERRYS_QUIZ_RESULT',
+                        studentId: urlSid,
+                        studentName: urlStudent,
+                        testFile: (location.pathname.split('/').pop() || ''),
+                        payload: payload
+                    };
+                    window.parent.postMessage(msg, '*');
+                }
+            }
+        }catch(e){}
+        return origFetch(url, opts);
+    };
+})();
+// ═══════════════════════════════════════════════════════════════════
+</script>
+</body>
+</html>

@@ -67,6 +67,15 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
 .empty-box{background:#fff;border:1.5px dashed #d1d5db;border-radius:14px;padding:2.5rem 1rem;text-align:center;color:#9ca3af}
 .empty-box .ei{font-size:32px;margin-bottom:10px}
 .empty-box p{font-size:14px}
+
+/* 정렬바 + 점수 배지 */
+.sort-bar{display:flex;align-items:center;justify-content:space-between;margin:1.25rem 4px .6rem}
+.sort-bar:first-child{margin-top:0}
+.sort-btns{display:flex;gap:6px}
+.sort-btn{font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:#fff;color:#6b7280;cursor:pointer;transition:all .15s}
+.sort-btn:hover{background:#f9fafb}
+.sort-btn.on{background:var(--c,#d97706);color:#fff;border-color:var(--c,#d97706);font-weight:600}
+.score-badge{display:inline-block;font-size:13px;font-weight:700;color:#fff;background:#16a34a;padding:3px 10px;border-radius:20px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -200,7 +209,144 @@ const STRUCTURE = {
     color: "#d97706",
     colorLight: "#fef3c7",
     colorDark: "#92400e",
-    books: []
+    books: [
+      {
+        id: "donga_yjm_2",
+        icon: "📕",
+        title: "중2 동아 (윤정미)",
+        desc: "Lesson 3 · Lesson 4",
+        themeColor: "#dc2626",
+        themeColorLight: "#fee2e2",
+        themeColorDark: "#991b1b",
+        levels: [
+          {
+            icon: "3",
+            title: "Lesson 3",
+            desc: "준비중",
+            tests: [
+              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            ]
+          },
+          {
+            icon: "4",
+            title: "Lesson 4",
+            desc: "준비중",
+            tests: [
+              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            ]
+          }
+        ]
+      },
+      {
+        id: "donga_lbm_2",
+        icon: "📗",
+        title: "중2 동아 (이병민)",
+        desc: "Lesson 3 · Lesson 4",
+        themeColor: "#16a34a",
+        themeColorLight: "#dcfce7",
+        themeColorDark: "#15803d",
+        levels: [
+          {
+            icon: "3",
+            title: "Lesson 3",
+            desc: "준비중",
+            tests: [
+              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            ]
+          },
+          {
+            icon: "4",
+            title: "Lesson 4",
+            desc: "준비중",
+            tests: [
+              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            ]
+          }
+        ]
+      },
+      {
+        id: "chunjae_sys_2",
+        icon: "📙",
+        title: "중2 천재 (소영순)",
+        desc: "Lesson 3 · Lesson 4",
+        themeColor: "#d97706",
+        themeColorLight: "#fef3c7",
+        themeColorDark: "#92400e",
+        levels: [
+          {
+            icon: "3",
+            title: "Lesson 3",
+            desc: "New Ideas Bring Big Changes",
+            tests: [
+              {title:"대표유형 평가", file:"reading_naeshin.html", info:"독해 8문항 + 서술형 2문항 · 100점", db:"/results_reading_chunjae_l3.json", added:1},
+              {title:"본문 N제 (How Teens Talk Now)", file:"reading_donga_yjm_l2.html", info:"객관식 23문항 + 서술형 2문항 · 100점", db:"/results_reading_donga_yjm_l2.json", added:2},
+            ]
+          },
+          {
+            icon: "4",
+            title: "Lesson 4",
+            desc: "준비중",
+            tests: [
+              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            ]
+          }
+        ]
+      },
+      {
+        id: "donga_yjm_3",
+        icon: "📘",
+        title: "중3 동아 (윤정미)",
+        desc: "Lesson 3 · Lesson 4",
+        themeColor: "#2563eb",
+        themeColorLight: "#dbeafe",
+        themeColorDark: "#1d4ed8",
+        levels: [
+          {
+            icon: "3",
+            title: "Lesson 3",
+            desc: "준비중",
+            tests: [
+              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            ]
+          },
+          {
+            icon: "4",
+            title: "Lesson 4",
+            desc: "준비중",
+            tests: [
+              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            ]
+          }
+        ]
+      },
+      {
+        id: "chunjae_ljy_3",
+        icon: "📓",
+        title: "중3 천재 (이재영)",
+        desc: "Lesson 3 · Lesson 4",
+        themeColor: "#9333ea",
+        themeColorLight: "#f3e8ff",
+        themeColorDark: "#6b21a8",
+        levels: [
+          {
+            icon: "3",
+            title: "Lesson 3",
+            desc: "준비중",
+            tests: [
+              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            ]
+          },
+          {
+            icon: "4",
+            title: "Lesson 4",
+            desc: "준비중",
+            tests: [
+              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
 </script>
@@ -271,9 +417,53 @@ const STRUCTURE = {
 <script>
 let curCat = null, curBookIdx = null, curLevelIdx = null;
 
+// ── 점수 표시용 설정 ──
+const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
+let sortMode = 'added';          // 'added'(업로드순) | 'name'(파일명순)
+const scoreCache = {};           // db경로 → 해당 학생 최고점 (중복 조회 방지)
+
+// 학생 이름: URL ?student= 또는 sessionStorage에서
+function getStudent(){
+  try{
+    var p = new URLSearchParams(location.search).get('student');
+    if(p) return p;
+    return sessionStorage.getItem('terrys_embed_student') || '';
+  }catch(e){ return ''; }
+}
+
+// 특정 평가지(db)에서 현재 학생의 최고점을 가져옴 (없으면 null)
+async function fetchBestScore(db){
+  const student = getStudent();
+  if(!student || !db) return null;
+  const key = db + '::' + student;
+  if(key in scoreCache) return scoreCache[key];
+  try{
+    const r = await fetch(FIREBASE_URL + db);
+    const data = await r.json();
+    if(!data){ scoreCache[key] = null; return null; }
+    let best = null;
+    Object.values(data).forEach(rec=>{
+      if(rec && rec.name === student && typeof rec.score === 'number'){
+        if(best === null || rec.score > best) best = rec.score;
+      }
+    });
+    scoreCache[key] = best;
+    return best;
+  }catch(e){ return null; }
+}
+
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+}
+
+// 평가지 표시 이름: title이 있으면 그대로, 없으면 파일명에서 자동 추출
+function testTitle(t){
+  if(t.title) return t.title;                 // 직접 지정한 이름 우선
+  if(!t.file || t.file==='#') return '평가지';
+  return t.file.replace(/\.html?$/i,'')        // 확장자 제거
+               .replace(/[_-]+/g,' ')          // _,- → 공백
+               .trim();
 }
 
 function initCounts(){
@@ -378,19 +568,76 @@ function renderTests(book){
   }
 
   if(book.tests && book.tests.length){
-    const sectionLabel = curCat === 'vocab' ? '회차별 테스트' : '챕터별 테스트';
-    html += '<div class="sec-label">'+sectionLabel+'</div>';
-    html += book.tests.map(t=>
-      '<a href="'+t.file+'" class="test-item">' +
-      '<div class="test-dot"></div>' +
-      '<div class="test-info"><div class="test-title">'+t.title+'</div><div class="test-meta">'+t.info+'</div></div>' +
-      '<span class="test-go">›</span></a>'
-    ).join('');
+    const sectionLabel = curCat === 'vocab' ? '회차별 테스트' : (curCat === 'reading' ? '평가지' : '챕터별 테스트');
+
+    // 리딩에서만 정렬 토글 표시
+    if(curCat === 'reading'){
+      html += '<div class="sort-bar">'+
+        '<span class="sec-label" style="margin:0">'+sectionLabel+'</span>'+
+        '<div class="sort-btns">'+
+          '<button class="sort-btn'+(sortMode==='added'?' on':'')+'" onclick="setSort(\'added\')">업로드순</button>'+
+          '<button class="sort-btn'+(sortMode==='name'?' on':'')+'" onclick="setSort(\'name\')">이름순</button>'+
+        '</div></div>';
+    } else {
+      html += '<div class="sec-label">'+sectionLabel+'</div>';
+    }
+
+    // 정렬: 원본 순서를 보존하기 위해 인덱스 동봉 후 정렬
+    let list = book.tests.map((t,i)=>({t, i}));
+    if(sortMode === 'name'){
+      list.sort((a,b)=> testTitle(a.t).localeCompare(testTitle(b.t), 'ko'));
+    } else { // added(업로드순): added 필드 우선, 없으면 원래 순서
+      list.sort((a,b)=>{
+        const av = (typeof a.t.added==='number')?a.t.added:a.i+1;
+        const bv = (typeof b.t.added==='number')?b.t.added:b.i+1;
+        return av - bv;
+      });
+    }
+
+    html += list.map(({t})=>{
+      const ready = t.file && t.file !== '#';
+      // 점수 배지 자리: db가 있으면 나중에 채움
+      const sid = t.db ? ('sc-'+t.db.replace(/[^a-z0-9]/gi,'')) : '';
+      const goCell = ready
+        ? (t.db ? '<span class="test-go" id="'+sid+'">›</span>' : '<span class="test-go">›</span>')
+        : '<span class="test-go">🔒</span>';
+      if(ready){
+        return '<a href="'+t.file+'" class="test-item">' +
+          '<div class="test-dot"></div>' +
+          '<div class="test-info"><div class="test-title">'+testTitle(t)+'</div><div class="test-meta">'+t.info+'</div></div>' +
+          goCell+'</a>';
+      }
+      return '<div class="test-item" style="opacity:.55;cursor:not-allowed" onclick="alert(\'아직 자료가 준비되지 않았습니다.\')">' +
+        '<div class="test-dot" style="background:#d1d5db"></div>' +
+        '<div class="test-info"><div class="test-title">'+testTitle(t)+'</div><div class="test-meta">'+t.info+'</div></div>' +
+        goCell+'</div>';
+    }).join('');
   }
 
   html += '</div>';
   document.getElementById('tests-body').innerHTML = html;
   show('s-tests');
+
+  // 점수 비동기 로딩 → 우측 끝에 표시
+  if(book.tests){
+    book.tests.forEach(t=>{
+      if(!t.db || t.file==='#') return;
+      const sid = 'sc-'+t.db.replace(/[^a-z0-9]/gi,'');
+      fetchBestScore(t.db).then(score=>{
+        const el = document.getElementById(sid);
+        if(!el) return;
+        if(score===null){ el.textContent='›'; }
+        else { el.innerHTML='<span class="score-badge">'+score+'점</span>'; }
+      });
+    });
+  }
+}
+
+function setSort(mode){
+  sortMode = mode;
+  // 현재 보고 있는 화면을 다시 그림
+  if(curLevelIdx !== null){ openLevel(curLevelIdx); }
+  else if(curBookIdx !== null){ openBook(curBookIdx); }
 }
 
 // ── 테스트 화면 뒤로가기: Level에서 왔으면 Level 목록으로, 아니면 책 목록으로 ──
