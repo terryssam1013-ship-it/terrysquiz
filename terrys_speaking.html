@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>테리스 영어 · 나도 모르게 스피킹</title>
+<style>
+  :root{
+    --navy:#1F3864; --blue:#2E75B6; --light:#D5E8F0;
+    --green:#2e9e5b; --red:#d9534f; --amber:#e0a800; --gray:#f2f4f7;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; font-family:"맑은 고딕","Malgun Gothic",system-ui,sans-serif;
+       background:#eef1f6; color:#1a1a1a;}
+  header{background:var(--navy); color:#fff; padding:14px 18px; display:flex;
+         align-items:center; justify-content:space-between;}
+  header .brand{font-weight:700; font-size:18px;}
+  header .brand small{font-weight:400; color:var(--light); margin-left:6px; font-size:13px;}
+  .wrap{max-width:680px; margin:0 auto; padding:18px;}
+
+  .panel{background:#fff; border-radius:16px; box-shadow:0 4px 18px rgba(0,0,0,.06);
+         padding:22px; margin-bottom:16px;}
+
+  /* set picker */
+  select{font-size:16px; padding:8px 10px; border:1px solid #cdd5e0; border-radius:10px;
+         width:100%; background:#fff;}
+  label.lbl{font-size:13px; color:#6b7480; display:block; margin-bottom:6px;}
+
+  .progress{display:flex; align-items:center; gap:10px; margin:4px 0 14px;}
+  .bar{flex:1; height:8px; background:#e3e8ef; border-radius:99px; overflow:hidden;}
+  .bar > i{display:block; height:100%; background:var(--blue); width:0%; transition:width .3s;}
+  .count{font-size:13px; color:#6b7480; white-space:nowrap;}
+
+  .ko{font-size:30px; font-weight:700; text-align:center; color:var(--navy);
+      line-height:1.35; margin:26px 0;}
+  .hint{font-size:14px; color:#9aa3af; text-align:center; margin:-14px 0 22px; min-height:20px;}
+
+  .mic{display:block; margin:0 auto; width:108px; height:108px; border-radius:50%;
+       border:none; background:var(--blue); color:#fff; font-size:15px; font-weight:700;
+       cursor:pointer; box-shadow:0 6px 20px rgba(46,117,182,.4); transition:transform .1s;}
+  .mic:active{transform:scale(.96);}
+  .mic.rec{background:var(--red); animation:pulse 1.1s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(217,83,79,.5);}
+                   70%{box-shadow:0 0 0 18px rgba(217,83,79,0);}
+                   100%{box-shadow:0 0 0 0 rgba(217,83,79,0);}}
+  .mic-cap{text-align:center; font-size:13px; color:#6b7480; margin-top:10px;}
+
+  .heard{margin-top:18px; background:var(--gray); border-radius:12px; padding:14px 16px;
+          font-size:16px; min-height:50px;}
+  .heard b{color:var(--blue);}
+
+  .result{margin-top:16px; border-radius:12px; padding:16px; display:none;}
+  .result.show{display:block;}
+  .result.ok{background:#e9f7ef; border:1px solid #b6e2c6;}
+  .result.almost{background:#fff7e0; border:1px solid #f0dca0;}
+  .result.no{background:#fdeeee; border:1px solid #f3c6c4;}
+  .result .score{font-size:22px; font-weight:800;}
+  .result.ok .score{color:var(--green);}
+  .result.almost .score{color:var(--amber);}
+  .result.no .score{color:var(--red);}
+  .answer{margin-top:8px; font-size:17px;}
+  .answer .w-ok{color:var(--green); font-weight:700;}
+  .answer .w-miss{color:var(--red); text-decoration:underline; text-decoration-style:wavy;}
+
+  .btns{display:flex; gap:10px; margin-top:16px;}
+  .btn{flex:1; padding:13px; border-radius:12px; border:none; font-size:16px;
+       font-weight:700; cursor:pointer;}
+  .btn-show{background:#eef1f6; color:var(--navy);}
+  .btn-next{background:var(--navy); color:#fff;}
+  .btn:disabled{opacity:.4; cursor:default;}
+
+  .summary{text-align:center; padding:10px 0;}
+  .summary .big{font-size:46px; font-weight:800; color:var(--navy);}
+  .summary table{width:100%; border-collapse:collapse; margin-top:16px; font-size:14px;}
+  .summary td{padding:8px 6px; border-bottom:1px solid #eef1f6; text-align:left;}
+  .summary td.s{text-align:right; font-weight:700; white-space:nowrap;}
+  .badge{display:inline-block; padding:2px 8px; border-radius:99px; font-size:12px; font-weight:700;}
+  .badge.ok{background:#e9f7ef; color:var(--green);}
+  .badge.almost{background:#fff7e0; color:var(--amber);}
+  .badge.no{background:#fdeeee; color:var(--red);}
+
+  .warn{background:#fff7e0; border:1px solid #f0dca0; border-radius:12px; padding:12px 14px;
+        font-size:14px; color:#7a5d00; margin-bottom:16px;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">테리스 영어 <small>나도 모르게 스피킹</small></div>
+  <div style="font-size:13px;color:var(--light)">동탄남광장 엠베스트</div>
+</header>
+
+<div class="wrap">
+
+  <div id="unsupported" class="warn hidden">
+    이 브라우저는 음성 인식을 지원하지 않아요. <b>크롬(Chrome)</b> 브라우저에서 열어 주세요.
+  </div>
+
+  <!-- SETUP -->
+  <div class="panel" id="setup">
+    <label class="lbl">패턴 선택</label>
+    <select id="setSelect"></select>
+    <div class="btns" style="margin-top:18px;">
+      <button class="btn btn-next" id="startBtn">시작하기 →</button>
+    </div>
+    <p style="font-size:13px;color:#9aa3af;margin:14px 0 0;line-height:1.6;">
+      한글 문장을 보고 영어로 말하면 AI가 자동으로 채점해요.<br>
+      마이크 버튼을 누르고 또박또박 말해 보세요. 발음이 조금 달라도 핵심 단어가 맞으면 통과돼요.
+    </p>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="panel hidden" id="quiz">
+    <div class="progress">
+      <span class="count" id="counter">1 / 8</span>
+      <div class="bar"><i id="barFill"></i></div>
+      <span class="count" id="scoreNow">0점</span>
+    </div>
+
+    <div class="ko" id="koText">—</div>
+    <div class="hint" id="hint"></div>
+
+    <button class="mic" id="micBtn">🎤<br>눌러서 말하기</button>
+    <div class="mic-cap" id="micCap">마이크 버튼을 누르고 영어로 말하세요</div>
+
+    <div class="heard" id="heard">들린 말: <b id="heardText">—</b></div>
+
+    <div class="result" id="result">
+      <div class="score" id="scoreLine"></div>
+      <div class="answer" id="answerLine"></div>
+    </div>
+
+    <div class="btns">
+      <button class="btn btn-show" id="showBtn">정답 보기</button>
+      <button class="btn btn-next" id="nextBtn" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="panel hidden summary" id="summary">
+    <div style="font-size:16px;color:#6b7480;">오늘의 스피킹 결과</div>
+    <div class="big" id="finalScore">0점</div>
+    <div id="finalMsg" style="font-size:15px;color:var(--navy);font-weight:700;"></div>
+    <table id="summaryTable"></table>
+    <div class="btns" style="margin-top:20px;">
+      <button class="btn btn-show" id="retryBtn">다시 풀기</button>
+      <button class="btn btn-next" id="homeBtn">다른 패턴 →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ===================== 문제 데이터 =====================
+   여기 SETS 객체만 수정하면 새 패턴을 추가할 수 있어요.
+   { ko: "한글문장", en: "영어정답" } 형태로 넣으면 됩니다. */
+const SETS = {
+  "PT16 · I am here to ~ (나는 ~하러 여기 왔어요)": [
+    {ko:"나는 영어를 배우러 여기 왔어요.", en:"I am here to learn English."},
+    {ko:"나는 너를 도우러 여기 왔어요.", en:"I am here to help you."},
+    {ko:"나는 질문하러 여기 왔어요.", en:"I am here to ask a question."},
+    {ko:"나는 티켓을 사러 여기 왔어요.", en:"I am here to buy a ticket."},
+    {ko:"나는 그녀를 기억하기 위해 여기 왔어요.", en:"I am here to remember her."},
+    {ko:"나는 누군가를 만나러 여기 왔어요.", en:"I am here to meet someone."},
+    {ko:"나는 책을 읽으러 여기 왔어요.", en:"I am here to read a book."},
+    {ko:"나는 숙제를 하러 여기 왔어요.", en:"I am here to do my homework."},
+  ],
+  "PT16 · I am sorry to ~ (~해서 미안해요)": [
+    {ko:"늦어서 미안해요.", en:"I am sorry to be late."},
+    {ko:"아니라고 말해서 미안해요.", en:"I am sorry to say no."},
+    {ko:"귀찮게 해서 미안해요.", en:"I am sorry to bother you."},
+    {ko:"네 이름을 잊어서 미안해요.", en:"I am sorry to forget your name."},
+    {ko:"규칙을 어겨서 미안해요.", en:"I am sorry to break the rule."},
+    {ko:"수업을 빠져서 미안해요.", en:"I am sorry to miss the class."},
+    {ko:"실수해서 미안해요.", en:"I am sorry to make a mistake."},
+    {ko:"네 마음을 아프게 해서 미안해요.", en:"I am sorry to hurt your feelings."},
+  ],
+};
+
+/* ===================== 채점 로직 ===================== */
+// 텍스트 정규화: 소문자, 문장부호 제거, I'm=I am 등 축약 처리, 공백 정리
+function normalize(s){
+  return s.toLowerCase()
+    .replace(/i['’]m/g,"i am")
+    .replace(/don['’]t/g,"do not")
+    .replace(/can['’]t/g,"cannot")
+    .replace(/won['’]t/g,"will not")
+    .replace(/['’]s/g," is")     // 단순화 (he's -> he is)
+    .replace(/[.,!?;:"]/g,"")
+    .replace(/\s+/g," ")
+    .trim();
+}
+// 핵심어 비교: 정답 단어 중 몇 %가 학생 발화에 포함됐는지 (순서 무관, 너무 예민하지 않게)
+function gradeWords(said, answer){
+  const a = normalize(answer).split(" ").filter(Boolean);
+  const sSet = new Set(normalize(said).split(" ").filter(Boolean));
+  // 비중 낮은 기능어는 가중치 절반
+  const lowWeight = new Set(["a","an","the","to","is","am","are","my","your","i","you"]);
+  let got=0, total=0, missed=[];
+  a.forEach(w=>{
+    const wgt = lowWeight.has(w)?0.5:1;
+    total += wgt;
+    if(sSet.has(w)) got += wgt;
+    else if(!lowWeight.has(w)) missed.push(w);
+  });
+  const pct = total? Math.round(got/total*100):0;
+  return {pct, missed};
+}
+// 단어별 색칠 (맞은 단어 초록, 틀린 핵심어 빨강)
+function markup(answer, said){
+  const sSet = new Set(normalize(said).split(" ").filter(Boolean));
+  return answer.split(/(\s+)/).map(tok=>{
+    if(/^\s+$/.test(tok)) return tok;
+    const clean = normalize(tok);
+    if(!clean) return tok;
+    const hit = clean.split(" ").every(w=>sSet.has(w));
+    return `<span class="${hit?'w-ok':'w-miss'}">${tok}</span>`;
+  }).join("");
+}
+
+/* ===================== 앱 상태 ===================== */
+let curSet=[], idx=0, results=[], recognizing=false, recog=null, answered=false;
+
+const $ = id=>document.getElementById(id);
+
+// 음성인식 준비
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(!SR){ $("unsupported").classList.remove("hidden"); }
+else{
+  recog = new SR();
+  recog.lang = "en-US";
+  recog.interimResults = false;
+  recog.maxAlternatives = 3;
+  recog.onresult = e=>{
+    // 여러 후보 중 정답과 가장 비슷한 것을 채점에 사용 (관대하게)
+    const ans = curSet[idx].en;
+    let best="", bestPct=-1;
+    for(let i=0;i<e.results[0].length;i++){
+      const t = e.results[0][i].transcript;
+      const p = gradeWords(t, ans).pct;
+      if(p>bestPct){bestPct=p; best=t;}
+    }
+    grade(best);
+  };
+  recog.onerror = ev=>{
+    stopRec();
+    if(ev.error==="not-allowed"||ev.error==="service-not-allowed"){
+      $("micCap").textContent="마이크 권한을 허용해 주세요.";
+    }else if(ev.error==="no-speech"){
+      $("micCap").textContent="소리가 안 들렸어요. 다시 눌러서 말해 보세요.";
+    }else{
+      $("micCap").textContent="다시 한 번 눌러서 말해 보세요.";
+    }
+  };
+  recog.onend = ()=>{ if(recognizing) stopRec(); };
+}
+
+// 패턴 목록 채우기
+const sel = $("setSelect");
+Object.keys(SETS).forEach(k=>{
+  const o=document.createElement("option"); o.value=k; o.textContent=k; sel.appendChild(o);
+});
+
+function show(panel){ ["setup","quiz","summary"].forEach(p=>$(p).classList.toggle("hidden", p!==panel)); }
+
+$("startBtn").onclick = ()=>{
+  curSet = SETS[sel.value].slice();
+  idx=0; results=[];
+  show("quiz");
+  loadQ();
+};
+
+function loadQ(){
+  answered=false;
+  const q = curSet[idx];
+  $("koText").textContent = q.ko;
+  $("hint").textContent = `힌트: ${q.en.split(" ").length}단어, "${q.en.split(" ")[0]}..."로 시작`;
+  $("counter").textContent = `${idx+1} / ${curSet.length}`;
+  $("barFill").style.width = `${(idx)/curSet.length*100}%`;
+  $("heardText").textContent="—";
+  $("result").className="result";
+  $("nextBtn").disabled=true;
+  $("micCap").textContent="마이크 버튼을 누르고 영어로 말하세요";
+  $("scoreNow").textContent = `${results.reduce((a,r)=>a+r.pct,0)}점`;
+}
+
+function startRec(){
+  if(!recog) return;
+  try{ recog.start(); }catch(e){ return; }
+  recognizing=true;
+  $("micBtn").classList.add("rec");
+  $("micBtn").innerHTML="● <br>듣는 중...";
+  $("micCap").textContent="지금 말하세요!";
+}
+function stopRec(){
+  recognizing=false;
+  $("micBtn").classList.remove("rec");
+  $("micBtn").innerHTML="🎤<br>눌러서 말하기";
+  try{ recog && recog.stop(); }catch(e){}
+}
+
+$("micBtn").onclick = ()=>{
+  if(recognizing){ stopRec(); return; }
+  startRec();
+};
+
+function grade(saidText){
+  stopRec();
+  const q = curSet[idx];
+  const {pct, missed} = gradeWords(saidText, q.en);
+  $("heardText").textContent = saidText || "(인식 안 됨)";
+
+  let cls, label, emoji;
+  if(pct>=80){cls="ok"; label="정답!"; emoji="✅";}
+  else if(pct>=55){cls="almost"; label="거의 맞았어요!"; emoji="🟡";}
+  else{cls="no"; label="다시 도전!"; emoji="❌";}
+
+  $("result").className = `result show ${cls}`;
+  $("scoreLine").innerHTML = `${emoji} ${label} <span style="font-size:16px;">(${pct}점)</span>`;
+  $("answerLine").innerHTML = `정답: ${markup(q.en, saidText)}`;
+
+  if(!answered){
+    results[idx] = {pct, ko:q.ko, en:q.en, said:saidText, cls};
+    answered=true;
+  }else{
+    results[idx] = {pct, ko:q.ko, en:q.en, said:saidText, cls}; // 재시도 시 최신값 반영
+  }
+  $("scoreNow").textContent = `${results.reduce((a,r)=>a+(r?r.pct:0),0)}점`;
+  $("nextBtn").disabled=false;
+}
+
+$("showBtn").onclick = ()=>{
+  const q=curSet[idx];
+  $("result").className="result show almost";
+  $("scoreLine").innerHTML="👀 정답 확인";
+  $("answerLine").innerHTML=`정답: <b>${q.en}</b>`;
+  if(!results[idx]) results[idx]={pct:0, ko:q.ko, en:q.en, said:"(정답 봄)", cls:"no"};
+  answered=true;
+  $("nextBtn").disabled=false;
+};
+
+$("nextBtn").onclick = ()=>{
+  if(idx < curSet.length-1){ idx++; loadQ(); }
+  else finish();
+};
+
+function finish(){
+  const total = results.reduce((a,r)=>a+(r?r.pct:0),0);
+  const avg = Math.round(total/curSet.length);
+  $("finalScore").textContent = `${total}점`;
+  let msg;
+  if(avg>=80) msg="훌륭해요! 패턴을 완벽하게 익혔어요 🎉";
+  else if(avg>=55) msg="잘했어요! 조금만 더 연습하면 완벽해요 💪";
+  else msg="괜찮아요! 한 번 더 도전해 볼까요? 🔥";
+  $("finalMsg").textContent = `평균 ${avg}점 · ${msg}`;
+
+  const tb = $("summaryTable"); tb.innerHTML="";
+  results.forEach((r,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML = `<td>${i+1}. ${r.en}</td>
+      <td class="s"><span class="badge ${r.cls}">${r.pct}점</span></td>`;
+    tb.appendChild(tr);
+  });
+  show("summary");
+}
+
+$("retryBtn").onclick = ()=>{ idx=0; results=[]; show("quiz"); loadQ(); };
+$("homeBtn").onclick = ()=>{ show("setup"); };
+</script>
+</body>
+</html>
