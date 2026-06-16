@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>테리스 스피킹 · 4단계 실전 (랜덤 말하기)</title>
+<style>
+  :root{
+    --navy:#1F3864; --blue:#2E75B6; --light:#D5E8F0;
+    --green:#2e9e5b; --red:#d9534f; --amber:#e0a800; --gray:#f2f4f7;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; height:100%;}
+  body{font-family:"맑은 고딕","Malgun Gothic",system-ui,sans-serif;
+       background:#0e1726; color:#fff; overflow:hidden;
+       display:flex; flex-direction:column; height:100dvh;}
+
+  header{flex:0 0 auto; background:rgba(31,56,100,.95); padding:10px 16px;
+         display:flex; align-items:center; justify-content:space-between;}
+  header .brand{font-weight:700; font-size:15px;}
+  header .brand small{font-weight:400; color:var(--light); margin-left:5px; font-size:12px;}
+  header .stage{font-size:12px; background:var(--red); padding:3px 9px; border-radius:99px; font-weight:700;}
+
+  .stage-wrap{flex:1 1 auto; position:relative; display:flex; flex-direction:column;
+              justify-content:center; align-items:center; padding:16px; overflow:hidden;}
+
+  /* progress */
+  .prog{position:absolute; top:12px; left:16px; right:16px; display:flex; align-items:center; gap:8px;}
+  .prog .bar{flex:1; height:6px; background:rgba(255,255,255,.15); border-radius:99px; overflow:hidden;}
+  .prog .bar > i{display:block; height:100%; width:0%; background:var(--blue); transition:width .3s;}
+  .prog .c{font-size:12px; color:#aab4c4; white-space:nowrap;}
+
+  .ko{font-size:30px; font-weight:800; text-align:center; line-height:1.4; color:#fff;
+      text-shadow:0 2px 8px rgba(0,0,0,.4); padding:0 8px;}
+  .sub{font-size:13px; color:#9aa6ba; text-align:center; margin-top:14px; min-height:18px;}
+
+  .heard{margin-top:18px; font-size:15px; color:#cdd6e4; text-align:center; min-height:22px;}
+  .heard b{color:#7db8ec;}
+
+  .result{margin-top:14px; text-align:center; min-height:54px;}
+  .result .score{font-size:22px; font-weight:800;}
+  .result.ok .score{color:#5fd98a;}
+  .result.almost .score{color:#ffd24a;}
+  .result.no .score{color:#ff7b76;}
+  .result .ans{font-size:15px; color:#cdd6e4; margin-top:4px;}
+  .result .ans .w-ok{color:#5fd98a; font-weight:700;}
+  .result .ans .w-miss{color:#ff7b76; text-decoration:underline wavy;}
+
+  /* face cam bottom circle */
+  .cam-wrap{position:absolute; bottom:96px; left:50%; transform:translateX(-50%);
+            width:96px; height:96px; border-radius:50%; overflow:hidden;
+            border:3px solid var(--blue); box-shadow:0 4px 16px rgba(0,0,0,.5); background:#000;}
+  .cam-wrap video{width:100%; height:100%; object-fit:cover; transform:scaleX(-1);}
+  .cam-wrap.rec{border-color:var(--red); animation:pulse 1.1s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(217,83,79,.6);}
+                   70%{box-shadow:0 0 0 12px rgba(217,83,79,0);}
+                   100%{box-shadow:0 0 0 0 rgba(217,83,79,0);}}
+  .rec-dot{position:absolute; bottom:198px; left:50%; transform:translateX(-50%);
+           font-size:11px; color:#ff7b76; font-weight:700; display:none;}
+  .rec-dot.on{display:block;}
+
+  /* bottom controls */
+  .controls{flex:0 0 auto; padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+            background:rgba(14,23,38,.9);}
+  .mic{display:block; width:100%; padding:16px; border:none; border-radius:16px;
+       background:var(--blue); color:#fff; font-size:17px; font-weight:800; cursor:pointer;}
+  .mic.rec{background:var(--red);}
+  .mic:disabled{opacity:.4;}
+  .row{display:flex; gap:10px; margin-top:10px;}
+  .row .btn{flex:1; padding:13px; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer;}
+  .btn-skip{background:#2a3650; color:#cdd6e4;}
+  .btn-next{background:var(--navy); color:#fff;}
+  .btn:disabled{opacity:.4;}
+
+  /* overlays */
+  .screen{position:absolute; inset:0; background:#0e1726; z-index:5;
+          display:flex; flex-direction:column; justify-content:center; align-items:center;
+          padding:28px; text-align:center;}
+  .screen.hide{display:none;}
+  .screen h1{font-size:26px; margin:0 0 6px;}
+  .screen p{color:#9aa6ba; font-size:15px; line-height:1.6; margin:6px 0;}
+  .screen .big-btn{margin-top:24px; padding:16px 36px; border:none; border-radius:16px;
+                   background:var(--blue); color:#fff; font-size:18px; font-weight:800; cursor:pointer;}
+  .screen .ghost{margin-top:12px; background:transparent; color:#9aa6ba; border:1px solid #2a3650;
+                 padding:12px 28px; border-radius:14px; font-size:14px; cursor:pointer;}
+
+  .final-score{font-size:54px; font-weight:900; color:#fff; margin:8px 0;}
+  .final-list{width:100%; max-width:420px; margin-top:10px; text-align:left;}
+  .final-list .item{display:flex; justify-content:space-between; padding:8px 4px;
+                    border-bottom:1px solid #1d2942; font-size:14px;}
+  .badge{padding:2px 9px; border-radius:99px; font-size:12px; font-weight:700;}
+  .badge.ok{background:#15391f; color:#5fd98a;}
+  .badge.almost{background:#3a3210; color:#ffd24a;}
+  .badge.no{background:#3a1715; color:#ff7b76;}
+
+  video.review{width:100%; max-width:300px; border-radius:14px; margin-top:14px; transform:scaleX(-1);}
+  .warn{color:#ffd24a; font-size:13px; margin-top:12px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">테리스 스피킹 <small>4단계 · 실전</small></div>
+  <div class="stage">🔴 REC 영상 녹화</div>
+</header>
+
+<!-- START SCREEN -->
+<div class="screen" id="startScreen">
+  <h1>4단계 · 랜덤 말하기 🎬</h1>
+  <p>한글 문장이 랜덤으로 나와요.<br>영어로 자신 있게 말해 보세요!</p>
+  <p style="font-size:13px;color:#6f7d92;">카메라와 마이크를 켜고 진행돼요.<br>얼굴이 화면 하단에 작게 나오고, 전체가 영상으로 녹화됩니다.</p>
+  <button class="big-btn" id="enableBtn">카메라·마이크 켜고 시작</button>
+  <div class="warn" id="startWarn"></div>
+</div>
+
+<!-- QUIZ AREA -->
+<div class="stage-wrap" id="quizArea">
+  <div class="prog">
+    <span class="c" id="counter">1 / 6</span>
+    <div class="bar"><i id="barFill"></i></div>
+    <span class="c" id="scoreNow">0점</span>
+  </div>
+
+  <div class="ko" id="koText">준비 중…</div>
+  <div class="sub" id="sub"></div>
+  <div class="heard" id="heard"></div>
+  <div class="result" id="result"></div>
+
+  <div class="rec-dot" id="recDot">● 녹화 중</div>
+  <div class="cam-wrap" id="camWrap">
+    <video id="cam" autoplay muted playsinline></video>
+  </div>
+</div>
+
+<div class="controls" id="controls">
+  <button class="mic" id="micBtn">🎤 눌러서 영어로 말하기</button>
+  <div class="row">
+    <button class="btn btn-skip" id="showBtn">정답 보기</button>
+    <button class="btn btn-next" id="nextBtn" disabled>다음 →</button>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div class="screen hide" id="endScreen">
+  <h1>잘했어요! 🎉</h1>
+  <div class="final-score" id="finalScore">0점</div>
+  <p id="finalMsg"></p>
+  <video class="review" id="reviewVid" controls playsinline></video>
+  <div class="final-list" id="finalList"></div>
+  <button class="big-btn" id="saveBtn">📥 영상 저장하기</button>
+  <button class="ghost" id="restartBtn">다시 하기</button>
+  <div class="warn" id="saveHint"></div>
+</div>
+
+<script>
+/* ===== 문제: PT16 두 세트 섞어서 랜덤 ===== */
+const POOL = [
+  {ko:"나는 영어를 배우러 여기 왔어요.", en:"I am here to learn English."},
+  {ko:"나는 너를 도우러 여기 왔어요.", en:"I am here to help you."},
+  {ko:"나는 질문하러 여기 왔어요.", en:"I am here to ask a question."},
+  {ko:"나는 티켓을 사러 여기 왔어요.", en:"I am here to buy a ticket."},
+  {ko:"나는 누군가를 만나러 여기 왔어요.", en:"I am here to meet someone."},
+  {ko:"나는 책을 읽으러 여기 왔어요.", en:"I am here to read a book."},
+  {ko:"늦어서 미안해요.", en:"I am sorry to be late."},
+  {ko:"귀찮게 해서 미안해요.", en:"I am sorry to bother you."},
+  {ko:"규칙을 어겨서 미안해요.", en:"I am sorry to break the rule."},
+  {ko:"실수해서 미안해요.", en:"I am sorry to make a mistake."},
+  {ko:"수업을 빠져서 미안해요.", en:"I am sorry to miss the class."},
+  {ko:"네 마음을 아프게 해서 미안해요.", en:"I am sorry to hurt your feelings."},
+];
+const QUESTION_COUNT = 6; // 실전 문항 수
+
+/* ===== 채점 ===== */
+function normalize(s){
+  return s.toLowerCase()
+    .replace(/i['’]m/g,"i am").replace(/don['’]t/g,"do not")
+    .replace(/[.,!?;:"]/g,"").replace(/\s+/g," ").trim();
+}
+function gradeWords(said, answer){
+  const a = normalize(answer).split(" ").filter(Boolean);
+  const sSet = new Set(normalize(said).split(" ").filter(Boolean));
+  const low = new Set(["a","an","the","to","is","am","are","my","your","i","you"]);
+  let got=0,total=0,missed=[];
+  a.forEach(w=>{const wt=low.has(w)?0.5:1; total+=wt;
+    if(sSet.has(w))got+=wt; else if(!low.has(w))missed.push(w);});
+  return {pct: total?Math.round(got/total*100):0, missed};
+}
+function markup(answer, said){
+  const sSet=new Set(normalize(said).split(" ").filter(Boolean));
+  return answer.split(/(\s+)/).map(t=>{
+    if(/^\s+$/.test(t))return t; const c=normalize(t); if(!c)return t;
+    return `<span class="${c.split(" ").every(w=>sSet.has(w))?'w-ok':'w-miss'}">${t}</span>`;
+  }).join("");
+}
+
+/* ===== 상태 ===== */
+const $=id=>document.getElementById(id);
+let qs=[], idx=0, results=[], answered=false, recognizing=false;
+let recog=null, stream=null, mediaRec=null, chunks=[], videoURL=null, videoBlob=null;
+
+/* 음성인식 준비 */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){
+  recog=new SR(); recog.lang="en-US"; recog.interimResults=false; recog.maxAlternatives=3;
+  recog.onresult=e=>{
+    const ans=qs[idx].en; let best="",bp=-1;
+    for(let i=0;i<e.results[0].length;i++){
+      const t=e.results[0][i].transcript, p=gradeWords(t,ans).pct;
+      if(p>bp){bp=p;best=t;}
+    }
+    grade(best);
+  };
+  recog.onerror=ev=>{ stopRec();
+    $("sub").textContent = ev.error==="no-speech" ? "소리가 안 들렸어요. 다시 말해 보세요."
+      : ev.error==="not-allowed" ? "마이크 권한을 허용해 주세요." : "다시 한 번 눌러 말해 보세요.";
+  };
+  recog.onend=()=>{ if(recognizing) stopRec(); };
+}
+
+/* 시작: 카메라+마이크 권한 → 녹화 시작 */
+$("enableBtn").onclick = async ()=>{
+  if(!SR){ $("startWarn").textContent="이 브라우저는 음성인식을 지원하지 않아요. 크롬(Chrome)으로 열어 주세요."; return; }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:"user", width:{ideal:640}, height:{ideal:640} },
+      audio:true
+    });
+  }catch(e){
+    $("startWarn").textContent="카메라·마이크 권한이 필요해요. 허용 후 다시 눌러 주세요. (https 주소에서만 작동)";
+    return;
+  }
+  $("cam").srcObject = stream;
+  // 녹화 시작 (지원 포맷 자동 선택)
+  let mime = "video/webm;codecs=vp9,opus";
+  if(!MediaRecorder.isTypeSupported(mime)) mime="video/webm;codecs=vp8,opus";
+  if(!MediaRecorder.isTypeSupported(mime)) mime="video/webm";
+  if(!MediaRecorder.isTypeSupported(mime)) mime="video/mp4"; // iOS 사파리 대비
+  try{
+    mediaRec = new MediaRecorder(stream, { mimeType: mime });
+  }catch(e){ mediaRec = new MediaRecorder(stream); }
+  chunks=[];
+  mediaRec.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+  mediaRec.onstop = ()=>{
+    videoBlob = new Blob(chunks, { type: chunks[0]?.type || "video/webm" });
+    videoURL = URL.createObjectURL(videoBlob);
+  };
+  mediaRec.start();
+  $("camWrap").classList.add("rec");
+  $("recDot").classList.add("on");
+
+  // 문제 셔플
+  qs = POOL.slice().sort(()=>Math.random()-0.5).slice(0, QUESTION_COUNT);
+  idx=0; results=[];
+  $("startScreen").classList.add("hide");
+  loadQ();
+};
+
+function loadQ(){
+  answered=false;
+  const q=qs[idx];
+  $("koText").textContent=q.ko;
+  $("sub").textContent=`힌트: ${q.en.split(" ").length}단어`;
+  $("counter").textContent=`${idx+1} / ${qs.length}`;
+  $("barFill").style.width=`${idx/qs.length*100}%`;
+  $("heard").innerHTML="";
+  $("result").className="result";
+  $("result").innerHTML="";
+  $("nextBtn").disabled=true;
+  $("micBtn").disabled=false;
+  $("nextBtn").textContent = (idx===qs.length-1)?"끝내기 →":"다음 →";
+}
+
+function startRec(){
+  if(!recog)return;
+  try{ recog.start(); }catch(e){ return; }
+  recognizing=true;
+  $("micBtn").classList.add("rec");
+  $("micBtn").textContent="● 듣는 중… (탭하면 멈춤)";
+  $("sub").textContent="지금 영어로 말하세요!";
+}
+function stopRec(){
+  recognizing=false;
+  $("micBtn").classList.remove("rec");
+  $("micBtn").textContent="🎤 눌러서 영어로 말하기";
+  try{ recog&&recog.stop(); }catch(e){}
+}
+$("micBtn").onclick=()=>{ recognizing?stopRec():startRec(); };
+
+function grade(said){
+  stopRec();
+  const q=qs[idx];
+  const {pct}=gradeWords(said,q.en);
+  $("heard").innerHTML=`들린 말: <b>${said||"(인식 안 됨)"}</b>`;
+  let cls,label,emo;
+  if(pct>=80){cls="ok";label="정답!";emo="✅";}
+  else if(pct>=55){cls="almost";label="거의!";emo="🟡";}
+  else{cls="no";label="다시 도전!";emo="❌";}
+  $("result").className=`result ${cls}`;
+  $("result").innerHTML=`<div class="score">${emo} ${label} (${pct}점)</div>
+    <div class="ans">${markup(q.en,said)}</div>`;
+  results[idx]={pct,ko:q.ko,en:q.en,cls};
+  answered=true;
+  $("nextBtn").disabled=false;
+  $("scoreNow").textContent=`${results.reduce((a,r)=>a+(r?r.pct:0),0)}점`;
+}
+
+$("showBtn").onclick=()=>{
+  const q=qs[idx];
+  $("result").className="result almost";
+  $("result").innerHTML=`<div class="score">👀 정답</div><div class="ans">${q.en}</div>`;
+  if(!results[idx]) results[idx]={pct:0,ko:q.ko,en:q.en,cls:"no"};
+  answered=true; $("nextBtn").disabled=false;
+};
+
+$("nextBtn").onclick=()=>{
+  if(idx<qs.length-1){ idx++; loadQ(); }
+  else finish();
+};
+
+function finish(){
+  // 녹화 종료
+  $("barFill").style.width="100%";
+  $("camWrap").classList.remove("rec");
+  $("recDot").classList.remove("on");
+  if(mediaRec && mediaRec.state!=="inactive") mediaRec.stop();
+
+  const total=results.reduce((a,r)=>a+(r?r.pct:0),0);
+  const avg=Math.round(total/qs.length);
+  $("finalScore").textContent=`${total}점`;
+  let msg = avg>=80?"훌륭해요! 패턴을 완벽히 익혔어요 🎉"
+          : avg>=55?"잘했어요! 조금만 더 연습하면 완벽해요 💪"
+          : "괜찮아요! 한 번 더 도전해 볼까요? 🔥";
+  $("finalMsg").textContent=`평균 ${avg}점 · ${msg}`;
+
+  const list=$("finalList"); list.innerHTML="";
+  results.forEach((r,i)=>{
+    const d=document.createElement("div"); d.className="item";
+    d.innerHTML=`<span>${i+1}. ${r.en}</span><span class="badge ${r.cls}">${r.pct}점</span>`;
+    list.appendChild(d);
+  });
+
+  // 녹화본 미리보기 (onstop 후 약간 지연)
+  setTimeout(()=>{
+    if(videoURL){
+      const rv=$("reviewVid"); rv.src=videoURL; rv.muted=false;
+    }
+  }, 400);
+
+  $("startScreen").classList.add("hide");
+  $("quizArea").style.display="none";
+  $("controls").style.display="none";
+  $("endScreen").classList.remove("hide");
+}
+
+/* 영상 저장 (폰에 다운로드) */
+$("saveBtn").onclick=()=>{
+  if(!videoBlob){ $("saveHint").textContent="아직 영상이 준비되지 않았어요. 잠시 후 다시 시도해 주세요."; return; }
+  const a=document.createElement("a");
+  const ext = (videoBlob.type.includes("mp4"))?"mp4":"webm";
+  const stamp = new Date().toISOString().slice(0,16).replace(/[:T]/g,"-");
+  a.href=videoURL; a.download=`테리스스피킹_${stamp}.${ext}`;
+  document.body.appendChild(a); a.click(); a.remove();
+  $("saveHint").textContent="저장됨! 갤러리/다운로드 폴더를 확인하세요. (홍보 사용 시 학부모 동의 필요)";
+};
+
+$("restartBtn").onclick=()=>{ location.reload(); };
+</script>
+</body>
+</html>
