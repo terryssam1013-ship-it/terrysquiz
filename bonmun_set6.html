@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>테리스 영어 · 본문N제</title>
+<style>
+  :root{ --orange:#d97706; --orange-d:#b45309; --orange-l:#fef3e2; --ink:#1f2937; --mut:#6b7280; --line:#e5e7eb; --ok:#059669; --no:#dc2626; --bg:#fafaf9; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px 80px}
+  header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:2px solid var(--orange);padding:12px 14px;display:flex;align-items:center;gap:10px}
+  header .logo{font-weight:800;color:var(--orange);font-size:16px;letter-spacing:-.3px;white-space:nowrap}
+  header .sub{font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+  header .gear{margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;color:var(--mut);padding:4px}
+  /* progress dots */
+  .dots{display:flex;flex-wrap:wrap;gap:5px;padding:12px 0 4px}
+  .dot{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer}
+  .dot.done{background:var(--orange-l);border-color:var(--orange);color:var(--orange-d);font-weight:700}
+  .dot.cur{outline:2px solid var(--orange)}
+  /* card */
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .qhead{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .qnum{background:var(--orange);color:#fff;font-weight:800;font-size:13px;border-radius:8px;padding:3px 9px}
+  .badge{font-size:11px;background:var(--orange-l);color:var(--orange-d);border-radius:6px;padding:2px 8px;font-weight:600}
+  .gr{font-size:11px;background:#eef2ff;color:#4338ca;border-radius:6px;padding:2px 8px;font-weight:700}
+  .pts{font-size:11px;color:var(--mut);margin-left:auto}
+  .passage{background:#fafaf9;border:1px solid var(--line);border-left:3px solid var(--orange);border-radius:8px;padding:12px 14px;margin:8px 0 14px;font-size:14.5px;color:#374151;white-space:normal}
+  .passage u{text-decoration:underline;text-underline-offset:2px}
+  .qtext{font-weight:600;margin:6px 0 12px;font-size:15.5px}
+  .opt{display:flex;align-items:flex-start;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;margin:8px 0;cursor:pointer;transition:.12s;font-size:15px}
+  .opt:hover{border-color:var(--orange)}
+  .opt.sel{border-color:var(--orange);background:var(--orange-l)}
+  .opt .mk{font-weight:800;color:var(--orange-d);flex:0 0 auto}
+  .opt.correct{border-color:var(--ok);background:#ecfdf5}
+  .opt.correct .mk{color:var(--ok)}
+  .opt.wrong{border-color:var(--no);background:#fef2f2}
+  .opt.wrong .mk{color:var(--no)}
+  textarea.sa{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:15px;font-family:inherit;min-height:54px;resize:vertical}
+  textarea.sa:focus{outline:none;border-color:var(--orange)}
+  .expl{display:none;margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;font-size:14px;color:#92400e;white-space:normal}
+  .expl.show{display:block}
+  .expl .ans{font-weight:800;color:var(--ok);margin-bottom:6px}
+  /* nav buttons */
+  .navbtns{display:flex;gap:10px;margin-top:14px}
+  .btn{flex:1;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
+  .btn.prim{background:var(--orange);color:#fff}
+  .btn.prim:active{background:var(--orange-d)}
+  .btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+  .submit{width:100%;background:var(--orange);color:#fff;border:none;border-radius:14px;padding:17px;font-size:17px;font-weight:800;cursor:pointer;margin-top:8px}
+  /* login gate */
+  .gate{max-width:380px;margin:60px auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 22px;text-align:center}
+  .gate h2{color:var(--orange);margin:0 0 6px}
+  .gate p{color:var(--mut);font-size:14px;margin:0 0 18px}
+  .gate input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:13px;font-size:16px;margin-bottom:10px;font-family:inherit}
+  .gate input:focus{outline:none;border-color:var(--orange)}
+  /* result */
+  .scorebox{text-align:center;background:#fff;border:2px solid var(--orange);border-radius:16px;padding:26px;margin:14px 0}
+  .scorebox .big{font-size:46px;font-weight:900;color:var(--orange)}
+  .scorebox .lab{color:var(--mut);font-size:14px}
+  /* admin modal */
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-start;justify-content:center;overflow:auto;padding:20px}
+  .modal.show{display:flex}
+  .modal .box{background:#fff;border-radius:14px;max-width:680px;width:100%;padding:20px}
+  .modal h3{margin:0 0 12px;color:var(--orange)}
+  .admtbl{width:100%;border-collapse:collapse;font-size:13px}
+  .admtbl th,.admtbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+  .admtbl input,.admtbl textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:4px;font-family:inherit;font-size:12px}
+  .small{font-size:13px;color:var(--mut)}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- 데이터 파일은 이 주석 아래 인라인으로 삽입됨 (각 세트마다 다름) -->
+<script>// 본문N제 6세트 (226~250) — 동아(윤정미) 3.What a Great Idea — PDF 원문 그대로 전사
+window.QUIZ_DATA = {
+  SET_TITLE: "본문N제 6세트",
+  SET_SUB: "What a Great Idea · 동아(윤정미) Lesson 3 · 226~250번",
+  DB: "/results_reading_donga_yjm_l3_bonmun6.json",
+  Q: [
+    { n:226, type:"mc", t:"GR", p:"어법 (괄호)", pts:4,
+      passage:`G: I want to see a movie. What movie is (A) [playing / played] at the Star Cinema?<br>B: The Hero. The next show (B) [start / starts] at 6:30. Let's leave right away. Then, we can catch it.<br>G: Are you sure? It's (C) [already / yet] 6.<br>B: Yes, I'm quite sure. The Star Cinema is only 1 km from here.`,
+      q:"다음 글의 괄호 (A), (B), (C)에서 어법에 맞는 표현으로 가장 적절한 것은?",
+      c:["playing – start – already","playing – starts – already","played – starts – yet","played – start – already","playing – starts – yet"],
+      a:1,
+      expl:"(A) 영화가 상영 중임을 나타내므로 현재분사 playing이 적절하다. (B) 주어 The next show가 단수이므로 starts가 적절하다. (C) 긍정문에서 '이미'라는 의미를 나타내므로 already가 적절하다." },
+
+    { n:227, type:"mc", p:"밑줄 구체적 방법", pts:4,
+      passage:`People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply <u>pushed the bicycle forward with their feet</u>. The present-day bicycle is the result of many inventors' work in the 19th century.`,
+      q:"다음 글의 밑줄 친 pushed the bicycle forward with their feet의 구체적인 방법으로 알맞은 것은?",
+      c:["Riding a horse while pulling the bicycle.","Walking while carrying the bicycle on the back.","Using the feet on the ground to move the bicycle.","Jumping from the bicycle to make it go even faster.","Turning the wooden wheels by using their own hands."],
+      a:2,
+      expl:"페달이 없는 초기 자전거를 타는 사람이 직접 발로 땅을 차거나 밀어서 나아가는 방식을 설명한다. 따라서 ③ '자전거를 움직이기 위해 땅 위의 발을 사용하는 것'이 정답이다. ① 자전거를 끌면서 말을 타는 것 ② 자전거를 등에 지고 걷는 것 ④ 자전거를 더 빨리 가게 하려고 자전거에서 뛰어내리는 것 ⑤ 자신의 손을 사용하여 나무 바퀴를 돌리는 것" },
+
+    { n:228, type:"mc", p:"요약문 빈칸", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, this made traveling difficult. Why? In those days, people rode horses, but many horses were killed for food.<br><br>The ⓐ_________ in food supply after the volcanic explosion led to a ⓑ_________ in the number of horses for travel.`,
+      q:"다음 글의 내용을 한 문장으로 요약하고자 한다. 빈칸 ⓐ, ⓑ에 들어갈 단어로 가장 적절한 것은?",
+      c:["decrease – reduction","increase – growth","stability – change","shortage – rise","problem – balance"],
+      a:0,
+      expl:"화산 폭발 이후 식량 공급의 감소(decrease/shortage)는 이동을 위한 말의 수의 감소(reduction)를 가져왔다는 내용이 적절하다. 따라서 ①이 정답이다. ① 감소 - 감소 ② 증가 - 성장 ③ 안정 - 변화 ④ 부족 - 상승 ⑤ 문제 - 균형" },
+
+    { n:229, type:"mc", p:"빈칸 (A)(B)(C)", pts:4,
+      passage:`Graham was a (A)______ typist, so she needed a solution. One day, Graham saw some window painters. When they made a (B)______, they corrected it by simply painting over it. The next day, she made her own white paint and used it to correct her typing mistakes. Surprisingly, nobody (C)______!`,
+      q:"빈칸 (A), (B), (C)에 들어갈 말로 가장 적절한 것끼리 짝지어진 것은?",
+      c:["bad – mistake – noticed","bad – success – noticed","bad – mistake – ignored","good – success – ignored","good – mistake – noticed"],
+      a:0,
+      expl:"(A) 타자 실수를 자주 하는 '서툰(bad)' 타자수였다. (B) 도색공들이 '실수(mistake)'를 고치는 것을 보았다. succeed(성공) (C) 흰 페인트를 사용했을 때 아무도 '알아차리지(noticed)' 못했다는 흐름이 적절하다. ignored(무시했다)" },
+
+    { n:230, type:"mc", p:"영작 순서 (단어)", pts:4,
+      passage:`B: What movie will we watch tomorrow?<br>G: How about Magic Island?<br>B: Are you sure? (A) 당신은 Love in Seoul을 보고 싶다고 말했었잖아요.<br>G: I changed my mind. Magic Island looks more fun.<br>B: OK. Let's watch Magic Island, then.<br><br>&lt;조건&gt; 아래 주어진 단어를 모두 사용할 것<br>said / to / watch / you / wanted / you / Love / in / Seoul /`,
+      q:"다음 글의 밑줄 친 우리말 (A)와 일치하도록 &lt;조건&gt;에 맞춰 영작했을 때, 4번째 올 단어로 가장 적절한 것은?",
+      c:["said","watch","you","wanted","in"],
+      a:3,
+      expl:"주어진 우리말을 영작하면 \"You said you wanted to watch Love in Seoul.\"이다. 따라서 4번째 단어는 wanted이다." },
+
+    { n:231, type:"mc", p:"글의 주제", pts:4,
+      passage:`Graham was a bad typist, so she needed a solution. One day, Graham saw some window painters. When they made a mistake, they corrected it by simply painting over it. The next day, she made her own white paint and used it to correct her typing mistakes.`,
+      q:"주어진 글의 주제로 가장 적절한 것은?",
+      c:["why window painting is a difficult job","how to increase typing speed at a bank","the inspiration for a new correction tool","the history of paint used in the 1950s","ways to avoid making mistakes while typing"],
+      a:2,
+      expl:"타자 실수를 해결하기 위해 고민하던 그레이엄이 창문 도색공들의 작업 방식에서 영감을 얻어 새로운 수정 도구(화이트)를 만들게 된 과정을 설명하는 글이다. 따라서 주제로 가장 적절한 것은 ③이다. ① 창문 칠하기가 어려운 작업인 이유 ② 은행에서 타자 속도를 높이는 방법 ③ 새로운 수정 도구에 대한 영감 ④ 1950년대에 사용된 페인트의 역사 ⑤ 타자 도중 실수를 피하는 방법" },
+
+    { n:232, type:"mc", p:"밑줄 의미", pts:4,
+      passage:`Whiteout was invented by Bette Graham. In 1956, Graham was working at a bank in Texas, USA. At that time, people had to <u>retype the whole page</u> when they made even a small mistake. Graham was a bad typist, so she needed a solution.`,
+      q:"다음 글의 맥락상 밑줄 친 retype the whole page가 의미하는 바로 가장 적절한 것은?",
+      c:["Writing was very easy","The paper was very cheap","Fixing a small error was very hard","People had to read the page carefully","Typing was the best hobby at the bank"],
+      a:2,
+      expl:"아주 작은 실수 하나 때문에 종이 전체를 다시 타자로 쳐야 했다는 것은 실수를 수정하는 작업이 매우 번거롭고 힘들었음을 시사한다. 따라서 ③ '작은 오류를 고치는 것이 매우 어려웠다'가 정답이다. ① 글쓰기는 매우 쉬웠다 ② 종이는 매우 저렴했다 ④ 사람들은 페이지를 주의 깊게 읽어야 했다 ⑤ 타자 치기는 은행에서 최고의 취미였다." },
+
+    { n:233, type:"mc", p:"글의 순서 배열", pts:4,
+      passage:`Karl von Drais invented the first bicycle in Germany in 1817.<br>(A) Well, riders simply pushed the bicycle forward with their feet.<br>(B) Drais's bicycle had two wooden wheels but no pedals.<br>(C) How did it move without pedals?`,
+      q:"글의 흐름이 자연스럽도록 (A)~(C)를 배열한 것으로 가장 적절한 것은?",
+      c:["(A)-(C)-(B)","(B)-(A)-(C)","(B)-(C)-(A)","(C)-(A)-(B)","(C)-(B)-(A)"],
+      a:2,
+      expl:"자전거 발명 소개 뒤에는 그 특징인 나무 바퀴와 페달이 없음을 말하는 (B)가 오고, 페달 없이 어떻게 움직이는지 묻는 (C)를 거쳐, 발로 밀어 움직였다는 답변인 (A)가 이어지는 것이 적절하다." },
+
+    { n:234, type:"mc", p:"문맥상 어휘 (괄호)", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge (A) [cloud / crowd] of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, this made traveling difficult. Why? In those days, people rode horses, but many horses were killed for food. People needed a new way to travel, and Karl von Drais (B) [discovered / invented] the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders (C) [simply / hardly] pushed the bicycle forward with their feet.`,
+      q:"주어진 글의 (A), (B), (C) 안에서 문맥에 맞는 낱말로 가장 적절한 것을 고르면?",
+      c:["cloud – discovered – simply","cloud – invented – simply","cloud – invented – hardly","crowd – discovered – simply","crowd – invented – hardly"],
+      a:1,
+      expl:"(A) 화산재 '구름(cloud)'이 적절하다. crowd(군중) (B) 새로운 이동 수단을 필요로 하여 자전거를 '발명했다(invented)'가 적절하다. discovered(발견했다) (C) 페달 없이 발로 '단순히(simply)' 밀어서 자전거를 앞으로 움직였다는 설명이 자연스럽다. hardly(거의 ~않다)" },
+
+    { n:235, type:"mc", p:"밑줄 의미", pts:4,
+      passage:`To work better, they needed lots of coffee. However, there was <u>only one coffee machine</u> in the building. So, they had to make many disappointing trips to the empty coffee pot.<br>As a solution, the two researchers set up a camera in front of the coffee machine. The camera took pictures of the coffee pot three times a minute.`,
+      q:"다음 글의 밑줄 친 only one coffee machine이 의미하는 바로 가장 적절한 것은?",
+      c:["Many people had to share the same coffee machine.","The coffee machine was too small for the researchers.","The building was very big, so they needed more cameras.","The coffee machine was broken, so they could not drink coffee.","The researchers didn't want to walk to the only coffee machine."],
+      a:0,
+      expl:"큰 건물에 커피 머신이 단 한 대뿐이었다는 것은 많은 연구원이 그 기계 하나를 공유해야 했음을 의미한다. 따라서 ① '많은 사람이 같은 커피 머신을 공유해야 했다'가 정답이다. ② 커피 머신이 연구원들에게 너무 작았다 ③ 건물이 매우 커서 그들은 더 많은 카메라가 필요했다 ④ 커피 머신이 고장 나서 그들은 커피를 마실 수 없었다 ⑤ 연구원들은 유일한 커피 머신으로 걸어가고 싶지 않았다" },
+
+    { n:236, type:"mc", p:"빈칸 (A)(B)", pts:4,
+      passage:`G: Yes. All the activities look fun, and they're all free.<br>B: All of them? Are you sure?<br>G: Yes, I'm quite sure. I saw it on the poster. ___(A)___, which ones are you interested in?<br>B: I want to go to the drone-flying class the most. ___(B)___ you, Somi?<br>G: Well, I want to go to Dr. Lee's lecture on AI.`,
+      q:"흐름상 다음 글의 빈칸 (A), (B)에 들어갈 말이 바르게 짝지어진 것은?",
+      c:["However – How about","Anyway – How about","Anyway – Instead of","However – Instead of","Therefore – How about"],
+      a:1,
+      expl:"(A)는 앞의 대화를 정리하고 화제를 전환할 때 사용하는 Anyway(어쨌든)가 적절하다. (B)는 상대방의 의견을 물을 때 쓰는 표현인 How about(~은 어때?)이 적절하다. ① 그러나, ~은 어때? ② 어쨌든, ~은 어때? ③ 어쨌든, ~대신에 ④ 그러나, ~대신에 ⑤ 그러므로, ~은 어때?" },
+
+    { n:237, type:"mc", p:"빈칸 추론", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, this made traveling difficult. Why? In those days, people ________ horses, but many horses were killed for food.`,
+      q:"다음 글의 빈칸에 들어갈 말로 가장 적절한 것은?",
+      c:["fed","rode","loved","bought","cleaned"],
+      a:1,
+      expl:"당시 사람들이 말을 이동 수단으로 사용했다는 내용이므로 ② '탔다'가 적절하다. ① 먹이를 주었다 ③ 사랑했다 ④ 샀다 ⑤ 청소했다" },
+
+    { n:238, type:"mc", p:"빈칸 (A)(B)", pts:4,
+      passage:`G: I want to see a movie. What movie is playing at the Star Cinema?<br>B: The Hero. The next show starts at 6:30. Let's leave right away. ___(A)___, we can catch it.<br>G: Are you sure? It's already 6.<br>B: Yes, I'm quite sure. The Star Cinema is ___(B)___ 1 km from here.`,
+      q:"다음 글의 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것은?",
+      c:["Then – only","But – only","Then – exactly","But – exactly","Instead – nearly"],
+      a:0,
+      expl:"(A)는 바로 출발한다면 영화를 볼 수 있다는 인과관계의 흐름이므로 Then(그러면)이 적절하다. (B)는 1km가 멀지 않음을 강조하는 only(겨우/단지)가 적절하다. ① 그러면, 단지 ② 하지만, 단지 ③ 그러면, 정확히 ④ 하지만, 정확히 ⑤ 대신에, 거의" },
+
+    { n:239, type:"mc", p:"내용 불일치(보기)", pts:4,
+      passage:`Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the result of many inventors' work in the 19th century.<br><br>&lt;보기&gt;<br>a. The first bicycle was made in Germany.<br>b. Karl von Drais used iron to make the wheels.<br>c. Early bicycles had pedals for riders to use.<br>d. People moved the first bicycle using their feet.<br>e. Modern bicycles were made by only one inventor.`,
+      q:"주어진 글의 내용과 일치하지 않는 것을 &lt;보기&gt;에서 모두 고른 것은?",
+      c:["a, b","b, c, e","c, d","d, e","a, d"],
+      a:1,
+      expl:"a. 최초의 자전거는 독일에서 만들어졌다 (O) b. 칼 폰 드라이스는 바퀴를 만들 때 철을 사용했다 (X) - 나무로 만들어진 바퀴였다 c. 초기 자전거에는 사람이 사용할 수 있는 페달이 있었다 (X) - 페달이 없다고 했다 d. 사람들은 발을 사용해 최초의 자전거를 움직였다 (O) e. 현대의 자전거는 오직 한 명의 발명가에 의해 만들어졌다 (X) - 19세기의 많은 발명가들의 노력의 결과물이라고 했다. 따라서 일치하지 않는 것을 모두 고른 것은 ② b, c, e 이다." },
+
+    { n:240, type:"mc", p:"요약문 빈칸", pts:4,
+      passage:`In 1956, Graham was working at a bank in Texas, USA. At that time, people had to retype the whole page when they made even a small mistake. Graham was a bad typist, so she needed a solution. One day, Graham saw some window painters. When they made a mistake, they corrected it by simply painting over it. The next day, she made her own white paint and used it to correct her typing mistakes.<br><br>Bette Graham found a ___(A)___ to fix her typing errors by ___(B)___ window painters' methods.`,
+      q:"다음 글의 내용을 한 문장으로 요약하고자 한다. 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것은?",
+      c:["way – watching","problem – ignoring","machine – hiring","job – helping","friend – calling"],
+      a:0,
+      expl:"그레이엄이 도색공들의 방식을 관찰함으로써 자신의 타자 실수를 고칠 방법을 찾아냈다는 내용이므로 (A)에는 way, (B)에는 watching이 적절하다. ② 문제 - 무시하기 ③ 기계 - 고용하기 ④ 직업 - 돕기 ⑤ 친구 - 전화하기" },
+
+    { n:241, type:"mc", p:"내용 불일치", pts:4,
+      passage:`To work better, they needed lots of coffee. However, there was only one coffee machine in the building. So, they had to make many disappointing trips to the empty coffee pot. As a solution, the two researchers set up a camera in front of the coffee machine. The camera took pictures of the coffee pot three times a minute. With special software, all the researchers in the building could see the pictures on their local network.`,
+      q:"주어진 글의 내용과 일치하지 않는 것은?",
+      c:["The researchers needed coffee to improve their work.","The building had multiple coffee machines for everyone.","Looking at an empty coffee pot made the researchers feel sad.","The camera did not take a video but took photos several times.","The network allowed researchers to check the coffee from their desks."],
+      a:1,
+      expl:"지문에서 건물에 '단 한 대의 커피 머신(only one coffee machine)'이 있었다고 했으므로 여러 대가 있었다는 ②는 틀린 내용이다. ① 연구원들은 업무 향상을 위해 커피가 필요했다 ③ 빈 커피포트를 보는 것은 연구원들을 슬프게(실망하게) 했다 ④ 카메라는 영상 촬영이 아니라 여러 번 사진을 찍었다 ⑤ 네트워크는 연구원들이 자리에서 커피를 확인할 수 있게 해주었다" },
+
+    { n:242, type:"mc", p:"추론 (가나다라)", pts:4,
+      passage:`Whiteout was invented by Bette Graham. In 1956, Graham was working at a bank in Texas, USA. At that time, people had to retype the whole page when they made even a small mistake. Graham was a bad typist, so she needed a solution.<br>One day, Graham saw some window painters. When they made a mistake, they corrected it by simply painting over it. The next day, she made her own white paint and used it to correct her typing mistakes. Surprisingly, nobody noticed!<br><br>가. Graham's job required her to type many documents every day.<br>나. Retyping a whole page took a lot of time for people in 1956.<br>다. Graham asked the window painters for their special white paint.<br>라. Typing machines in 1956 had a built-in function to fix mistakes.`,
+      q:"다음 글을 통해 추론할 수 있는 내용으로 적절한 것을 바르게 짝지은 것을 고르시오.",
+      c:["가, 나","가, 다","나, 다","나, 라","다, 라"],
+      a:0,
+      expl:"그레이엄이 은행에서 일하며 타자 실수 때문에 고생했다는 점에서 '가'를 추론할 수 있고, 작은 실수에도 전체를 다시 쳐야 했다는 점에서 '나'가 적절한 추론이다. '다'는 직접 페인트를 만들었다고 했으므로 틀렸고, '라'는 그런 기능이 없어서 발명하게 된 것이므로 틀렸다." },
+
+    { n:243, type:"mc", p:"밑줄 의미", pts:4,
+      passage:`G: I know that the concert begins at 7, but what time does it end?<br>B: At 9:30, I think.<br>G: Are you sure?<br>B: Yes, I'm quite sure. Anyway, it's already 6. <u>We should hurry</u>.`,
+      q:"다음 대화의 맥락상 밑줄 친 We should hurry가 의미하는 바로 가장 적절한 것은?",
+      c:["We have a lot of time.","The concert will end soon.","We don't have much time to go there.","We should find out when the concert ends.","We need to buy tickets for the next concert."],
+      a:2,
+      expl:"콘서트 시작이 7시인데 현재 벌써 6시이므로 이동 시간을 고려하면 시간이 넉넉하지 않으니 빨리 움직여야 한다는 의미이다. 따라서 ③ '우리는 그곳에 갈 시간이 많지 않다'가 정답이다. ① 우리는 시간이 많다 ② 콘서트가 곧 끝날 것이다 ④ 우리는 콘서트가 언제 끝나는지 알아내야 한다 ⑤ 우리는 다음 콘서트를 위해 티켓을 사야 한다." },
+
+    { n:244, type:"mc", p:"요약문 빈칸", pts:4,
+      passage:`Whiteout was invented by Bette Graham. In 1956, Graham was working at a bank in Texas, USA. At that time, people had to retype the whole page when they made even a small mistake. Graham was a bad typist, so she needed a solution.<br>One day, Graham saw some window painters. When they made a mistake, they corrected it by simply painting over it. The next day, she made her own white paint and used it to correct her typing mistakes. Surprisingly, nobody noticed! Soon, everybody at the bank began using it.<br><br>Bette Graham's invention became ⓐ_________ among her colleagues because it was a ⓑ_________ way to fix mistakes without retyping.`,
+      q:"다음 글의 내용을 한 문장으로 요약하고자 한다. 빈칸 ⓐ, ⓑ에 들어갈 단어로 가장 적절한 것은?",
+      c:["popular – simple","expensive – slow","scary – hidden","difficult – bad","useless – creative"],
+      a:0,
+      expl:"그레이엄의 발명품은 다시 칠 필요 없이 실수를 고치는 간단한(simple) 방법이었기 때문에 동료들 사이에서 인기(popular)를 얻었다는 요약이 적절하다. ② 비싼 - 느린 ③ 무서운 - 숨겨진 ④ 어려운 - 나쁜 ⑤ 쓸모없는 - 창의적인" },
+
+    { n:245, type:"mc", p:"문맥상 부적절(개수)", pts:4,
+      passage:`To work better, they needed lots of coffee. However, there was only one coffee machine in the building. So, they had to make (A) <u>few</u> disappointing trips to the (B) <u>empty</u> coffee pot.<br>As a solution, the two researchers set up a camera in front of the coffee machine. The camera took pictures of the coffee pot three times a (C) <u>day</u>. With (D) <u>common</u> software, all the researchers in the building could see the pictures on their local network. No more (E) <u>disappointing</u> trips!`,
+      q:"다음 글의 밑줄 친 (A)~(E) 중, 문맥상 낱말의 쓰임이 적절하지 않은 것은 모두 몇 개인가?",
+      c:["1개","2개","3개","4개","5개"],
+      a:2,
+      expl:"커피 기계가 한 대뿐이라 헛걸음을 많이 했으므로 (A) '거의 없는'(few)을 '많은'(many)으로 고쳐야 한다. 카메라는 1분에 세 번 사진을 찍었으므로 (C) '하루'(day)를 '분'(minute)으로 고쳐야 한다. 또한 특수한 소프트웨어를 사용했으므로 (D) '흔한'(common)을 '특별한'(special)으로 고쳐야 한다. (B) 비어 있는 (E) 실망스러운 → 부적절한 것은 3개" },
+
+    { n:246, type:"mc", p:"밑줄 의미", pts:4,
+      passage:`People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the <u>result of many inventors' work</u> in the 19th century.`,
+      q:"밑줄 친 result of many inventors' work가 다음 글에서 의미하는 바로 가장 적절한 것은?",
+      c:["One person made it perfect","It was made in a short time","Many people used the bicycle","Many ideas were added over time","It was only for the inventors in the past"],
+      a:3,
+      expl:"오늘날의 자전거가 단순히 드라이스 한 명의 발명품이 아니라, 오랜 시간 동안 수많은 발명가의 아이디어와 개량이 더해져 완성되었음을 의미한다. 따라서 ④ '오랜 시간에 걸쳐 많은 아이디어가 더해졌다'가 적절하다. ① 한 사람이 그것을 완벽하게 만들었다 ② 그것은 짧은 시간에 만들어졌다 ③ 많은 사람이 자전거를 사용했다 ⑤ 그것은 과거의 발명가들만을 위한 것이었다." },
+
+    { n:247, type:"mc", t:"GR", p:"어법 틀린 것", pts:4,
+      passage:`(어법 판단)`,
+      q:"다음 중 어법상 틀린 것은?",
+      c:["English is spoken in many countries.","He has to works hard for his family.","I have no time to talk with you now.","The bridge was built many years ago.","They don't have to wake up early on Sundays."],
+      a:1,
+      expl:"have to는 조동사처럼 쓰여 뒤에 반드시 동사원형이 와야 하므로 works를 work로 고쳐야 한다." },
+
+    { n:248, type:"mc", p:"영작 순서 (단어)", pts:4,
+      passage:`As a solution, the two researchers set up a camera in front of the coffee machine. (A) 카메라는 1분에 세 번 커피포트의 사진을 찍었습니다. With special software, all the researchers in the building could see the pictures on their local network. No more disappointing trips!<br><br>&lt;조건&gt; 아래 주어진 단어를 모두 사용할 것<br>pictures / a / took / minute / coffee / of / camera / the / the / times / pot / three /`,
+      q:"다음 글의 밑줄 친 우리말 (A)와 일치하도록 &lt;조건&gt;에 맞춰 영작했을 때, 9번째 올 단어로 가장 적절한 것은?",
+      c:["pot","coffee","times","minute","three"],
+      a:4,
+      expl:"(A)를 영작하면 \"The camera took pictures of the coffee pot three times a minute.\"가 된다. 순서대로 단어를 나열하면 1.The 2.camera 3.took 4.pictures 5.of 6.the 7.coffee 8.pot 9.three 이므로 9번째 단어는 three이다." },
+
+    { n:249, type:"mc", p:"요약문 빈칸", pts:4,
+      passage:`People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the result of many inventors' work in the 19th century.<br><br>The first bicycle made of ___(A)___ had no pedals, so it moved by the ___(B)___ of the riders' feet.`,
+      q:"다음 글의 내용을 한 문장으로 요약하고자 한다. 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것은?",
+      c:["wood – push","stone – kick","metal – jump","paper – dance","plastic – run"],
+      a:0,
+      expl:"나무(wood)로 만들어졌고, 발로 밀어서(push) 움직였다는 요약이 적절하다. ② 돌 – 발차기 ③ 금속 – 점프 ④ 종이 – 춤 ⑤ 플라스틱 – 달리기" },
+
+    { n:250, type:"mc", p:"빈칸 추론", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people ________________________. Surprisingly, this made traveling difficult. Why? In those days, people rode horses, but many horses were killed for food. People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the result of many inventors' work in the 19th century.`,
+      q:"다음 빈칸에 들어갈 말로 가장 적절한 것을 고르시오.",
+      c:["were very happy","had too much food","wanted to go hiking","became very healthy","lacked enough to eat"],
+      a:4,
+      expl:"농작물 수확에 실패했으므로 식량이 부족해졌다는 내용이 이어져야 한다. 따라서 ⑤ '먹을 것이 부족했다'가 가장 적절하다. ① 매우 행복했다 ② 너무 많은 음식을 가졌다 ③ 하이킹하러 가고 싶었다 ④ 매우 건강해졌다" }
+  ]
+};
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var D = window.QUIZ_DATA;
+  var FB = "https://terrys-d643a-default-rtdb.firebaseio.com";
+  var MARK = ["①","②","③","④","⑤"];
+  var app = document.getElementById('app');
+  var answers = {};   // n -> selected index (mc) or text (sa)
+  var cur = 0;
+  var graded = false;
+  var student = null;
+  var overrides = {}; // n -> {a, expl}
+
+  /* ---------- 로그인 (terrys_embed_student → TERRYS_BRIDGE 폴백) ---------- */
+  function getStudent(){
+    try{
+      var s = sessionStorage.getItem('terrys_embed_student');
+      if(s) return s;
+      var b = sessionStorage.getItem('TERRYS_BRIDGE');
+      if(b){ try{ var o=JSON.parse(b); return o.name||o.student||b; }catch(e){ return b; } }
+    }catch(e){}
+    return null;
+  }
+
+  function loginGate(){
+    app.innerHTML =
+      '<div class="gate">'+
+      '<h2>테리스 영어</h2>'+
+      '<p>'+esc(D.SET_TITLE)+' · 학생 이름을 입력하세요</p>'+
+      '<input id="nm" placeholder="이름" autocomplete="off">'+
+      '<button class="submit" id="go">시작하기</button>'+
+      '</div>';
+    document.getElementById('go').onclick=function(){
+      var v=document.getElementById('nm').value.trim();
+      if(!v){ document.getElementById('nm').focus(); return; }
+      try{ sessionStorage.setItem('terrys_embed_student', v); }catch(e){}
+      student=v; render();
+    };
+    document.getElementById('nm').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('go').click(); });
+  }
+
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  /* ---------- 채점 ---------- */
+  function answerOf(q){ var o=overrides[q.n]; return (o&&o.a!=null)?o.a:q.a; }
+  function explOf(q){ var o=overrides[q.n]; return (o&&o.expl!=null&&o.expl!=='')?o.expl:q.expl; }
+
+  function norm(s){ return String(s||'').toLowerCase().replace(/[.,!?'"`’]/g,'').replace(/\s+/g,' ').trim(); }
+  function saCorrect(q, val){
+    var gold=[answerOf(q)].concat(q.accepts||[]);
+    var v=norm(val);
+    for(var i=0;i<gold.length;i++){ if(norm(gold[i])===v) return true; }
+    // 느슨한 포함 매칭(서술형 키워드)
+    for(var j=0;j<gold.length;j++){ var g=norm(gold[j]); if(g && v && (v.indexOf(g)>=0||g.indexOf(v)>=0)) return true; }
+    return false;
+  }
+  function isCorrect(q){
+    if(q.type==='mc') return answers[q.n]===answerOf(q);
+    return saCorrect(q, answers[q.n]||'');
+  }
+
+  /* ---------- 렌더 ---------- */
+  function shell(inner){
+    app.innerHTML =
+      '<header><span class="logo">테리스 영어</span>'+
+      '<span class="sub">'+esc(D.SET_TITLE)+' · '+esc(D.SET_SUB)+'</span>'+
+      '<button class="gear" id="gear" title="관리자">⚙</button></header>'+
+      '<div class="wrap">'+inner+'</div>';
+    document.getElementById('gear').onclick=adminPrompt;
+  }
+
+  function dotsHTML(){
+    var h='<div class="dots">';
+    D.Q.forEach(function(q,i){
+      var c='dot'; if(answers[q.n]!=null && answers[q.n]!=='') c+=' done'; if(i===cur) c+=' cur';
+      h+='<div class="'+c+'" data-i="'+i+'">'+q.n+'</div>';
+    });
+    return h+'</div>';
+  }
+
+  function optHTML(q){
+    if(q.type==='mc'){
+      return q.c.map(function(t,i){
+        var cls='opt'; if(answers[q.n]===i) cls+=' sel';
+        if(graded){
+          if(i===answerOf(q)) cls+=' correct';
+          else if(answers[q.n]===i) cls+=' wrong';
+        }
+        return '<div class="'+cls+'" data-pick="'+i+'"><span class="mk">'+MARK[i]+'</span><span>'+q.c[i]+'</span></div>';
+      }).join('');
+    }
+    // sa_text
+    var val=answers[q.n]||'';
+    return '<textarea class="sa" data-sa placeholder="여기에 답을 입력하세요"'+(graded?' disabled':'')+'>'+esc(val)+'</textarea>';
+  }
+
+  function explHTML(q){
+    if(!graded) return '';
+    var ok=isCorrect(q);
+    var ansText = q.type==='mc' ? (MARK[answerOf(q)]+' '+q.c[answerOf(q)]) : answerOf(q);
+    return '<div class="expl show">'+
+      '<div class="ans">'+(ok?'✅ 정답':'❌ 오답')+' · 정답: '+esc(ansText)+'</div>'+
+      esc(explOf(q))+'</div>';
+  }
+
+  function questionView(){
+    var q=D.Q[cur];
+    var inner=dotsHTML()+
+      '<div class="card">'+
+      '<div class="qhead"><span class="qnum">'+q.n+'</span>'+
+      (q.t==='GR'?'<span class="gr">어법</span>':'')+
+      '<span class="badge">'+esc(q.p||'')+'</span>'+
+      '<span class="pts">'+q.pts+'점</span></div>'+
+      (q.passage?'<div class="passage">'+q.passage+'</div>':'')+
+      '<div class="qtext">'+q.q+'</div>'+
+      optHTML(q)+
+      explHTML(q)+
+      '</div>'+
+      navHTML();
+    shell(inner);
+    bindQ();
+  }
+
+  function navHTML(){
+    var last = cur===D.Q.length-1;
+    if(graded){
+      return '<div class="navbtns">'+
+        '<button class="btn ghost" id="prev"'+(cur===0?' disabled':'')+'>◀ 이전</button>'+
+        '<button class="btn '+(last?'ghost':'prim')+'" id="next"'+(last?' disabled':'')+'>다음 ▶</button>'+
+        '</div>'+
+        '<button class="submit" id="toresult" style="margin-top:10px;background:var(--orange-d)">결과 화면으로</button>';
+    }
+    if(last){
+      return '<div class="navbtns"><button class="btn ghost" id="prev">◀ 이전</button></div>'+
+        '<button class="submit" id="submit">제출하고 채점하기</button>';
+    }
+    return '<div class="navbtns">'+
+      '<button class="btn ghost" id="prev"'+(cur===0?' disabled':'')+'>◀ 이전</button>'+
+      '<button class="btn prim" id="next">다음 ▶</button></div>';
+  }
+
+  function bindQ(){
+    var q=D.Q[cur];
+    Array.prototype.forEach.call(document.querySelectorAll('.dot'),function(d){
+      d.onclick=function(){ cur=+d.getAttribute('data-i'); questionView(); };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pick]'),function(o){
+      if(graded) return;
+      o.onclick=function(){ answers[q.n]=+o.getAttribute('data-pick'); questionView(); };
+    });
+    var sa=document.querySelector('[data-sa]');
+    if(sa && !graded){ sa.oninput=function(){ answers[q.n]=sa.value; }; }
+    var p=document.getElementById('prev'); if(p) p.onclick=function(){ if(cur>0){cur--;questionView();} };
+    var nx=document.getElementById('next'); if(nx) nx.onclick=function(){ if(cur<D.Q.length-1){cur++;questionView();} };
+    var sb=document.getElementById('submit'); if(sb) sb.onclick=submit;
+    var tr=document.getElementById('toresult'); if(tr) tr.onclick=resultView;
+  }
+
+  /* ---------- 제출/결과 ---------- */
+  function score(){
+    var s=0,right=0;
+    D.Q.forEach(function(q){ if(isCorrect(q)){ s+=q.pts; right++; } });
+    return {s:s, right:right, total:D.Q.length};
+  }
+
+  function submit(){
+    var blanks=D.Q.filter(function(q){ return answers[q.n]==null||answers[q.n]===''; });
+    if(blanks.length){
+      if(!confirm('아직 '+blanks.length+'문항을 풀지 않았어요. 그래도 제출할까요?')) return;
+    }
+    graded=true;
+    var r=score();
+    saveScore(r);
+    resultView();
+  }
+
+  function resultView(){
+    var r=score();
+    var wrongs=D.Q.filter(function(q){ return !isCorrect(q); });
+    var inner=
+      '<div class="scorebox"><div class="lab">'+esc(student)+' 님의 점수</div>'+
+      '<div class="big">'+r.s+'점</div>'+
+      '<div class="lab">정답 '+r.right+' / '+r.total+'문항</div></div>'+
+      '<p class="small">아래 번호를 누르면 해당 문제의 해설을 볼 수 있어요. (틀린 문항은 빨강)</p>'+
+      '<div class="dots">'+
+        D.Q.map(function(q,i){
+          var ok=isCorrect(q);
+          return '<div class="dot '+(ok?'done':'')+'" data-i="'+i+'" style="'+(ok?'':'background:#fef2f2;border-color:var(--no);color:var(--no);font-weight:700')+'">'+q.n+'</div>';
+        }).join('')+
+      '</div>'+
+      '<button class="submit" id="review" style="margin-top:16px">전체 해설 보기 ('+wrongs.length+'개 틀림)</button>';
+    shell(inner);
+    Array.prototype.forEach.call(document.querySelectorAll('.dot'),function(d){
+      d.onclick=function(){ cur=+d.getAttribute('data-i'); questionView(); };
+    });
+    document.getElementById('review').onclick=function(){ cur=0; questionView(); };
+  }
+
+  /* ---------- Firebase 저장 ---------- */
+  function saveScore(r){
+    if(!student) return;
+    var path=(D.DB||'/results_reading_unknown.json');
+    var url=FB+path; // path는 .json 포함
+    var wrong=D.Q.filter(function(q){return !isCorrect(q);}).map(function(q){return q.n;});
+    var payload={ name:student, score:r.s, right:r.right, total:r.total, wrong:wrong, at:new Date().toISOString() };
+    try{
+      fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+        .catch(function(){});
+    }catch(e){}
+  }
+
+  /* ---------- 관리자 패널 ---------- */
+  function adminPrompt(){
+    var pw=prompt('관리자 비밀번호');
+    if(pw==='terry2025'){ adminPanel(); }
+    else if(pw!=null){ alert('비밀번호가 틀렸습니다.'); }
+  }
+  function adminPanel(){
+    var rows=D.Q.map(function(q){
+      var aVal = q.type==='mc' ? (answerOf(q)+1) : answerOf(q);
+      return '<tr><td>'+q.n+'</td>'+
+        '<td>'+esc(q.type)+'</td>'+
+        '<td><input data-adm-a="'+q.n+'" value="'+esc(aVal)+'"></td>'+
+        '<td><textarea data-adm-e="'+q.n+'" rows="2">'+esc(explOf(q))+'</textarea></td></tr>';
+    }).join('');
+    var box=document.createElement('div');
+    box.className='modal show';
+    box.innerHTML='<div class="box"><h3>⚙ 관리자 — 정답·해설 수정</h3>'+
+      '<p class="small">객관식 정답은 번호(1~5)로, 서술형은 텍스트로 입력하세요. 수정은 이 브라우저에서만 즉시 채점에 반영됩니다.</p>'+
+      '<table class="admtbl"><tr><th>번호</th><th>유형</th><th>정답</th><th>해설</th></tr>'+rows+'</table>'+
+      '<div class="navbtns"><button class="btn ghost" id="adm-close">닫기</button><button class="btn prim" id="adm-save">저장</button></div></div>';
+    document.body.appendChild(box);
+    box.querySelector('#adm-close').onclick=function(){ box.remove(); };
+    box.querySelector('#adm-save').onclick=function(){
+      D.Q.forEach(function(q){
+        var ai=box.querySelector('[data-adm-a="'+q.n+'"]').value.trim();
+        var ei=box.querySelector('[data-adm-e="'+q.n+'"]').value;
+        var o=overrides[q.n]||{};
+        if(q.type==='mc'){ var idx=parseInt(ai,10)-1; if(idx>=0&&idx<q.c.length) o.a=idx; }
+        else { o.a=ai; }
+        o.expl=ei;
+        overrides[q.n]=o;
+      });
+      box.remove();
+      if(graded) resultView(); else questionView();
+      alert('저장되었습니다.');
+    };
+  }
+
+  /* ---------- 시작 ---------- */
+  function render(){ questionView(); }
+  function start(){
+    if(!D || !D.Q){ app.innerHTML='<div class="gate"><h2>데이터 없음</h2><p>이 시험의 문항 데이터를 불러오지 못했습니다.</p></div>'; return; }
+    student=getStudent();
+    if(student) render(); else loginGate();
+  }
+  start();
+})();
+</script>
+</body>
+</html>

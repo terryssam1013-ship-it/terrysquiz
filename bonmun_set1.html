@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>테리스 영어 · 본문N제</title>
+<style>
+  :root{ --orange:#d97706; --orange-d:#b45309; --orange-l:#fef3e2; --ink:#1f2937; --mut:#6b7280; --line:#e5e7eb; --ok:#059669; --no:#dc2626; --bg:#fafaf9; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px 80px}
+  header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:2px solid var(--orange);padding:12px 14px;display:flex;align-items:center;gap:10px}
+  header .logo{font-weight:800;color:var(--orange);font-size:16px;letter-spacing:-.3px;white-space:nowrap}
+  header .sub{font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+  header .gear{margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;color:var(--mut);padding:4px}
+  /* progress dots */
+  .dots{display:flex;flex-wrap:wrap;gap:5px;padding:12px 0 4px}
+  .dot{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer}
+  .dot.done{background:var(--orange-l);border-color:var(--orange);color:var(--orange-d);font-weight:700}
+  .dot.cur{outline:2px solid var(--orange)}
+  /* card */
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .qhead{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .qnum{background:var(--orange);color:#fff;font-weight:800;font-size:13px;border-radius:8px;padding:3px 9px}
+  .badge{font-size:11px;background:var(--orange-l);color:var(--orange-d);border-radius:6px;padding:2px 8px;font-weight:600}
+  .gr{font-size:11px;background:#eef2ff;color:#4338ca;border-radius:6px;padding:2px 8px;font-weight:700}
+  .pts{font-size:11px;color:var(--mut);margin-left:auto}
+  .passage{background:#fafaf9;border:1px solid var(--line);border-left:3px solid var(--orange);border-radius:8px;padding:12px 14px;margin:8px 0 14px;font-size:14.5px;color:#374151;white-space:normal}
+  .passage u{text-decoration:underline;text-underline-offset:2px}
+  .qtext{font-weight:600;margin:6px 0 12px;font-size:15.5px}
+  .opt{display:flex;align-items:flex-start;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;margin:8px 0;cursor:pointer;transition:.12s;font-size:15px}
+  .opt:hover{border-color:var(--orange)}
+  .opt.sel{border-color:var(--orange);background:var(--orange-l)}
+  .opt .mk{font-weight:800;color:var(--orange-d);flex:0 0 auto}
+  .opt.correct{border-color:var(--ok);background:#ecfdf5}
+  .opt.correct .mk{color:var(--ok)}
+  .opt.wrong{border-color:var(--no);background:#fef2f2}
+  .opt.wrong .mk{color:var(--no)}
+  textarea.sa{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:15px;font-family:inherit;min-height:54px;resize:vertical}
+  textarea.sa:focus{outline:none;border-color:var(--orange)}
+  .expl{display:none;margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;font-size:14px;color:#92400e;white-space:normal}
+  .expl.show{display:block}
+  .expl .ans{font-weight:800;color:var(--ok);margin-bottom:6px}
+  /* nav buttons */
+  .navbtns{display:flex;gap:10px;margin-top:14px}
+  .btn{flex:1;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
+  .btn.prim{background:var(--orange);color:#fff}
+  .btn.prim:active{background:var(--orange-d)}
+  .btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+  .submit{width:100%;background:var(--orange);color:#fff;border:none;border-radius:14px;padding:17px;font-size:17px;font-weight:800;cursor:pointer;margin-top:8px}
+  /* login gate */
+  .gate{max-width:380px;margin:60px auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 22px;text-align:center}
+  .gate h2{color:var(--orange);margin:0 0 6px}
+  .gate p{color:var(--mut);font-size:14px;margin:0 0 18px}
+  .gate input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:13px;font-size:16px;margin-bottom:10px;font-family:inherit}
+  .gate input:focus{outline:none;border-color:var(--orange)}
+  /* result */
+  .scorebox{text-align:center;background:#fff;border:2px solid var(--orange);border-radius:16px;padding:26px;margin:14px 0}
+  .scorebox .big{font-size:46px;font-weight:900;color:var(--orange)}
+  .scorebox .lab{color:var(--mut);font-size:14px}
+  /* admin modal */
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-start;justify-content:center;overflow:auto;padding:20px}
+  .modal.show{display:flex}
+  .modal .box{background:#fff;border-radius:14px;max-width:680px;width:100%;padding:20px}
+  .modal h3{margin:0 0 12px;color:var(--orange)}
+  .admtbl{width:100%;border-collapse:collapse;font-size:13px}
+  .admtbl th,.admtbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+  .admtbl input,.admtbl textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:4px;font-family:inherit;font-size:12px}
+  .small{font-size:13px;color:var(--mut)}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- 데이터 파일은 이 주석 아래 인라인으로 삽입됨 (각 세트마다 다름) -->
+<script>// 본문N제 1세트 (101~125) — 동아(윤정미) 3.What a Great Idea — PDF 원문 그대로 전사
+window.QUIZ_DATA = {
+  SET_TITLE: "본문N제 1세트",
+  SET_SUB: "What a Great Idea · 동아(윤정미) Lesson 3 · 101~125번",
+  DB: "/results_reading_donga_yjm_l3_bonmun1.json",
+  Q: [
+    { n:101, type:"mc", p:"대화의 제목", pts:4,
+      passage:`G: Which team will win today, the Reds or the Blues?<br>B: The Reds. They're the better team.<br>G: Are you sure? Yun Jihun, their star player, is not playing today.<br>B: I didn't know that. Then, I'm not sure.`,
+      q:"다음 대화의 제목으로 가장 적절한 것은?",
+      c:["The Reason Why the Reds are the Best Team","Changing an Expectation Due to New Information","Yun Jihun: The Most Famous Player in Seoul","How to Win a Game Against the Blues","The Importance of Playing Sports Every Day"],
+      a:1,
+      expl:"스타 선수가 나오지 않는다는 새로운 정보를 듣고 경기 결과에 대한 예상을 바꾸는 내용이므로, 제목으로 ②가 가장 적절하다. ① 레즈 팀이 최고의 팀인 이유 ② 새로운 정보로 인한 예상의 변화 ③ 윤지훈: 서울에서 가장 유명한 선수 ④ 블루스 팀과의 경기에서 이기는 방법 ⑤ 매일 스포츠를 하는 것의 중요성" },
+
+    { n:102, type:"mc", p:"글의 순서", pts:4,
+      passage:`Whiteout was invented by Bette Graham.<br>(A) One day, Graham saw some window painters. When they made a mistake, they corrected it by simply painting over it.<br>(B) In 1956, Graham was working at a bank in Texas, USA. At that time, people had to retype the whole page when they made even a small mistake. Graham was a bad typist, so she needed a solution.<br>(C) The next day, she made her own white paint and used it to correct her typing mistakes. Surprisingly, nobody noticed! Soon, everybody at the bank began using it.`,
+      q:"주어진 글 다음에 이어질 글의 순서로 가장 적절한 것은?",
+      c:["(A)-(C)-(B)","(B)-(A)-(C)","(B)-(C)-(A)","(C)-(A)-(B)","(C)-(B)-(A)"],
+      a:1,
+      expl:"화이트의 발명자인 Bette Graham에 대해 소개하는 주어진 글 뒤에는, 그녀의 직업과 타자 실수 문제를 언급한 (B)가 오고, 창문 도색공들을 보고 아이디어를 얻은 (A)를 거쳐, 직접 페인트를 만들어 성공적으로 사용한 (C)로 이어지는 것이 가장 자연스럽다." },
+
+    { n:103, type:"mc", p:"빈칸 추론", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, this made traveling difficult. Why? In those days, people rode horses, but many horses ________________________. People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the result of many inventors' work in the 19th century.`,
+      q:"주어진 글의 빈칸에 들어갈 말로 가장 적절한 것은?",
+      c:["were very fast","ran away to the forest","were used for farming","were consumed as food","became too sick to move"],
+      a:3,
+      expl:"식량이 부족해지자 말을 식량 대용으로 사용했다는 맥락이므로 ④ '식량으로 소비되었다'가 가장 적절하다. ① 매우 빨랐다 ② 숲으로 도망갔다 ③ 농사에 사용되었다 ⑤ 움직이기에는 너무 아프게 되었다" },
+
+    { n:104, type:"mc", p:"대화의 제목", pts:4,
+      passage:`B: What movie will we watch tomorrow?<br>G: How about Magic Island?<br>B: Are you sure? You said you wanted to watch Love in Seoul.<br>G: I changed my mind. Magic Island looks more fun.<br>B: OK. Let's watch Magic Island, then.`,
+      q:"다음 대화의 내용과 가장 어울리는 제목을 고르시오.",
+      c:["'Magic Island' vs. 'Love in Seoul': Which is Better?","A Plan to Go to the Movie Theater Today","Changing a Movie Choice for Tomorrow","Why 'Love in Seoul' is More Popular","How to Buy Movie Tickets Online"],
+      a:2,
+      expl:"내일 볼 영화를 이전에 말했던 것에서 새로운 것으로 바꾸는 내용이므로 ③이 가장 적절한 제목이다. ① 'Magic Island' 대 'Love in Seoul': 어느 것이 더 나은가? ② 오늘 영화관에 가려는 계획 ③ 내일 볼 영화 선택 바꾸기 ④ 왜 'Love in Seoul'이 더 인기 있는가 ⑤ 온라인으로 영화표를 사는 방법" },
+
+    { n:105, type:"mc", t:"GR", p:"어법", pts:4,
+      passage:`The camera took pictures of the coffee pot ________ a minute. With special software, all the researchers in the building could see the pictures on their local network.`,
+      q:"다음 글의 빈칸에 들어갈 말로 어법상 적절한 것은?",
+      c:["three time","three times","third times","third time","three timing"],
+      a:1,
+      expl:"'세 번' 또는 '3회'를 표현할 때는 기수 three와 횟수를 뜻하는 복수 명사 times를 사용하여 'three times'라고 표현한다. ① 3회(단수형 오류) ③ 세 번째 횟수들 ④ 세 번째 시간 ⑤ 세 번의 타이밍" },
+
+    { n:106, type:"sa_text", p:"대화 배열 + 영작", pts:4,
+      passage:`ⓐ OK, Let's watch Magic Island, then.<br>ⓑ (will, tomorrow, watch, we, movie, what)?<br>ⓒ Are you sure? You said you wanted to watch Love in Seoul.<br>ⓓ How about Magic Island?<br>ⓔ I changed my mind. Magic Island looks more fun.`,
+      q:"다음 대화를 순서대로 배열하고, ⓑ 문장을 주어진 단어를 배열하여 영작하시오.<br>(1) 순서: ( )( )( )( )( )<br>(2) ⓑ 문장 배열:",
+      a:"(1) ⓑⓓⓒⓔⓐ (2) What movie will we watch tomorrow?",
+      accepts:["ⓑⓓⓒⓔⓐ","What movie will we watch tomorrow"],
+      expl:"대화의 흐름에 따라 순서를 나열하고 특정 문장을 배열 영작할 수 있는지 묻는 문제이다. ⓑ 내일 무슨 영화를 볼 건지 묻는 내용으로 대화를 시작한다. 다음으로 ⓓ 'Magic Island'는 어떤지 묻는 내용이 나온다. ⓒ 'Love in Seoul'을 보고 싶다고 했으므로 확실하냐고 되묻는 내용이 전개된다. ⓔ 마음이 바뀌었다고 설명하는 내용으로 이어지고 마지막으로 ⓐ 'Magic Island'를 보기로 결정하면서 마무리된다." },
+
+    { n:107, type:"mc", p:"밑줄 의미", pts:4,
+      passage:`The first webcam was invented to <u>watch a coffee pot</u>. In 1991, Dr. Quentin Stafford-Fraser and Dr. Paul Jardetzky were working at a computer lab in England.<br>To work better, they needed lots of coffee. However, there was only one coffee machine in the building. So, they had to make many disappointing trips to the empty coffee pot.`,
+      q:"다음 글의 밑줄 친 watch a coffee pot이 의미하는 바로 가장 적절한 것은?",
+      c:["Making a new coffee pot with a camera.","Checking if there was coffee in the pot.","Cleaning the coffee pot three times a day.","Drinking coffee while watching a movie in the lab.","Learning how to make a coffee machine at the lab."],
+      a:1,
+      expl:"직접 가보지 않고도 원격으로 커피 포트에 커피가 남아 있는지 확인하려는 목적을 의미한다. 따라서 ② '포트에 커피가 있는지 확인하는 것'이 정답이다. ① 카메라로 새로운 커피 포트를 만드는 것 ③ 하루에 세 번 커피 포트를 청소하는 것 ④ 실험실에서 영화를 보면서 커피를 마시는 것 ⑤ 실험실에서 커피 머신을 만드는 법을 배우는 것" },
+
+    { n:108, type:"mc", p:"글의 순서 배열", pts:4,
+      passage:`Graham was a bad typist, so she needed a solution. One day, Graham saw some window painters.<br>(A) The next day, she made her own white paint and used it to correct her typing mistakes.<br>(B) Surprisingly, nobody noticed! Soon, everybody at the bank began using it.<br>(C) When they made a mistake, they corrected it by simply painting over it.`,
+      q:"글의 흐름이 자연스럽도록 (A)~(C)를 배열한 것으로 가장 적절한 것은?",
+      c:["(A)-(B)-(C)","(A)-(C)-(B)","(B)-(A)-(C)","(C)-(A)-(B)","(C)-(B)-(A)"],
+      a:3,
+      expl:"도색공들을 보았다는 도입부 뒤에는 그들이 실수를 고치는 방식을 설명한 (C)가 오고, 그 방법을 적용해 다음 날 페인트를 만든 (A)를 거쳐, 아무도 눈치채지 못한 결과와 인기를 얻은 과정을 담은 (B)가 이어져야 한다." },
+
+    { n:109, type:"sa_text", p:"지시어 찾기", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, <u>this</u> made traveling difficult. Why? In those days, people rode horses, but many horses were killed for food.`,
+      q:"윗글에서 밑줄 친 this가 뜻하는 것을 찾아 쓰시오.",
+      a:"people didn't have enough food to eat.",
+      accepts:["people didn't have enough food to eat","people did not have enough food to eat"],
+      expl:"대명사가 지칭하는 바가 무엇인지 찾을 수 있는지 묻는 문제이다. 'this'는 일반 명사를 지칭할 수도 있으나 맥락에 따라 앞 문장 전체를 가리킬 수 있으므로, 화산 폭발로 먹을 충분한 음식이 없었다는 내용의 앞 문장을 지칭한다고 볼 수 있다." },
+
+    { n:110, type:"sa_text", p:"수동태 전환", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, <u>this</u> made traveling difficult. Why? In those days, people rode horses, but many horses were killed for food.`,
+      q:"윗글에서 밑줄 친 this가 들어가는 문장을 수동태로 전환하시오.",
+      a:"Surprisingly, traveling was made difficult by this.",
+      accepts:["Surprisingly, traveling was made difficult by this","traveling was made difficult by this"],
+      expl:"형용사를 보어로 가지는 5형식 문장을 수동태로 바꿀 수 있는지 묻는 문제이다. 목적어 'traveling'을 주어로 하고, 형용사 보어 'difficult'는 'was made' 뒤에 위치시키면 된다." },
+
+    { n:111, type:"sa_text", p:"영작 (질문 만들기)", pts:4,
+      passage:`(표) when / where / why / how · invent / build / write · Antonio Gaudi / William Shakespeare / King Sejong / the Wright brothers · Romeo and Juliet / Hangeul / the airplane<br><br>A: ____________?<br>B: It was invented by them in 1903.`,
+      q:"다음 표현들 일부를 이용하여 B의 대답에 맞는 A의 질문을 완전한 문장으로 적으시오.",
+      a:"When was the airplane invented by the Wright brothers?",
+      accepts:["When was the airplane invented by the Wright brothers"],
+      expl:"주어진 표현을 이용하여 정보 묻는 표현을 영작할 수 있는지 묻는 문제이다. 대답에서 'by them'이 쓰인 것으로 보아 복수로 지칭될 것은 'the Wright brothers'뿐이고 1903년에 발명되었다고 했으니 '언제' 비행기가 발명되었는지 시기를 물어야 한다." },
+
+    { n:112, type:"mc", p:"요약문 빈칸", pts:4,
+      passage:`The first webcam was invented to watch a coffee pot. In 1991, Dr. Quentin Stafford-Fraser and Dr. Paul Jardetzky were working at a computer lab in England. To work better, they needed lots of coffee. However, there was only one coffee machine in the building. So, they had to make many disappointing trips to the empty coffee pot. As a solution, the two researchers set up a camera in front of the coffee machine. The camera took pictures of the coffee pot three times a minute. With special software, all the researchers in the building could see the pictures on their local network. No more disappointing trips!<br><br>The webcam was (A)_________ to solve the problem of walking to a(n) (B)_________ coffee pot by using a camera and software.`,
+      q:"다음 글의 내용을 한 문장으로 요약하고자 한다. 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것은?",
+      c:["invented – empty","discovered – full","changed – hot","improved – small","bought – broken"],
+      a:0,
+      expl:"비어 있는(empty) 커피포트 때문에 헛걸음하는 문제를 해결하기 위해 웹캠이 발명되었다(invented). ① 발명된 – 비어 있는 ② 발견된 – 가득 찬 ③ 변화된 – 뜨거운 ④ 개선된 – 작은 ⑤ 구입된 – 고장 난" },
+
+    { n:113, type:"mc", p:"글의 분위기", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, this made traveling difficult. Why? In those days, people rode horses, but many horses were killed for food.`,
+      q:"주어진 글의 상황에 나타난 분위기로 가장 적절한 것은?",
+      c:["exciting and lively","calm and peaceful","dark and challenging","funny and humorous","noisy and festive"],
+      a:2,
+      expl:"화산 폭발, 흉작, 기아, 그리고 말을 식용으로 잡아야 하는 비극적인 상황 등을 다루고 있으므로 ③ '어둡고 힘겨운' 분위기가 가장 적절하다. ① 신나고 활기찬 ② 차분하고 평화로운 ④ 웃기고 유머러스한 ⑤ 시끄럽고 축제 분위기의" },
+
+    { n:114, type:"mc", p:"밑줄 의미", pts:4,
+      passage:`People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but <u>no pedals</u>. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the result of many inventors' work in the 19th century.`,
+      q:"다음 글의 밑줄 친 no pedals가 의미하는 바로 가장 적절한 것은?",
+      c:["The bicycle was very light","It didn't have wheels to turn","It was not a real machine for kids","Riders had to push it with their feet.","The rider couldn't move it with their legs only"],
+      a:3,
+      expl:"페달(pedals)은 발로 밟아 바퀴를 돌리는 장치인데, 최초의 자전거에는 이 장치가 없었다는 뜻이다. 따라서 ④ '타는 사람들은 그것을 그들의 발로 밀어야만 했다'가 의미상 가장 가깝다. ① 자전거가 매우 가벼웠다 ② 그것은 돌릴 바퀴가 없었다 ③ 그것은 아이들을 위한 진짜 기계가 아니었다 ⑤ 타는 사람이 다리로만은 그것을 움직일 수 없었다." },
+
+    { n:115, type:"mc", p:"속담 추론", pts:4,
+      passage:`The first webcam was invented to watch a coffee pot. In 1991, Dr. Quentin Stafford-Fraser and Dr. Paul Jardetzky were working at a computer lab in England. To work better, they needed lots of coffee. However, there was only one coffee machine in the building. So, they had to make many disappointing trips to the empty coffee pot.`,
+      q:"다음 글을 통해 알 수 있는 발명의 원동력으로 가장 적절한 속담은?",
+      c:["A friend in need is a friend indeed.","Necessity is the mother of invention.","Don't count your chickens before they hatch.","Two heads are better than one.","Look before you leap."],
+      a:1,
+      expl:"커피를 확인해야 하는 필요성(필요)이 웹캠이라는 새로운 발명을 낳았으므로 ② '필요는 발명의 어머니'가 가장 적절하다. ① 어려울 때 친구가 진짜 친구다 ③ 김칫국부터 마시지 마라 ④ 백지장도 맞들면 낫다 ⑤ 돌다리도 두들겨 보고 건너라" },
+
+    { n:116, type:"mc", p:"내용 불일치", pts:4,
+      passage:`People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the result of many inventors' work in the 19th century.`,
+      q:"주어진 글의 내용과 일치하지 않는 것은?",
+      c:["Drais's bicycle had two wheels made of wood.","Drais's bicycle had pedals that people moved with their feet.","Riders moved the bicycle forward by pushing the ground.","Today's bicycle is the result of many inventors' work.","Drais is the person who invented the first bicycle in Germany."],
+      a:1,
+      expl:"드라이스의 자전거는 페달이 없었다(no pedals)고 했으므로 ②는 내용과 일치하지 않는다. ① 드라이스의 자전거는 나무로 된 두 바퀴를 가졌다. ② 드라이스의 자전거는 사람들이 발로 움직이는 페달을 가졌다. ③ 타는 사람들은 땅을 밀어서 자전거를 앞으로 움직였다. ④ 오늘날의 자전거는 많은 발명가들의 노력의 결과물이다. ⑤ 드라이스는 독일에서 최초의 자전거를 발명한 사람이다." },
+
+    { n:117, type:"mc", p:"문맥상 부적절한 어휘", pts:4,
+      passage:`To work better, they needed lots of coffee. However, there was only one coffee machine in the building. So, they had to make many ⓐ <u>disappointing</u> trips to the empty coffee pot.<br>As a ⓑ <u>solution</u>, the two researchers set up a camera in front of the coffee machine. The camera took ⓒ <u>pictures</u> of the coffee pot three times a minute. With ⓓ <u>old</u> software, all the researchers in the building could ⓔ <u>see</u> the pictures on their local network. No more disappointing trips!`,
+      q:"다음 글의 밑줄 친 ⓐ~ⓔ 중 문맥상 적절하지 않은 것은?",
+      c:["ⓐ","ⓑ","ⓒ","ⓓ","ⓔ"],
+      a:3,
+      expl:"연구원들이 네트워크를 통해 사진을 볼 수 있게 한 것은 기존의 소프트웨어가 아닌 특별히 개발된 소프트웨어이므로, ⓓ old(낡은/기존의)을 special(특별한)로 고쳐야 한다. ① 실망스러운 ② 해결책 ③ 사진들 ⑤ 보다" },
+
+    { n:118, type:"mc", p:"글의 주제", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, this made traveling difficult. Why? In those days, people rode horses, but many horses were killed for food.<br>People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the result of many inventors' work in the 19th century.`,
+      q:"다음 글의 주제로 가장 적절한 것을 고르시오.",
+      c:["the history of various volcanic explosions in Indonesia","how people find food during the cold 19th century","the background and reason for inventing the first bicycle","the difference between early bicycles and modern ones","why people stopped riding horses in the 19th century"],
+      a:2,
+      expl:"인도네시아의 화산 폭발로 인한 식량 부족 때문에 말을 식용으로 사용하게 되었고, 이로 인해 새로운 이동 수단이 필요해져 자전거가 발명되었다는 배경을 설명하는 글이다. 따라서 주제로 가장 적절한 것은 ③ '최초의 자전거 발명의 배경과 이유'이다. ① 인도네시아의 다양한 화산 폭발의 역사 ② 추운 19세기에 사람들이 음식을 찾은 방법 ④ 초기 자전거와 현대 자전거의 차이점 ⑤ 19세기에 사람들이 말 타기를 중단한 이유" },
+
+    { n:119, type:"mc", p:"빈칸 추론", pts:4,
+      passage:`G: I want to see a movie. What movie is playing at the Star Cinema?<br>B: The Hero. The next show starts at 6:30. Let's leave right away. Then, we can catch it.<br>G: Are you sure? It's already 6.<br>B: Yes, I'm quite ________. The Star Cinema is only 1 km from here.`,
+      q:"주어진 글의 빈칸에 들어갈 말로 가장 적절한 것은?",
+      c:["busy","sure","late","sorry","excited"],
+      a:1,
+      expl:"거리가 가깝기 때문에 제시간에 도착할 수 있다고 확신하는 대답이 나와야 하므로 ② '확신하는'이 적절하다. ① 바쁜 ③ 늦은 ④ 미안한 ⑤ 신이 난" },
+
+    { n:120, type:"mc", p:"글의 제목", pts:4,
+      passage:`One day, Graham saw some window painters. When they made a mistake, they corrected it by simply painting over it. The next day, she made her own white paint and used it to correct her typing mistakes. Surprisingly, nobody noticed! Soon, everybody at the bank began using it.`,
+      q:"주어진 글의 제목으로 가장 적절한 것은?",
+      c:["Painting Windows: A New Hobby","The Success of a Bad Typist's Idea","Why Bank Workers Need to Paint","How to Hide Mistakes from Your Boss","The Best Way to Improve Typing Skills"],
+      a:1,
+      expl:"타자를 잘 못 치는 직원이 낸 아이디어(화이트)가 성공하여 모두가 사용하게 되었다는 내용이므로 ② '서툰 타이피스트의 아이디어의 성공'이 가장 적절하다. ① 창문 칠하기: 새로운 취미 ③ 왜 은행원들은 페인트칠을 해야 하는가 ④ 상사로부터 실수를 숨기는 방법 ⑤ 타자 실력을 향상시키는 가장 좋은 방법" },
+
+    { n:121, type:"mc", p:"답할 수 있는 질문", pts:4,
+      passage:`People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the result of many inventors' work in the 19th century.<br><br>&lt;보기&gt;<br>a. Why did people need a new way to travel?<br>b. In what year was the first bicycle invented?<br>c. What was the material of the first bicycle's wheels?<br>d. How much did Karl von Drais's bicycle cost to buy?<br>e. Is the modern bicycle the work of only one person?`,
+      q:"주어진 글을 읽고 답할 수 있는 질문을 &lt;보기&gt;에서 모두 고른 것은?",
+      c:["a, b","b, c","b, c, e","a, b, c, e","a, b, c, d, e"],
+      a:2,
+      expl:"최초의 자전거가 발명된 연도를 묻는 b(1817년), 자전거 바퀴의 재료를 묻는 c(나무), 그리고 현대 자전거가 한 사람만의 작품인지에 대한 질문인 e(여러 발명가들의 노력의 결과)의 대답은 본문에서 확인할 수 있다. a. 왜 사람들은 새로운 이동 수단이 필요했는가? - 이 지문만으로는 알 수 없다. d. 칼 폰 드라이스의 자전거를 사는 데 비용이 얼마나 들었는가? - 역시 언급되지 않았다." },
+
+    { n:122, type:"mc", p:"글의 주제", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, this made traveling difficult. Why? In those days, people rode horses, but many horses were killed for food.<br>People needed a new way to travel, and Karl von Drais invented the first bicycle in Germany in 1817. Drais's bicycle had two wooden wheels but no pedals. How did it move without pedals? Well, riders simply pushed the bicycle forward with their feet. The present-day bicycle is the result of many inventors' work in the 19th century.`,
+      q:"다음 글의 주제로 가장 적절한 것은?",
+      c:["the history of various volcanic explosions","why people needed food in the 19th century","the reason and the beginning of the first bicycle","how to ride a bicycle with wooden wheels and pedals","the problems of using horses for traveling in Germany"],
+      a:2,
+      expl:"화산 폭발로 인한 식량 부족과 말의 부족이라는 상황이 최초 자전거의 발명으로 이어졌다는 배경과 기원을 설명하는 글이다. 따라서 주제는 ③이다. ① 다양한 화산 폭발의 역사 ② 19세기에 사람들이 음식이 필요했던 이유 ④ 나무 바퀴와 페달이 있는 자전거를 타는 방법 ⑤ 독일에서 이동을 위해 말을 사용하는 것의 문제점" },
+
+    { n:123, type:"mc", p:"언급되지 않은 내용", pts:4,
+      passage:`Mt. Tambora, a volcano in Indonesia, exploded in 1815. The explosion created a huge cloud of ash, so crops failed around the world. As a result, people didn't have enough food to eat. Surprisingly, this made traveling difficult. Why? In those days, people rode horses, but many horses were killed for food.`,
+      q:"다음 중 글에서 언급되지 않은 내용을 고르시오.",
+      c:["the year when the volcanic explosion happened","the country where the volcanic explosion happened","the reason why the crops failed around the world","the specific way horses were killed for food","the effect of the volcanic explosion on traveling"],
+      a:3,
+      expl:"말이 식용으로 죽임을 당했다는 사실만 언급되었을 뿐, 죽이는 '구체적인 방식'은 나오지 않았다. ① 화산 폭발이 일어난 연도 ② 화산 폭발이 일어난 국가 ③ 전 세계적으로 흉작이 발생한 이유 ④ 말이 식용으로 죽임을 당한 구체적인 방법 ⑤ 화산 폭발이 이동에 미친 영향" },
+
+    { n:124, type:"mc", p:"연결어 추론", pts:4,
+      passage:`Graham saw window painters painting over mistakes. ___(A)___, she used white paint at the bank. ___(B)___, she didn't have to retype the whole page anymore.`,
+      q:"다음 글의 빈칸 (A), (B)에 들어갈 말로 가장 적절한 것은?",
+      c:["Like them – Therefore","Like them – However","Instead – Therefore","Instead – However","For example – Moreover"],
+      a:0,
+      expl:"(A)는 도색공들처럼 페인트를 사용했다는 의미이므로 Like them(그들처럼)이 적절하다. (B)는 그 결과 페이지를 다시 칠 필요가 없게 되었으므로 인과를 나타내는 Therefore가 적절하다. ① 그들처럼, 그러므로 ② 그들처럼, 그러나 ③ 대신에, 그러므로 ④ 대신에, 그러나 ⑤ 예를 들어, 더욱이" },
+
+    { n:125, type:"mc", p:"밑줄 의미", pts:4,
+      passage:`One day, Graham saw some window painters. When they made a mistake, they <u>corrected it</u> by simply painting over it. The next day, she made her own white paint and used it to correct her typing mistakes. Surprisingly, nobody noticed! Soon, everybody at the bank began using it.`,
+      q:"다음 글의 밑줄 친 corrected it이 맥락상 의미하는 바로 가장 적절한 것은?",
+      c:["Made the mistake again.","Found a new window to paint.","Fixed the error they had made.","Asked other painters for some help.","Cleaned the window with a lot of water."],
+      a:2,
+      expl:"'correct'는 잘못된 것을 바로잡거나 고친다는 뜻이다. 따라서 ③ '그들이 저질렀던 오류를 고쳤다'가 정답이다. ① 실수를 다시 저질렀다 ② 칠할 새로운 창문을 찾았다 ④ 다른 도색공들에게 도움을 요청했다 ⑤ 많은 물로 창문을 청소했다" }
+  ]
+};
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var D = window.QUIZ_DATA;
+  var FB = "https://terrys-d643a-default-rtdb.firebaseio.com";
+  var MARK = ["①","②","③","④","⑤"];
+  var app = document.getElementById('app');
+  var answers = {};   // n -> selected index (mc) or text (sa)
+  var cur = 0;
+  var graded = false;
+  var student = null;
+  var overrides = {}; // n -> {a, expl}
+
+  /* ---------- 로그인 (terrys_embed_student → TERRYS_BRIDGE 폴백) ---------- */
+  function getStudent(){
+    try{
+      var s = sessionStorage.getItem('terrys_embed_student');
+      if(s) return s;
+      var b = sessionStorage.getItem('TERRYS_BRIDGE');
+      if(b){ try{ var o=JSON.parse(b); return o.name||o.student||b; }catch(e){ return b; } }
+    }catch(e){}
+    return null;
+  }
+
+  function loginGate(){
+    app.innerHTML =
+      '<div class="gate">'+
+      '<h2>테리스 영어</h2>'+
+      '<p>'+esc(D.SET_TITLE)+' · 학생 이름을 입력하세요</p>'+
+      '<input id="nm" placeholder="이름" autocomplete="off">'+
+      '<button class="submit" id="go">시작하기</button>'+
+      '</div>';
+    document.getElementById('go').onclick=function(){
+      var v=document.getElementById('nm').value.trim();
+      if(!v){ document.getElementById('nm').focus(); return; }
+      try{ sessionStorage.setItem('terrys_embed_student', v); }catch(e){}
+      student=v; render();
+    };
+    document.getElementById('nm').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('go').click(); });
+  }
+
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  /* ---------- 채점 ---------- */
+  function answerOf(q){ var o=overrides[q.n]; return (o&&o.a!=null)?o.a:q.a; }
+  function explOf(q){ var o=overrides[q.n]; return (o&&o.expl!=null&&o.expl!=='')?o.expl:q.expl; }
+
+  function norm(s){ return String(s||'').toLowerCase().replace(/[.,!?'"`’]/g,'').replace(/\s+/g,' ').trim(); }
+  function saCorrect(q, val){
+    var gold=[answerOf(q)].concat(q.accepts||[]);
+    var v=norm(val);
+    for(var i=0;i<gold.length;i++){ if(norm(gold[i])===v) return true; }
+    // 느슨한 포함 매칭(서술형 키워드)
+    for(var j=0;j<gold.length;j++){ var g=norm(gold[j]); if(g && v && (v.indexOf(g)>=0||g.indexOf(v)>=0)) return true; }
+    return false;
+  }
+  function isCorrect(q){
+    if(q.type==='mc') return answers[q.n]===answerOf(q);
+    return saCorrect(q, answers[q.n]||'');
+  }
+
+  /* ---------- 렌더 ---------- */
+  function shell(inner){
+    app.innerHTML =
+      '<header><span class="logo">테리스 영어</span>'+
+      '<span class="sub">'+esc(D.SET_TITLE)+' · '+esc(D.SET_SUB)+'</span>'+
+      '<button class="gear" id="gear" title="관리자">⚙</button></header>'+
+      '<div class="wrap">'+inner+'</div>';
+    document.getElementById('gear').onclick=adminPrompt;
+  }
+
+  function dotsHTML(){
+    var h='<div class="dots">';
+    D.Q.forEach(function(q,i){
+      var c='dot'; if(answers[q.n]!=null && answers[q.n]!=='') c+=' done'; if(i===cur) c+=' cur';
+      h+='<div class="'+c+'" data-i="'+i+'">'+q.n+'</div>';
+    });
+    return h+'</div>';
+  }
+
+  function optHTML(q){
+    if(q.type==='mc'){
+      return q.c.map(function(t,i){
+        var cls='opt'; if(answers[q.n]===i) cls+=' sel';
+        if(graded){
+          if(i===answerOf(q)) cls+=' correct';
+          else if(answers[q.n]===i) cls+=' wrong';
+        }
+        return '<div class="'+cls+'" data-pick="'+i+'"><span class="mk">'+MARK[i]+'</span><span>'+q.c[i]+'</span></div>';
+      }).join('');
+    }
+    // sa_text
+    var val=answers[q.n]||'';
+    return '<textarea class="sa" data-sa placeholder="여기에 답을 입력하세요"'+(graded?' disabled':'')+'>'+esc(val)+'</textarea>';
+  }
+
+  function explHTML(q){
+    if(!graded) return '';
+    var ok=isCorrect(q);
+    var ansText = q.type==='mc' ? (MARK[answerOf(q)]+' '+q.c[answerOf(q)]) : answerOf(q);
+    return '<div class="expl show">'+
+      '<div class="ans">'+(ok?'✅ 정답':'❌ 오답')+' · 정답: '+esc(ansText)+'</div>'+
+      esc(explOf(q))+'</div>';
+  }
+
+  function questionView(){
+    var q=D.Q[cur];
+    var inner=dotsHTML()+
+      '<div class="card">'+
+      '<div class="qhead"><span class="qnum">'+q.n+'</span>'+
+      (q.t==='GR'?'<span class="gr">어법</span>':'')+
+      '<span class="badge">'+esc(q.p||'')+'</span>'+
+      '<span class="pts">'+q.pts+'점</span></div>'+
+      (q.passage?'<div class="passage">'+q.passage+'</div>':'')+
+      '<div class="qtext">'+q.q+'</div>'+
+      optHTML(q)+
+      explHTML(q)+
+      '</div>'+
+      navHTML();
+    shell(inner);
+    bindQ();
+  }
+
+  function navHTML(){
+    var last = cur===D.Q.length-1;
+    if(graded){
+      return '<div class="navbtns">'+
+        '<button class="btn ghost" id="prev"'+(cur===0?' disabled':'')+'>◀ 이전</button>'+
+        '<button class="btn '+(last?'ghost':'prim')+'" id="next"'+(last?' disabled':'')+'>다음 ▶</button>'+
+        '</div>'+
+        '<button class="submit" id="toresult" style="margin-top:10px;background:var(--orange-d)">결과 화면으로</button>';
+    }
+    if(last){
+      return '<div class="navbtns"><button class="btn ghost" id="prev">◀ 이전</button></div>'+
+        '<button class="submit" id="submit">제출하고 채점하기</button>';
+    }
+    return '<div class="navbtns">'+
+      '<button class="btn ghost" id="prev"'+(cur===0?' disabled':'')+'>◀ 이전</button>'+
+      '<button class="btn prim" id="next">다음 ▶</button></div>';
+  }
+
+  function bindQ(){
+    var q=D.Q[cur];
+    Array.prototype.forEach.call(document.querySelectorAll('.dot'),function(d){
+      d.onclick=function(){ cur=+d.getAttribute('data-i'); questionView(); };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pick]'),function(o){
+      if(graded) return;
+      o.onclick=function(){ answers[q.n]=+o.getAttribute('data-pick'); questionView(); };
+    });
+    var sa=document.querySelector('[data-sa]');
+    if(sa && !graded){ sa.oninput=function(){ answers[q.n]=sa.value; }; }
+    var p=document.getElementById('prev'); if(p) p.onclick=function(){ if(cur>0){cur--;questionView();} };
+    var nx=document.getElementById('next'); if(nx) nx.onclick=function(){ if(cur<D.Q.length-1){cur++;questionView();} };
+    var sb=document.getElementById('submit'); if(sb) sb.onclick=submit;
+    var tr=document.getElementById('toresult'); if(tr) tr.onclick=resultView;
+  }
+
+  /* ---------- 제출/결과 ---------- */
+  function score(){
+    var s=0,right=0;
+    D.Q.forEach(function(q){ if(isCorrect(q)){ s+=q.pts; right++; } });
+    return {s:s, right:right, total:D.Q.length};
+  }
+
+  function submit(){
+    var blanks=D.Q.filter(function(q){ return answers[q.n]==null||answers[q.n]===''; });
+    if(blanks.length){
+      if(!confirm('아직 '+blanks.length+'문항을 풀지 않았어요. 그래도 제출할까요?')) return;
+    }
+    graded=true;
+    var r=score();
+    saveScore(r);
+    resultView();
+  }
+
+  function resultView(){
+    var r=score();
+    var wrongs=D.Q.filter(function(q){ return !isCorrect(q); });
+    var inner=
+      '<div class="scorebox"><div class="lab">'+esc(student)+' 님의 점수</div>'+
+      '<div class="big">'+r.s+'점</div>'+
+      '<div class="lab">정답 '+r.right+' / '+r.total+'문항</div></div>'+
+      '<p class="small">아래 번호를 누르면 해당 문제의 해설을 볼 수 있어요. (틀린 문항은 빨강)</p>'+
+      '<div class="dots">'+
+        D.Q.map(function(q,i){
+          var ok=isCorrect(q);
+          return '<div class="dot '+(ok?'done':'')+'" data-i="'+i+'" style="'+(ok?'':'background:#fef2f2;border-color:var(--no);color:var(--no);font-weight:700')+'">'+q.n+'</div>';
+        }).join('')+
+      '</div>'+
+      '<button class="submit" id="review" style="margin-top:16px">전체 해설 보기 ('+wrongs.length+'개 틀림)</button>';
+    shell(inner);
+    Array.prototype.forEach.call(document.querySelectorAll('.dot'),function(d){
+      d.onclick=function(){ cur=+d.getAttribute('data-i'); questionView(); };
+    });
+    document.getElementById('review').onclick=function(){ cur=0; questionView(); };
+  }
+
+  /* ---------- Firebase 저장 ---------- */
+  function saveScore(r){
+    if(!student) return;
+    var path=(D.DB||'/results_reading_unknown.json');
+    var url=FB+path; // path는 .json 포함
+    var wrong=D.Q.filter(function(q){return !isCorrect(q);}).map(function(q){return q.n;});
+    var payload={ name:student, score:r.s, right:r.right, total:r.total, wrong:wrong, at:new Date().toISOString() };
+    try{
+      fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+        .catch(function(){});
+    }catch(e){}
+  }
+
+  /* ---------- 관리자 패널 ---------- */
+  function adminPrompt(){
+    var pw=prompt('관리자 비밀번호');
+    if(pw==='terry2025'){ adminPanel(); }
+    else if(pw!=null){ alert('비밀번호가 틀렸습니다.'); }
+  }
+  function adminPanel(){
+    var rows=D.Q.map(function(q){
+      var aVal = q.type==='mc' ? (answerOf(q)+1) : answerOf(q);
+      return '<tr><td>'+q.n+'</td>'+
+        '<td>'+esc(q.type)+'</td>'+
+        '<td><input data-adm-a="'+q.n+'" value="'+esc(aVal)+'"></td>'+
+        '<td><textarea data-adm-e="'+q.n+'" rows="2">'+esc(explOf(q))+'</textarea></td></tr>';
+    }).join('');
+    var box=document.createElement('div');
+    box.className='modal show';
+    box.innerHTML='<div class="box"><h3>⚙ 관리자 — 정답·해설 수정</h3>'+
+      '<p class="small">객관식 정답은 번호(1~5)로, 서술형은 텍스트로 입력하세요. 수정은 이 브라우저에서만 즉시 채점에 반영됩니다.</p>'+
+      '<table class="admtbl"><tr><th>번호</th><th>유형</th><th>정답</th><th>해설</th></tr>'+rows+'</table>'+
+      '<div class="navbtns"><button class="btn ghost" id="adm-close">닫기</button><button class="btn prim" id="adm-save">저장</button></div></div>';
+    document.body.appendChild(box);
+    box.querySelector('#adm-close').onclick=function(){ box.remove(); };
+    box.querySelector('#adm-save').onclick=function(){
+      D.Q.forEach(function(q){
+        var ai=box.querySelector('[data-adm-a="'+q.n+'"]').value.trim();
+        var ei=box.querySelector('[data-adm-e="'+q.n+'"]').value;
+        var o=overrides[q.n]||{};
+        if(q.type==='mc'){ var idx=parseInt(ai,10)-1; if(idx>=0&&idx<q.c.length) o.a=idx; }
+        else { o.a=ai; }
+        o.expl=ei;
+        overrides[q.n]=o;
+      });
+      box.remove();
+      if(graded) resultView(); else questionView();
+      alert('저장되었습니다.');
+    };
+  }
+
+  /* ---------- 시작 ---------- */
+  function render(){ questionView(); }
+  function start(){
+    if(!D || !D.Q){ app.innerHTML='<div class="gate"><h2>데이터 없음</h2><p>이 시험의 문항 데이터를 불러오지 못했습니다.</p></div>'; return; }
+    student=getStudent();
+    if(student) render(); else loginGate();
+  }
+  start();
+})();
+</script>
+</body>
+</html>
