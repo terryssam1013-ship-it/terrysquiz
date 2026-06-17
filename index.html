@@ -64,6 +64,30 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
 .sec-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin:1.25rem 4px .6rem;display:flex;align-items:center;gap:6px}
 .sec-label:first-child{margin-top:0}
 
+.adm-wrap{max-width:640px;margin:0 auto}
+.adm-help{font-size:13px;color:#6b7280;background:#f0faf5;border:1px solid #c7e8d9;border-radius:10px;padding:10px 14px;margin-bottom:16px;line-height:1.6}
+.adm-sec{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.adm-sec-head{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700;margin-bottom:10px;gap:6px;flex-wrap:wrap}
+.adm-chips{display:flex;flex-wrap:wrap;gap:7px}
+.adm-chip{border:1.5px solid #d1d5db;background:#fff;border-radius:9px;padding:7px 13px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151}
+.adm-chip.on{border-color:#1a7350;background:#e1f5ee;color:#0f6e56}
+.adm-empty{font-size:13px;color:#9ca3af;padding:4px}
+.adm-add{border:none;background:#1a7350;color:#fff;border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.adm-mini{border:1px solid #d1d5db;background:#fff;color:#6b7280;border-radius:7px;padding:5px 9px;font-size:11.5px;cursor:pointer;font-family:inherit;margin-left:4px}
+.adm-mini.del{color:#dc2626;border-color:#fecaca}
+.adm-levels{display:flex;flex-direction:column;gap:8px}
+.adm-level{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #e5e7eb;border-radius:11px;padding:10px 12px;flex-wrap:wrap}
+.adm-level-info b{font-size:14.5px}
+.adm-level-info span{font-size:12px;color:#9ca3af}
+.adm-level-cnt{font-size:11.5px;color:#6b7280;margin-top:2px}
+.adm-level-btns{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.adm-go{border:none;background:#d97706;color:#fff;border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.adm-go:hover{background:#b45309}
+.adm-foot{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.adm-save{border:none;background:#1a7350;color:#fff;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.adm-logout{border:1px solid #d1d5db;background:#fff;color:#6b7280;border-radius:10px;padding:12px 18px;font-size:13px;cursor:pointer;font-family:inherit}
+.admin-fab{position:fixed;right:16px;bottom:16px;z-index:60;background:#1a7350;color:#fff;border:none;border-radius:50px;padding:12px 18px;font-size:13.5px;font-weight:700;box-shadow:0 4px 14px rgba(26,115,80,.35);cursor:pointer;font-family:inherit;display:none}
+.admin-fab.show{display:block}
 .empty-box{background:#fff;border:1.5px dashed #d1d5db;border-radius:14px;padding:2.5rem 1rem;text-align:center;color:#9ca3af}
 .empty-box .ei{font-size:32px;margin-bottom:10px}
 .empty-box p{font-size:14px}
@@ -80,269 +104,476 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
 </head>
 <body>
 <script>
+/* ════════════════════════════════════════════════════════════════
+   [시험 등록 — 직접 수정할 필요 없음]
+   메인 하단 ⚙ → 비밀번호 → pdf2quiz.html 의 "내신 메뉴에 등록" 패널에서
+   학년/출판사/과를 고르거나 새로 만들고 → 등록 파일 받기 →
+   받은 data 파일과 index.html을 폴더에 덮어쓰면 끝.
+   리딩 테스트 구조: grades(학년) → books(출판사) → levels(과) → tests
+   ════════════════════════════════════════════════════════════════ */
 const STRUCTURE = {
-  vocab: {
-    name: "단어 테스트",
-    color: "#1a7350",
-    colorLight: "#e1f5ee",
-    colorDark: "#0f6e56",
-    books: [
+  "vocab": {
+    "name": "단어 테스트",
+    "color": "#1a7350",
+    "colorLight": "#e1f5ee",
+    "colorDark": "#0f6e56",
+    "books": [
       {
-        id: "sumanman",
-        icon: "📚",
-        title: "수능만만 기본독해 10+1",
-        desc: "10회분 어휘 리스트",
-        cumulative: {
-          title: "📚 누적 테스트 (회차 선택)",
-          file: "vocab_cumulative.html",
-          info: "원하는 회차 선택 · 균등 60문항"
+        "id": "sumanman",
+        "icon": "📚",
+        "title": "수능만만 기본독해 10+1",
+        "desc": "10회분 어휘 리스트",
+        "cumulative": {
+          "title": "📚 누적 테스트 (회차 선택)",
+          "file": "vocab_cumulative.html",
+          "info": "원하는 회차 선택 · 균등 60문항"
         },
-        tests: [
-          {title:"1회", file:"vocab_1.html", info:"60문항 · 영↔한 5지선다"},
-          {title:"2회", file:"vocab_2.html", info:"60문항 · 영↔한 5지선다"},
-          {title:"3회", file:"vocab_3.html", info:"60문항 · 영↔한 5지선다"},
-          {title:"4회", file:"vocab_4.html", info:"60문항 · 영↔한 5지선다"},
-          {title:"5회", file:"vocab_5.html", info:"60문항 · 영↔한 5지선다"},
-          {title:"6회", file:"vocab_6.html", info:"60문항 · 영↔한 5지선다"},
-          {title:"7회", file:"vocab_7.html", info:"60문항 · 영↔한 5지선다"},
-          {title:"8회", file:"vocab_8.html", info:"60문항 · 영↔한 5지선다"},
-          {title:"9회", file:"vocab_9.html", info:"60문항 · 영↔한 5지선다"},
-          {title:"10회", file:"vocab_10.html", info:"60문항 · 영↔한 5지선다"},
-        ]
-      }
-    ]
-  },
-  grammar: {
-    name: "문법 테스트",
-    color: "#2563eb",
-    colorLight: "#dbeafe",
-    colorDark: "#1d4ed8",
-    books: [
-      {
-        id: "chunilmun",
-        icon: "📘",
-        title: "천일문 GRAMMAR Level 2",
-        desc: "Ch.01~12 · 챕터별 25문항",
-        themeColor: "#7c3aed",
-        themeColorLight: "#f3e8ff",
-        themeColorDark: "#5b21b6",
-        cumulative: {
-          title: "📝 누적 테스트 (챕터 선택)",
-          file: "chunilmun_cumulative.html",
-          info: "원하는 챕터 선택 · 균등 30문항"
-        },
-        tests: [
-          {title:"전체 챕터별 테스트", file:"chunilmun_test.html", info:"Ch.01~12 · 챕터별 25문항 · 100점"},
-        ]
-      },
-      {
-        id: "eobeopkkeut",
-        icon: "📗",
-        title: "어법끝 START",
-        desc: "PART 1 UNIT 02~10",
-        themeColor: "#0d9488",
-        themeColorLight: "#ccfbf1",
-        themeColorDark: "#0f766e",
-        cumulative: {
-          title: "📝 누적 테스트 (유닛 선택)",
-          file: "eobeopkkeut_cumulative.html",
-          info: "원하는 유닛 선택 · 균등 30문항"
-        },
-        tests: [
-          {title:"전체 유닛별 테스트", file:"eobeopkkeut_start.html", info:"UNIT 02~10 · 유닛별 25문항 · 100점"},
-        ]
-      },
-      {
-        id: "munmajung",
-        icon: "📙",
-        title: "문마중 (2025 개정)",
-        desc: "Level 1 · Level 2 · Level 3",
-        themeColor: "#ea580c",
-        themeColorLight: "#ffedd5",
-        themeColorDark: "#9a3412",
-        levels: [
+        "tests": [
           {
-            icon: "1",
-            title: "Level 1",
-            desc: "Ch.01~13 · 챕터별 25문항",
-            cumulative: {
-              title: "📝 누적 테스트 (챕터 선택)",
-              file: "munmajung_lv1_cumulative.html",
-              info: "원하는 챕터 선택 · 균등 30문항"
-            },
-            tests: [
-              {title:"전체 챕터별 테스트", file:"munmajung_lv1.html", info:"Ch.01~13 · 챕터별 25문항 · 100점"},
-            ]
+            "title": "1회",
+            "file": "vocab_1.html",
+            "info": "60문항 · 영↔한 5지선다"
           },
           {
-            icon: "2",
-            title: "Level 2",
-            desc: "Ch.01~14 · 챕터별 25문항",
-            cumulative: {
-              title: "📝 누적 테스트 (챕터 선택)",
-              file: "munmajung_cumulative.html",
-              info: "원하는 챕터 선택 · 균등 30문항"
-            },
-            tests: [
-              {title:"전체 챕터별 테스트", file:"munmajung.html", info:"Ch.01~14 · 챕터별 25문항 · 100점"},
-            ]
+            "title": "2회",
+            "file": "vocab_2.html",
+            "info": "60문항 · 영↔한 5지선다"
           },
           {
-            icon: "3",
-            title: "Level 3",
-            desc: "Ch.01~16 · 챕터별 25문항",
-            cumulative: {
-              title: "📝 누적 테스트 (챕터 선택)",
-              file: "munmajung_lv3_cumulative.html",
-              info: "원하는 챕터 선택 · 균등 30문항"
-            },
-            tests: [
-              {title:"전체 챕터별 테스트", file:"munmajung_lv3.html", info:"Ch.01~16 · 챕터별 25문항 · 100점"},
-            ]
+            "title": "3회",
+            "file": "vocab_3.html",
+            "info": "60문항 · 영↔한 5지선다"
+          },
+          {
+            "title": "4회",
+            "file": "vocab_4.html",
+            "info": "60문항 · 영↔한 5지선다"
+          },
+          {
+            "title": "5회",
+            "file": "vocab_5.html",
+            "info": "60문항 · 영↔한 5지선다"
+          },
+          {
+            "title": "6회",
+            "file": "vocab_6.html",
+            "info": "60문항 · 영↔한 5지선다"
+          },
+          {
+            "title": "7회",
+            "file": "vocab_7.html",
+            "info": "60문항 · 영↔한 5지선다"
+          },
+          {
+            "title": "8회",
+            "file": "vocab_8.html",
+            "info": "60문항 · 영↔한 5지선다"
+          },
+          {
+            "title": "9회",
+            "file": "vocab_9.html",
+            "info": "60문항 · 영↔한 5지선다"
+          },
+          {
+            "title": "10회",
+            "file": "vocab_10.html",
+            "info": "60문항 · 영↔한 5지선다"
           }
         ]
       }
     ]
   },
-  reading: {
-    name: "리딩 테스트",
-    color: "#d97706",
-    colorLight: "#fef3c7",
-    colorDark: "#92400e",
-    books: [
+  "grammar": {
+    "name": "문법 테스트",
+    "color": "#2563eb",
+    "colorLight": "#dbeafe",
+    "colorDark": "#1d4ed8",
+    "books": [
       {
-        id: "donga_yjm_2",
-        icon: "📕",
-        title: "중2 동아 (윤정미)",
-        desc: "Lesson 3 · Lesson 4",
-        themeColor: "#dc2626",
-        themeColorLight: "#fee2e2",
-        themeColorDark: "#991b1b",
-        levels: [
+        "id": "chunilmun",
+        "icon": "📘",
+        "title": "천일문 GRAMMAR Level 2",
+        "desc": "Ch.01~12 · 챕터별 25문항",
+        "themeColor": "#7c3aed",
+        "themeColorLight": "#f3e8ff",
+        "themeColorDark": "#5b21b6",
+        "cumulative": {
+          "title": "📝 누적 테스트 (챕터 선택)",
+          "file": "chunilmun_cumulative.html",
+          "info": "원하는 챕터 선택 · 균등 30문항"
+        },
+        "tests": [
           {
-            icon: "3",
-            title: "Lesson 3",
-            desc: "What a Great Idea",
-            tests: [
-              {title:"본문 N제 변형 1~25", file:"quiz.html?set=donga_yjm_l3_byun1", info:"객관식 22문항 + 서술형 3문항 · 100점", db:"/results_reading_donga_yjm_l3_byun1.json", added:4},
+            "title": "전체 챕터별 테스트",
+            "file": "chunilmun_test.html",
+            "info": "Ch.01~12 · 챕터별 25문항 · 100점"
+          }
+        ]
+      },
+      {
+        "id": "eobeopkkeut",
+        "icon": "📗",
+        "title": "어법끝 START",
+        "desc": "PART 1 UNIT 02~10",
+        "themeColor": "#0d9488",
+        "themeColorLight": "#ccfbf1",
+        "themeColorDark": "#0f766e",
+        "cumulative": {
+          "title": "📝 누적 테스트 (유닛 선택)",
+          "file": "eobeopkkeut_cumulative.html",
+          "info": "원하는 유닛 선택 · 균등 30문항"
+        },
+        "tests": [
+          {
+            "title": "전체 유닛별 테스트",
+            "file": "eobeopkkeut_start.html",
+            "info": "UNIT 02~10 · 유닛별 25문항 · 100점"
+          }
+        ]
+      },
+      {
+        "id": "munmajung",
+        "icon": "📙",
+        "title": "문마중 (2025 개정)",
+        "desc": "Level 1 · Level 2 · Level 3",
+        "themeColor": "#ea580c",
+        "themeColorLight": "#ffedd5",
+        "themeColorDark": "#9a3412",
+        "levels": [
+          {
+            "icon": "1",
+            "title": "Level 1",
+            "desc": "Ch.01~13 · 챕터별 25문항",
+            "cumulative": {
+              "title": "📝 누적 테스트 (챕터 선택)",
+              "file": "munmajung_lv1_cumulative.html",
+              "info": "원하는 챕터 선택 · 균등 30문항"
+            },
+            "tests": [
+              {
+                "title": "전체 챕터별 테스트",
+                "file": "munmajung_lv1.html",
+                "info": "Ch.01~13 · 챕터별 25문항 · 100점"
+              }
             ]
           },
           {
-            icon: "4",
-            title: "Lesson 4",
-            desc: "준비중",
-            tests: [
-              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            "icon": "2",
+            "title": "Level 2",
+            "desc": "Ch.01~14 · 챕터별 25문항",
+            "cumulative": {
+              "title": "📝 누적 테스트 (챕터 선택)",
+              "file": "munmajung_cumulative.html",
+              "info": "원하는 챕터 선택 · 균등 30문항"
+            },
+            "tests": [
+              {
+                "title": "전체 챕터별 테스트",
+                "file": "munmajung.html",
+                "info": "Ch.01~14 · 챕터별 25문항 · 100점"
+              }
+            ]
+          },
+          {
+            "icon": "3",
+            "title": "Level 3",
+            "desc": "Ch.01~16 · 챕터별 25문항",
+            "cumulative": {
+              "title": "📝 누적 테스트 (챕터 선택)",
+              "file": "munmajung_lv3_cumulative.html",
+              "info": "원하는 챕터 선택 · 균등 30문항"
+            },
+            "tests": [
+              {
+                "title": "전체 챕터별 테스트",
+                "file": "munmajung_lv3.html",
+                "info": "Ch.01~16 · 챕터별 25문항 · 100점"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "reading": {
+    "name": "리딩 테스트",
+    "color": "#d97706",
+    "colorLight": "#fef3c7",
+    "colorDark": "#92400e",
+    "grades": [
+      {
+        "title": "중2",
+        "icon": "2",
+        "books": [
+          {
+            "id": "donga_yjm_2",
+            "icon": "📕",
+            "title": "동아 (윤정미)",
+            "themeColor": "#dc2626",
+            "themeColorLight": "#fee2e2",
+            "themeColorDark": "#991b1b",
+            "levels": [
+              {
+                "icon": "2",
+                "title": "Lesson 2",
+                "desc": "How Teens Talk Now",
+                "tests": [
+                  {
+                    "title": "본문 N제 (How Teens Talk Now)",
+                    "file": "quiz2.html?set=pdf_donga_yjm_l2",
+                    "info": "객관식 23 + 주관식 2문항 · 100점",
+                    "db": "/results_reading_pdf_donga_yjm_l2.json",
+                    "added": 1
+                  }
+                ]
+              },
+              {
+                "icon": "3",
+                "title": "Lesson 3",
+                "desc": "What a Great Idea",
+                "tests": [
+                  {
+                    "title": "본문N제 1세트 (101~125번)",
+                    "file": "bonmun_set1.html",
+                    "info": "객관식 25문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun1.json",
+                    "added": 1
+                  },
+                  {
+                    "title": "본문N제 2세트 (126~150번)",
+                    "file": "bonmun_set2.html",
+                    "info": "객관식 25문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun2.json",
+                    "added": 2
+                  },
+                  {
+                    "title": "본문N제 3세트 (151~175번)",
+                    "file": "bonmun_set3.html",
+                    "info": "객관식 23 + 서술형 2문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun3.json",
+                    "added": 3
+                  },
+                  {
+                    "title": "본문N제 4세트 (176~200번)",
+                    "file": "bonmun_set4.html",
+                    "info": "객관식 25문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun4.json",
+                    "added": 4
+                  },
+                  {
+                    "title": "본문N제 5세트 (201~225번)",
+                    "file": "bonmun_set5.html",
+                    "info": "객관식 24 + 서술형 1문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun5.json",
+                    "added": 5
+                  },
+                  {
+                    "title": "본문N제 6세트 (226~250번)",
+                    "file": "bonmun_set6.html",
+                    "info": "객관식 25문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun6.json",
+                    "added": 6
+                  },
+                  {
+                    "title": "본문N제 7세트 (1~25번)",
+                    "file": "bonmun_set7.html",
+                    "info": "객관식 25문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun7.json",
+                    "added": 7
+                  },
+                  {
+                    "title": "본문N제 8세트 (26~50번)",
+                    "file": "bonmun_set8.html",
+                    "info": "객관식 25문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun8.json",
+                    "added": 8
+                  },
+                  {
+                    "title": "본문N제 9세트 (51~75번)",
+                    "file": "bonmun_set9.html",
+                    "info": "객관식 25문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun9.json",
+                    "added": 9
+                  },
+                  {
+                    "title": "본문N제 10세트 (76~100번)",
+                    "file": "bonmun_set10.html",
+                    "info": "객관식 24 + 서술형 1문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l3_bonmun10.json",
+                    "added": 10
+                  }
+                ]
+              },
+              {
+                "icon": "4",
+                "title": "Lesson 4",
+                "desc": "준비중",
+                "tests": [
+                  {
+                    "title": "(준비중) 대표유형 평가",
+                    "file": "#",
+                    "info": "자료 준비 중입니다"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "donga_lbm_2",
+            "icon": "📗",
+            "title": "동아 (이병민)",
+            "themeColor": "#16a34a",
+            "themeColorLight": "#dcfce7",
+            "themeColorDark": "#15803d",
+            "levels": [
+              {
+                "icon": "3",
+                "title": "Lesson 3",
+                "desc": "준비중",
+                "tests": [
+                  {
+                    "title": "(준비중) 대표유형 평가",
+                    "file": "#",
+                    "info": "자료 준비 중입니다"
+                  }
+                ]
+              },
+              {
+                "icon": "4",
+                "title": "Lesson 4",
+                "desc": "준비중",
+                "tests": [
+                  {
+                    "title": "(준비중) 대표유형 평가",
+                    "file": "#",
+                    "info": "자료 준비 중입니다"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "chunjae_sys_2",
+            "icon": "📙",
+            "title": "천재 (소영순)",
+            "themeColor": "#d97706",
+            "themeColorLight": "#fef3c7",
+            "themeColorDark": "#92400e",
+            "levels": [
+              {
+                "icon": "3",
+                "title": "Lesson 3",
+                "desc": "New Ideas Bring Big Changes",
+                "tests": [
+                  {
+                    "title": "대표유형 평가",
+                    "file": "quiz.html?set=chunjae_l3",
+                    "info": "독해 8문항 + 서술형 2문항 · 100점",
+                    "db": "/results_reading_chunjae_l3.json",
+                    "added": 1
+                  },
+                  {
+                    "title": "본문 N제 (How Teens Talk Now)",
+                    "file": "quiz.html?set=donga_yjm_l2",
+                    "info": "객관식 23문항 + 서술형 2문항 · 100점",
+                    "db": "/results_reading_donga_yjm_l2.json",
+                    "added": 2
+                  },
+                  {
+                    "title": "실전 Set 1",
+                    "file": "quiz.html?set=newideas_set1",
+                    "info": "독해 13 + 어법 10 + 서술형 2 · 100점",
+                    "db": "/results_reading_newideas_set1.json",
+                    "added": 3
+                  }
+                ]
+              },
+              {
+                "icon": "4",
+                "title": "Lesson 4",
+                "desc": "준비중",
+                "tests": [
+                  {
+                    "title": "(준비중) 대표유형 평가",
+                    "file": "#",
+                    "info": "자료 준비 중입니다"
+                  }
+                ]
+              }
             ]
           }
         ]
       },
       {
-        id: "donga_lbm_2",
-        icon: "📗",
-        title: "중2 동아 (이병민)",
-        desc: "Lesson 3 · Lesson 4",
-        themeColor: "#16a34a",
-        themeColorLight: "#dcfce7",
-        themeColorDark: "#15803d",
-        levels: [
+        "title": "중3",
+        "icon": "3",
+        "books": [
           {
-            icon: "3",
-            title: "Lesson 3",
-            desc: "준비중",
-            tests: [
-              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            "id": "donga_yjm_3",
+            "icon": "📘",
+            "title": "동아 (윤정미)",
+            "themeColor": "#2563eb",
+            "themeColorLight": "#dbeafe",
+            "themeColorDark": "#1d4ed8",
+            "levels": [
+              {
+                "icon": "3",
+                "title": "Lesson 3",
+                "desc": "준비중",
+                "tests": [
+                  {
+                    "title": "(준비중) 대표유형 평가",
+                    "file": "#",
+                    "info": "자료 준비 중입니다"
+                  }
+                ]
+              },
+              {
+                "icon": "4",
+                "title": "Lesson 4",
+                "desc": "준비중",
+                "tests": [
+                  {
+                    "title": "(준비중) 대표유형 평가",
+                    "file": "#",
+                    "info": "자료 준비 중입니다"
+                  }
+                ]
+              }
             ]
           },
           {
-            icon: "4",
-            title: "Lesson 4",
-            desc: "준비중",
-            tests: [
-              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
-            ]
-          }
-        ]
-      },
-      {
-        id: "chunjae_sys_2",
-        icon: "📙",
-        title: "중2 천재 (소영순)",
-        desc: "Lesson 3 · Lesson 4",
-        themeColor: "#d97706",
-        themeColorLight: "#fef3c7",
-        themeColorDark: "#92400e",
-        levels: [
-          {
-            icon: "3",
-            title: "Lesson 3",
-            desc: "New Ideas Bring Big Changes",
-            tests: [
-              {title:"대표유형 평가", file:"quiz.html?set=chunjae_l3", info:"독해 8문항 + 서술형 2문항 · 100점", db:"/results_reading_chunjae_l3.json", added:1},
-              {title:"본문 N제 (How Teens Talk Now)", file:"quiz.html?set=donga_yjm_l2", info:"객관식 23문항 + 서술형 2문항 · 100점", db:"/results_reading_donga_yjm_l2.json", added:2},
-              {title:"실전 Set 1", file:"quiz.html?set=newideas_set1", info:"독해 13 + 어법 10 + 서술형 2 · 100점", db:"/results_reading_newideas_set1.json", added:3},
-            ]
-          },
-          {
-            icon: "4",
-            title: "Lesson 4",
-            desc: "준비중",
-            tests: [
-              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
-            ]
-          }
-        ]
-      },
-      {
-        id: "donga_yjm_3",
-        icon: "📘",
-        title: "중3 동아 (윤정미)",
-        desc: "Lesson 3 · Lesson 4",
-        themeColor: "#2563eb",
-        themeColorLight: "#dbeafe",
-        themeColorDark: "#1d4ed8",
-        levels: [
-          {
-            icon: "3",
-            title: "Lesson 3",
-            desc: "준비중",
-            tests: [
-              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
-            ]
-          },
-          {
-            icon: "4",
-            title: "Lesson 4",
-            desc: "준비중",
-            tests: [
-              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
-            ]
-          }
-        ]
-      },
-      {
-        id: "chunjae_ljy_3",
-        icon: "📓",
-        title: "중3 천재 (이재영)",
-        desc: "Lesson 3 · Lesson 4",
-        themeColor: "#9333ea",
-        themeColorLight: "#f3e8ff",
-        themeColorDark: "#6b21a8",
-        levels: [
-          {
-            icon: "3",
-            title: "Lesson 3",
-            desc: "준비중",
-            tests: [
-              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
-            ]
-          },
-          {
-            icon: "4",
-            title: "Lesson 4",
-            desc: "준비중",
-            tests: [
-              {title:"(준비중) 대표유형 평가", file:"#", info:"자료 준비 중입니다"},
+            "id": "chunjae_ljy_3",
+            "icon": "📓",
+            "title": "천재 (이재영)",
+            "themeColor": "#9333ea",
+            "themeColorLight": "#f3e8ff",
+            "themeColorDark": "#6b21a8",
+            "levels": [
+              {
+                "icon": "3",
+                "title": "Lesson 3",
+                "desc": "준비중",
+                "tests": [
+                  {
+                    "title": "(준비중) 대표유형 평가",
+                    "file": "#",
+                    "info": "자료 준비 중입니다"
+                  }
+                ]
+              },
+              {
+                "icon": "4",
+                "title": "Lesson 4",
+                "desc": "준비중",
+                "tests": [
+                  {
+                    "title": "(준비중) 대표유형 평가",
+                    "file": "#",
+                    "info": "자료 준비 중입니다"
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -376,13 +607,15 @@ const STRUCTURE = {
       <span class="cat-arrow">›</span>
     </div>
   </div>
-  <div class="main-footer">© 테리스 영어 · 동탄남광장 엠베스트</div>
+  <div class="main-footer">© 테리스 영어 · 동탄남광장 엠베스트
+    <a href="#" onclick="openTeacherTool();return false"
+       style="color:#c8cfcb;text-decoration:none;margin-left:6px" title="관리자">⚙</a></div>
 </div>
 
 <!-- ── 교재 폴더 목록 ── -->
 <div id="s-books" class="screen">
   <div class="list-header">
-    <button class="back-btn" onclick="show('s-main')">‹</button>
+    <button class="back-btn" onclick="booksBack()">‹</button>
     <div>
       <div class="list-header-title" id="books-title"></div>
       <div class="list-header-sub" id="books-sub"></div>
@@ -394,13 +627,25 @@ const STRUCTURE = {
 <!-- ── Level 선택 (문마중 같은 levels 폴더 진입 시) ── -->
 <div id="s-levels" class="screen">
   <div class="list-header">
-    <button class="back-btn" onclick="openCat(curCat)">‹</button>
+    <button class="back-btn" onclick="levelsBack()">‹</button>
     <div>
       <div class="list-header-title" id="levels-title"></div>
       <div class="list-header-sub" id="levels-sub"></div>
     </div>
   </div>
   <div class="list-body" id="levels-body"></div>
+</div>
+
+<!-- ── 관리자: 학년/출판사/과 설정 ── -->
+<div id="s-admin" class="screen">
+  <div class="list-header">
+    <button class="back-btn" onclick="show('s-main')">‹</button>
+    <div>
+      <div class="list-header-title">⚙ 메뉴 설정 (관리자) <span style="font-size:11px;color:#9ca3af">v2</span></div>
+      <div class="list-header-sub">학년 · 출판사 · 과 만들기 / PDF 시험 등록</div>
+    </div>
+  </div>
+  <div class="list-body" id="admin-body"></div>
 </div>
 
 <!-- ── 테스트 목록 ── -->
@@ -416,7 +661,13 @@ const STRUCTURE = {
 </div>
 
 <script>
-let curCat = null, curBookIdx = null, curLevelIdx = null;
+let curCat = null, curGradeIdx = null, curBookIdx = null, curLevelIdx = null;
+// 현재 위치의 교재 목록 (학년 구조면 해당 학년의 books, 아니면 카테고리 books)
+function curBooks(){
+  const cat = STRUCTURE[curCat];
+  if(cat.grades) return (curGradeIdx!=null && cat.grades[curGradeIdx]) ? cat.grades[curGradeIdx].books : [];
+  return cat.books || [];
+}
 
 // ── 점수 표시용 설정 ──
 const FIREBASE_URL = "https://terrys-d643a-default-rtdb.firebaseio.com";
@@ -453,6 +704,23 @@ async function fetchBestScore(db){
   }catch(e){ return null; }
 }
 
+// 이 파일의 원본 HTML 보관 (관리자 저장 시 STRUCTURE 주입용)
+window.__INDEX_SRC__ = document.documentElement.outerHTML;
+// 관리자가 이전에 편집한 구조가 있으면 복원 (저장 전 미리보기 용도)
+(function(){
+  try{
+    const ov = JSON.parse(localStorage.getItem("terry_structure_override")||"null");
+    if(ov && ov.reading){ for(const k in ov) STRUCTURE[k]=ov[k]; }
+  }catch(e){}
+})();
+
+// HTML 특수문자 이스케이프 (관리자 화면·버튼 렌더링용)
+function esc(t){
+  return String(t==null?"":t)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -469,41 +737,99 @@ function testTitle(t){
 
 function initCounts(){
   ['vocab','grammar','reading'].forEach(k=>{
-    const n = STRUCTURE[k].books.length;
-    document.getElementById('cnt-'+k).textContent = n>0 ? n+'개 교재 등록됨' : '등록된 교재 없음';
+    const cat = STRUCTURE[k];
+    let txt;
+    if(cat.grades){
+      txt = cat.grades.length>0 ? cat.grades.length+'개 학년' : '등록된 학년 없음';
+    }else{
+      const n = (cat.books||[]).length;
+      txt = n>0 ? n+'개 교재 등록됨' : '등록된 교재 없음';
+    }
+    document.getElementById('cnt-'+k).textContent = txt;
   });
 }
 initCounts();
 
-// ── 카테고리 → 교재 폴더 목록 ──
+// ── 카테고리 → (학년 목록) 또는 교재 폴더 목록 ──
 function openCat(catKey){
   curCat = catKey;
+  curGradeIdx = null;
   curBookIdx = null;
   curLevelIdx = null;
   const cat = STRUCTURE[catKey];
-  document.getElementById('books-title').textContent = cat.name;
-  document.getElementById('books-sub').textContent = cat.books.length>0 ? cat.books.length+'개 교재' : '등록된 교재 없음';
 
+  // 학년 구조 (리딩): 학년 카드 먼저
+  if(cat.grades){
+    document.getElementById('books-title').textContent = cat.name;
+    document.getElementById('books-sub').textContent = cat.grades.length>0 ? '학년을 선택하세요' : '등록된 학년 없음';
+    const body = document.getElementById('books-body');
+    if(!cat.grades.length){
+      body.innerHTML = '<div class="empty-box"><div class="ei">📭</div><p>아직 등록된 학년이 없어요</p></div>';
+    } else {
+      body.innerHTML = cat.grades.map((g,idx)=>{
+        const c = cat.color, cl = cat.colorLight;
+        const desc = g.books.length>0 ? g.books.length+'개 출판사' : '준비중';
+        return '<div class="book-card level-card" style="--c:'+c+';--c-l:'+cl+'" onclick="openGrade('+idx+')">' +
+          '<div class="book-icon">'+(g.icon||'🎓')+'</div>' +
+          '<div class="book-info"><div class="book-title">'+g.title+'</div><div class="book-desc">'+desc+'</div></div>' +
+          '<span class="book-go">›</span></div>';
+      }).join('');
+    }
+    show('s-books');
+    return;
+  }
+
+  renderBookList(cat.name, cat.books||[]);
+}
+
+// ── 학년 클릭 → 그 학년의 출판사(교재) 목록 ──
+function openGrade(gIdx){
+  curGradeIdx = gIdx;
+  curBookIdx = null;
+  curLevelIdx = null;
+  const cat = STRUCTURE[curCat];
+  const grade = cat.grades[gIdx];
+  renderBookList(cat.name+' · '+grade.title, grade.books, grade.books.length+'개 출판사');
+}
+
+// ── 교재 카드 목록 공용 렌더 ──
+function renderBookList(title, books, subText){
+  const cat = STRUCTURE[curCat];
+  document.getElementById('books-title').textContent = title;
+  document.getElementById('books-sub').textContent = subText || (books.length>0 ? books.length+'개 교재' : '등록된 교재 없음');
   const body = document.getElementById('books-body');
-  if(!cat.books.length){
-    body.innerHTML = '<div class="empty-box"><div class="ei">📭</div><p>아직 등록된 교재가 없어요</p></div>';
+  if(!books.length){
+    body.innerHTML = '<div class="empty-box"><div class="ei">📭</div><p>아직 등록된 자료가 없어요</p></div>';
   } else {
-    body.innerHTML = cat.books.map((b,idx)=>{
+    body.innerHTML = books.map((b,idx)=>{
       const c = b.themeColor || cat.color;
       const cl = b.themeColorLight || cat.colorLight;
+      const desc = (b.levels && b.levels.length) ? b.levels.map(l=>l.title).join(' · ') : (b.desc||'');
       return '<div class="book-card" style="--c:'+c+';--c-l:'+cl+'" onclick="openBook('+idx+')">' +
         '<div class="book-icon">'+b.icon+'</div>' +
-        '<div class="book-info"><div class="book-title">'+b.title+'</div><div class="book-desc">'+b.desc+'</div></div>' +
+        '<div class="book-info"><div class="book-title">'+b.title+'</div><div class="book-desc">'+desc+'</div></div>' +
         '<span class="book-go">›</span></div>';
     }).join('');
   }
   show('s-books');
 }
 
+// ── 교재 목록 화면 뒤로가기: 학년 목록 또는 메인 ──
+function booksBack(){
+  const cat = STRUCTURE[curCat];
+  if(cat && cat.grades && curGradeIdx!=null){ openCat(curCat); return; }
+  show('s-main');
+}
+function levelsBack(){
+  const cat = STRUCTURE[curCat];
+  if(cat && cat.grades) openGrade(curGradeIdx);
+  else openCat(curCat);
+}
+
 // ── 교재 폴더 클릭 → Level 목록 OR 테스트 목록 ──
 function openBook(bookIdx){
   const cat = STRUCTURE[curCat];
-  const book = cat.books[bookIdx];
+  const book = curBooks()[bookIdx];
   curBookIdx = bookIdx;
   curLevelIdx = null;
 
@@ -532,7 +858,7 @@ function openBook(bookIdx){
 // ── Level 클릭 → 해당 Level의 테스트 목록 ──
 function openLevel(lvIdx){
   const cat = STRUCTURE[curCat];
-  const book = cat.books[curBookIdx];
+  const book = curBooks()[curBookIdx];
   const level = book.levels[lvIdx];
   curLevelIdx = lvIdx;
 
@@ -615,6 +941,16 @@ function renderTests(book){
     }).join('');
   }
 
+  // 관리자: 이 과에 PDF로 바로 시험 추가
+  if(ADMIN && curCat==='reading' && STRUCTURE[curCat].grades){
+    const g = STRUCTURE.reading.grades[curGradeIdx];
+    const bk = g && g.books[curBookIdx];
+    const lv = (bk && curLevelIdx!=null) ? bk.levels[curLevelIdx] : null;
+    if(g && bk && lv){
+      html += '<button class="adm-go" style="width:100%;margin-top:14px;padding:13px" '+
+        'onclick="adminAddHere()">📄 이 과에 PDF로 시험 만들기 ('+esc(g.title)+' · '+esc(bk.title)+' · '+esc(lv.title)+')</button>';
+    }
+  }
   html += '</div>';
   document.getElementById('tests-body').innerHTML = html;
   show('s-tests');
@@ -634,6 +970,15 @@ function renderTests(book){
   }
 }
 
+function adminAddHere(){
+  const g = STRUCTURE.reading.grades[curGradeIdx];
+  const bk = g.books[curBookIdx];
+  const lv = bk.levels[curLevelIdx];
+  // 현재 구조 저장(브라우저) — pdf2quiz가 병합 베이스로 fetch함
+  saveStructureLocal();
+  const params = new URLSearchParams({ cat:'reading', grade:g.title, book:bk.title, level:lv.title });
+  location.href = 'pdf2quiz.html?'+params.toString();
+}
 function setSort(mode){
   sortMode = mode;
   // 현재 보고 있는 화면을 다시 그림
@@ -642,9 +987,224 @@ function setSort(mode){
 }
 
 // ── 테스트 화면 뒤로가기: Level에서 왔으면 Level 목록으로, 아니면 책 목록으로 ──
+// ── 관리자 도구(PDF → 시험 변환기) 진입 ──
+let ADMIN = false;
+try{ ADMIN = sessionStorage.getItem("terry_admin")==="1"; }catch(e){}
+function openTeacherTool(){
+  if(typeof openAdminMenu !== "function" || !document.getElementById("s-admin")){
+    alert("⚠ 이전 버전이 캐시에 남아 있어요.\nCtrl+Shift+R(강력 새로고침)을 누른 뒤 다시 시도해 주세요.");
+    return;
+  }
+  const pw = prompt("관리자 비밀번호");
+  if(pw === null) return;
+  if(pw !== "terry2025"){ alert("비밀번호가 틀렸습니다."); return; }
+  ADMIN = true;
+  try{ sessionStorage.setItem("terry_admin","1"); }catch(e){}
+  openAdminMenu();
+}
+function adminLogout(){
+  ADMIN = false;
+  try{ sessionStorage.removeItem("terry_admin"); }catch(e){}
+  var f=document.getElementById("adminFab"); if(f) f.classList.remove("show");
+  initCounts(); show('s-main');
+}
+
+/* ════════ 관리자: 학년/출판사/과 설정 페이지 ════════ */
+let admSel = { grade:0, book:0 };
+function saveStructureLocal(){
+  try{ localStorage.setItem("terry_structure_override", JSON.stringify(STRUCTURE)); }catch(e){}
+}
+function openAdminMenu(){
+  admSel = { grade:0, book:0 };
+  renderAdminMenu();
+  show('s-admin');
+  var f=document.getElementById("adminFab"); if(f) f.classList.add("show");
+}
+function admPalette(i){
+  const P=[["#dc2626","#fee2e2","#991b1b"],["#16a34a","#dcfce7","#15803d"],
+    ["#d97706","#fef3c7","#92400e"],["#2563eb","#dbeafe","#1d4ed8"],
+    ["#9333ea","#f3e8ff","#6b21a8"],["#0d9488","#ccfbf1","#0f766e"]];
+  return P[i % P.length];
+}
+function renderAdminMenu(){
+  const R = STRUCTURE.reading;
+  R.grades = R.grades || [];
+  if(admSel.grade >= R.grades.length) admSel.grade = Math.max(0, R.grades.length-1);
+  const grade = R.grades[admSel.grade] || null;
+  const books = grade ? (grade.books||[]) : [];
+  if(admSel.book >= books.length) admSel.book = Math.max(0, books.length-1);
+  const book = books[admSel.book] || null;
+  const levels = book ? (book.levels||[]) : [];
+
+  let h = '<div class="adm-wrap">';
+  h += '<p class="adm-help">리딩 테스트의 <b>학년 → 출판사 → 과</b>를 만들고 정리하세요. '+
+       '과 안으로 들어가면 PDF로 시험을 바로 만들 수 있어요.</p>';
+
+  // 학년
+  h += '<div class="adm-sec"><div class="adm-sec-head"><span>📚 학년</span>'+
+       '<button class="adm-add" onclick="admAdd(\'grade\')">+ 학년 추가</button></div><div class="adm-chips">';
+  h += R.grades.map((g,i)=>
+    '<button class="adm-chip'+(i===admSel.grade?' on':'')+'" onclick="admPick(\'grade\','+i+')">'+
+    esc(g.title)+'</button>').join('');
+  if(!R.grades.length) h += '<span class="adm-empty">학년을 추가하세요 (예: 중2)</span>';
+  h += '</div></div>';
+
+  // 출판사
+  if(grade){
+    h += '<div class="adm-sec"><div class="adm-sec-head"><span>🏫 '+esc(grade.title)+' 의 출판사</span>'+
+         '<span><button class="adm-mini" onclick="admRen(\'grade\')">이름변경</button>'+
+         '<button class="adm-mini del" onclick="admDel(\'grade\')">학년삭제</button>'+
+         '<button class="adm-add" onclick="admAdd(\'book\')">+ 출판사</button></span></div><div class="adm-chips">';
+    h += books.map((b,i)=>
+      '<button class="adm-chip'+(i===admSel.book?' on':'')+'" onclick="admPick(\'book\','+i+')">'+
+      esc(b.title)+'</button>').join('');
+    if(!books.length) h += '<span class="adm-empty">출판사를 추가하세요 (예: 동아 (윤정미))</span>';
+    h += '</div></div>';
+  }
+
+  // 과
+  if(book){
+    h += '<div class="adm-sec"><div class="adm-sec-head"><span>📖 '+esc(book.title)+' 의 과</span>'+
+         '<span><button class="adm-mini" onclick="admRen(\'book\')">이름변경</button>'+
+         '<button class="adm-mini del" onclick="admDel(\'book\')">출판사삭제</button>'+
+         '<button class="adm-add" onclick="admAdd(\'level\')">+ 과</button></span></div>';
+    h += '<div class="adm-levels">';
+    h += levels.map((lv,i)=>{
+      const cnt = (lv.tests||[]).filter(t=>t.file&&t.file!=='#').length;
+      return '<div class="adm-level">'+
+        '<div class="adm-level-info"><b>'+esc(lv.title)+'</b>'+(lv.desc?' <span>'+esc(lv.desc)+'</span>':'')+
+          '<div class="adm-level-cnt">시험 '+cnt+'개</div></div>'+
+        '<div class="adm-level-btns">'+
+          '<button class="adm-go" onclick="adminEnterLevel('+i+')">📄 PDF로 시험 만들기</button>'+
+          '<button class="adm-mini" onclick="admRenLevel('+i+')">이름</button>'+
+          '<button class="adm-mini del" onclick="admDelLevel('+i+')">삭제</button>'+
+        '</div></div>';
+    }).join('');
+    if(!levels.length) h += '<div class="adm-empty" style="padding:10px">과를 추가하세요 (예: Lesson 3)</div>';
+    h += '</div></div>';
+  }
+
+  h += '<div class="adm-foot">'+
+    '<button class="adm-save" onclick="admDownloadIndex()">💾 변경사항 저장 (index.html 받기)</button>'+
+    '<button class="adm-logout" onclick="adminLogout()">관리자 종료</button></div>';
+  h += '</div>';
+  document.getElementById('admin-body').innerHTML = h;
+}
+function admPick(kind,i){
+  if(kind==='grade'){ admSel.grade=i; admSel.book=0; }
+  else if(kind==='book'){ admSel.book=i; }
+  renderAdminMenu();
+}
+function admAdd(kind){
+  const R = STRUCTURE.reading; R.grades = R.grades||[];
+  if(kind==='grade'){
+    const t = prompt("새 학년 이름 (예: 중2)"); if(!t||!t.trim()) return;
+    R.grades.push({ title:t.trim(), icon:(t.match(/\d+/)||['🎓'])[0], books:[] });
+    admSel.grade = R.grades.length-1; admSel.book=0;
+  } else if(kind==='book'){
+    const g = R.grades[admSel.grade]; if(!g){ alert("먼저 학년을 추가하세요."); return; }
+    const t = prompt("새 출판사 이름 (예: 동아 (윤정미))"); if(!t||!t.trim()) return;
+    const p = admPalette(g.books.length);
+    g.books.push({ id:'bk_'+Date.now().toString(36), icon:'📘', title:t.trim(),
+      themeColor:p[0], themeColorLight:p[1], themeColorDark:p[2], levels:[] });
+    admSel.book = g.books.length-1;
+  } else if(kind==='level'){
+    const b = R.grades[admSel.grade].books[admSel.book]; if(!b){ alert("먼저 출판사를 추가하세요."); return; }
+    b.levels = b.levels||[];
+    const t = prompt("새 과 이름 (예: Lesson 3)"); if(!t||!t.trim()) return;
+    const d = prompt("과 부제 (단원 제목 — 생략 가능)")||"";
+    b.levels.push({ icon:(t.match(/\d+/)||['•'])[0], title:t.trim(), desc:d.trim(), tests:[] });
+  }
+  saveStructureLocal(); renderAdminMenu();
+}
+function admRen(kind){
+  const R = STRUCTURE.reading;
+  const node = kind==='grade' ? R.grades[admSel.grade] : R.grades[admSel.grade].books[admSel.book];
+  if(!node) return;
+  const t = prompt("새 이름", node.title); if(!t||!t.trim()) return;
+  node.title = t.trim();
+  if(kind==='grade') node.icon=(node.title.match(/\d+/)||[node.icon||'🎓'])[0];
+  saveStructureLocal(); renderAdminMenu();
+}
+function admRenLevel(i){
+  const lv = STRUCTURE.reading.grades[admSel.grade].books[admSel.book].levels[i]; if(!lv) return;
+  const t = prompt("과 이름", lv.title); if(!t||!t.trim()) return;
+  lv.title = t.trim();
+  const d = prompt("부제 (비우면 유지)", lv.desc||""); if(d!==null) lv.desc=d.trim();
+  saveStructureLocal(); renderAdminMenu();
+}
+function realTestCount(tests){ return (tests||[]).filter(t=>t.file&&t.file!=='#').length; }
+function admDel(kind){
+  const R = STRUCTURE.reading;
+  if(kind==='grade'){
+    const g = R.grades[admSel.grade]; if(!g) return;
+    const cnt = (g.books||[]).reduce((a,b)=>a+(b.levels||[]).reduce((x,l)=>x+realTestCount(l.tests),0),0);
+    if(cnt>0){ alert("이 학년에 시험이 "+cnt+"개 있어요. 먼저 비워 주세요."); return; }
+    if(!confirm('"'+g.title+'" 학년을 삭제할까요?')) return;
+    R.grades.splice(admSel.grade,1); admSel.grade=0; admSel.book=0;
+  } else if(kind==='book'){
+    const b = R.grades[admSel.grade].books[admSel.book]; if(!b) return;
+    const cnt = (b.levels||[]).reduce((x,l)=>x+realTestCount(l.tests),0);
+    if(cnt>0){ alert("이 출판사에 시험이 "+cnt+"개 있어요. 먼저 비워 주세요."); return; }
+    if(!confirm('"'+b.title+'" 을(를) 삭제할까요?')) return;
+    R.grades[admSel.grade].books.splice(admSel.book,1); admSel.book=0;
+  }
+  saveStructureLocal(); renderAdminMenu();
+}
+function admDelLevel(i){
+  const b = STRUCTURE.reading.grades[admSel.grade].books[admSel.book];
+  const lv = b.levels[i]; if(!lv) return;
+  if(realTestCount(lv.tests)>0){ alert("이 과에 시험이 있어요. 먼저 비워 주세요."); return; }
+  if(!confirm('"'+lv.title+'" 과를 삭제할까요?')) return;
+  b.levels.splice(i,1); saveStructureLocal(); renderAdminMenu();
+}
+// 과 진입 → pdf2quiz로 경로 전달
+function adminEnterLevel(i){
+  const g = STRUCTURE.reading.grades[admSel.grade];
+  const b = g.books[admSel.book];
+  const lv = b.levels[i];
+  admDownloadIndex(true); // 구조 먼저 저장(조용히)
+  const params = new URLSearchParams({
+    cat:'reading', grade:g.title, book:b.title, level:lv.title
+  });
+  location.href = 'pdf2quiz.html?'+params.toString();
+}
+function admDownloadIndex(silent){
+  const out = buildIndexFromStructure();
+  saveStructureLocal();
+  if(!silent){
+    downloadIndexFile(out);
+    alert("변경된 index.html을 받았습니다.\nH:\\terrysquiz\\ 에 덮어쓰면 학생 메뉴에 반영돼요.");
+  }
+}
+function downloadIndexFile(txt){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/html;charset=utf-8'}));
+  a.download='index.html'; a.click();
+}
+// 현재 STRUCTURE를 이 파일 원본에 주입해 새 index.html 문자열 생성
+function buildIndexFromStructure(){
+  const src = window.__INDEX_SRC__ || document.documentElement.outerHTML;
+  const at = src.indexOf('const STRUCTURE');
+  if(at<0) return src;
+  const b0 = src.indexOf('{', at);
+  let i=b0, depth=0, q=null;
+  for(; i<src.length; i++){
+    const ch=src[i];
+    if(q){ if(ch==='\\') i++; else if(ch===q) q=null; continue; }
+    if(ch==="'"||ch==='"'||ch==='`'){ q=ch; continue; }
+    if(ch==='{') depth++;
+    else if(ch==='}'){ depth--; if(depth===0){ i++; break; } }
+  }
+  let end=i; if(src[end]===';') end++;
+  return src.slice(0,at) + 'const STRUCTURE = ' + JSON.stringify(STRUCTURE,null,2) + ';' + src.slice(end);
+}
+
 function goBackFromTests(){
   if(curLevelIdx !== null){
     openBook(curBookIdx);
+  } else if(STRUCTURE[curCat].grades && curGradeIdx!=null){
+    openGrade(curGradeIdx);
   } else {
     openCat(curCat);
   }
@@ -667,6 +1227,10 @@ function goBackFromTests(){
 })();
 // ═══════════════════════════════════════════════════════════════════
 
+</script>
+<button class="admin-fab" id="adminFab" onclick="openAdminMenu()">⚙ 메뉴 설정</button>
+<script>
+(function(){ if(typeof ADMIN!=="undefined" && ADMIN){ var f=document.getElementById("adminFab"); if(f) f.classList.add("show"); } })();
 </script>
 </body>
 </html>
