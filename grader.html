@@ -173,6 +173,16 @@ select:focus{outline:none;border-color:var(--brand)!important;box-shadow:0 0 0 4
 .navtab.on{background:linear-gradient(135deg,var(--brand),var(--violet));color:#fff;border-color:transparent;box-shadow:0 6px 16px -7px rgba(91,91,240,.7)}
 .passage-diff .w-ok{color:var(--ink-2)}
 .passage-diff .w-bad{color:var(--bad-d);font-weight:800;background:var(--bad-l);border-radius:5px;padding:1px 4px;text-decoration:line-through;text-decoration-color:var(--bad)}
+.passage-diff .w-plain{color:var(--ink-2)}
+.passage-diff .w-mine{color:var(--soft);font-size:13px;font-style:italic;margin-left:2px}
+.modepick{display:flex;gap:7px;flex-wrap:wrap}
+.modebtn{flex:1;min-width:72px;padding:11px 10px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink-2);cursor:pointer;transition:all .12s}
+.modebtn:hover{border-color:var(--brand)}
+.modebtn.on{background:linear-gradient(135deg,var(--brand),var(--violet));color:#fff;border-color:transparent;box-shadow:0 5px 13px -6px rgba(91,91,240,.7)}
+.passage-fill{font-size:16px;line-height:2.4;word-spacing:1px;margin-bottom:6px}
+.passage-fill .w-plain{color:var(--ink-2)}
+.blank-in{display:inline-block;width:96px;border:none;border-bottom:2px solid var(--brand);background:var(--brand-l);border-radius:6px 6px 0 0;padding:2px 6px;font-size:15px;font-family:inherit;color:var(--brand-d);text-align:center}
+.blank-in:focus{outline:none;background:#e6e6ff}
 </style>
 </head>
 <body>
@@ -913,10 +923,12 @@ async function savePassage(){
 
 /* ---------- 학생: 본문 채점 ---------- */
 let PS_GRADED=false;
+let PS_MODE="full"; // 'full' | 'blank' | 'photo'
+let PS_BLANKS=null;  // {tokens:[{t,blank,idx}], blankIdx:[..]}
 function renderPassageStudent(){
   $("topTitle").textContent="본문 채점";
-  $("topSub").textContent="영어로 입력하거나, 답을 사진 찍어 올리세요";
-  PS_GRADED=false;
+  $("topSub").textContent="빈칸 비율을 고르거나, 전체를 입력/사진으로 제출하세요";
+  PS_GRADED=false; PS_BLANKS=null;
   $("app").innerHTML=`
     <div class="card" style="text-align:center">
       <div style="font-size:13px;color:var(--soft)">${esc(S_STUDENT)} 학생</div>
@@ -924,22 +936,87 @@ function renderPassageStudent(){
       <div style="font-size:12.5px;color:var(--soft);margin-top:3px">정답 본문과 비교해 틀린 부분을 표시해 드려요</div>
     </div>
     <div class="card">
-      <div class="label">방법 1. 영어로 입력 (가장 정확)</div>
-      <textarea id="psText" placeholder="외운 영어 본문을 여기에 입력하세요" style="width:100%;min-height:180px;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;font-size:15px;font-family:inherit;line-height:1.7;background:#fbfbfe;resize:vertical"></textarea>
-      <button class="btn btn-main btn-wide" onclick="gradePassageTyped()">입력한 답 채점하기</button>
-    </div>
-    <div class="card">
-      <div class="label">방법 2. 사진으로 제출</div>
-      <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.55">손으로 쓴 답을 사진 찍어 올리면 AI가 읽어서 채점해요. <b>손글씨·사진 상태에 따라 틀릴 수 있어</b> 선생님이 한 번 더 확인하는 게 좋아요.</div>
-      <div class="drop" id="psdrop" onclick="$('psfile').click()">
-        <div class="ic">📷</div><div class="t">답안 사진 올리기</div>
-        <div class="s">또렷하게, 똑바로 찍을수록 정확해요</div>
+      <div class="label">방식 선택</div>
+      <div class="modepick">
+        <button class="modebtn" data-m="b20" onclick="startBlank(20)">빈칸 20%</button>
+        <button class="modebtn" data-m="b40" onclick="startBlank(40)">빈칸 40%</button>
+        <button class="modebtn" data-m="b60" onclick="startBlank(60)">빈칸 60%</button>
+        <button class="modebtn" data-m="full" onclick="startFull()">전체 쓰기</button>
+        <button class="modebtn" data-m="photo" onclick="startPhoto()">📷 사진</button>
       </div>
-      <input type="file" id="psfile" accept="image/*" style="display:none">
     </div>
+    <div id="psArea"></div>
     <div id="psResult"></div>`;
-  $("psfile").addEventListener("change",e=>{ if(e.target.files[0]) gradePassagePhoto(e.target.files[0]); });
+  startBlank(40); // 기본값
   window.scrollTo(0,0);
+}
+function setActiveMode(m){
+  document.querySelectorAll(".modebtn").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+}
+
+const STOPW=new Set("a an the of to in on at for and or but is are was were be been being it its this that these those he she they we you i his her their our your my me as by with from into out up so if not no do does did have has had will would can could may might shall should must".split(" "));
+function pickBlankIdx(toks,pct){
+  const cand=[]; toks.forEach((t,i)=>{ const n=normTok(t); if(n.length>=3 && !STOPW.has(n)) cand.push(i); });
+  const want=Math.max(1,Math.round(toks.length*pct/100));
+  const idx=[...cand]; for(let k=idx.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[idx[k],idx[j]]=[idx[j],idx[k]];}
+  return new Set(idx.slice(0,Math.min(want,idx.length)));
+}
+function startBlank(pct){
+  PS_MODE="blank"; setActiveMode("b"+pct);
+  const toks=tokenize(S_EXAM.text);
+  const blanks=pickBlankIdx(toks,pct);
+  const blankList=[...blanks].sort((a,b)=>a-b);
+  PS_BLANKS={toks, blankList};
+  let bi=0;
+  const body=toks.map((t,i)=>{
+    if(blanks.has(i)){ const id=bi++; return `<input class="blank-in" id="bk${id}" data-idx="${i}" autocomplete="off" autocapitalize="off" spellcheck="false">`; }
+    return `<span class="w-plain">${esc(t)}</span>`;
+  }).join(" ");
+  $("psArea").innerHTML=`<div class="card">
+    <div class="label">빈칸 채우기 — 빈칸에 알맞은 영어 단어를 넣으세요 (${blankList.length}칸)</div>
+    <div class="passage-fill">${body}</div>
+    <button class="btn btn-main btn-wide" onclick="gradeBlank()">빈칸 채점하기</button>
+  </div>`;
+}
+function startFull(){
+  PS_MODE="full"; setActiveMode("full"); PS_BLANKS=null;
+  $("psArea").innerHTML=`<div class="card">
+    <div class="label">전체 쓰기 — 외운 영어 본문을 입력하세요</div>
+    <textarea id="psText" placeholder="외운 영어 본문을 여기에 입력하세요" style="width:100%;min-height:180px;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;font-size:15px;font-family:inherit;line-height:1.7;background:#fbfbfe;resize:vertical"></textarea>
+    <button class="btn btn-main btn-wide" onclick="gradePassageTyped()">입력한 답 채점하기</button>
+  </div>`;
+}
+function startPhoto(){
+  PS_MODE="photo"; setActiveMode("photo"); PS_BLANKS=null;
+  $("psArea").innerHTML=`<div class="card">
+    <div class="label">사진으로 제출</div>
+    <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.55">손으로 쓴 답을 사진 찍어 올리면 AI가 읽어서 채점해요. <b>손글씨·사진 상태에 따라 틀릴 수 있어</b> 선생님이 한 번 더 확인하는 게 좋아요.</div>
+    <div class="drop" id="psdrop" onclick="$('psfile').click()">
+      <div class="ic">📷</div><div class="t">답안 사진 올리기</div>
+      <div class="s">또렷하게, 똑바로 찍을수록 정확해요</div>
+    </div>
+    <input type="file" id="psfile" accept="image/*" style="display:none">
+  </div>`;
+  $("psfile").addEventListener("change",e=>{ if(e.target.files[0]) gradePassagePhoto(e.target.files[0]); });
+}
+
+function gradeBlank(){
+  if(!PS_BLANKS) return;
+  const {toks, blankList}=PS_BLANKS;
+  let correct=0; const out=[]; let bi=0;
+  const filled={};
+  blankList.forEach((tokIdx,k)=>{ const el=$("bk"+k); filled[tokIdx]= el?el.value:""; });
+  const blanksSet=new Set(blankList);
+  toks.forEach((t,i)=>{
+    if(blanksSet.has(i)){
+      const my=normTok(filled[i]||""); const ans=normTok(t);
+      const ok = my!=="" && my===ans;
+      if(ok) correct++;
+      out.push({t, s: ok?"ok":"miss", mine: filled[i]||"", isBlank:true});
+    } else out.push({t, s:"plain"});
+  });
+  const total=blankList.length||1;
+  showPassageResult({ tokens:out, score:Math.round(correct/total*100), correct, total }, "빈칸 "+total+"칸");
 }
 
 // 단어 단위 비교 (LCS 기반 diff)
@@ -966,23 +1043,29 @@ function diffWords(ans, stu){
 
 function showPassageResult(res, note){
   PS_GRADED=true;
-  const html=res.tokens.map(w=> w.s==="ok"
-    ? `<span class="w-ok">${esc(w.t)}</span>`
-    : `<span class="w-bad">${esc(w.t)}</span>`).join(" ");
+  const html=res.tokens.map(w=>{
+    if(w.s==="plain") return `<span class="w-plain">${esc(w.t)}</span>`;
+    if(w.s==="ok") return `<span class="w-ok">${esc(w.t)}</span>`;
+    // miss: 틀리거나 빠진 곳. 빈칸 모드면 학생이 쓴 답도 보여줌
+    if(w.isBlank){
+      const mine=(w.mine||"").trim();
+      return `<span class="w-bad">${esc(w.t)}</span>${mine?`<span class="w-mine">(${esc(mine)})</span>`:`<span class="w-mine">(빈칸)</span>`}`;
+    }
+    return `<span class="w-bad">${esc(w.t)}</span>`;
+  }).join(" ");
   const banner=`<div class="banner"><div><div class="who">${esc(S_STUDENT)} 학생</div>
     <div class="pts">${res.score}<small> / 100점</small></div>
     <div class="line">맞은 단어 ${res.correct} / ${res.total}${note?` · ${note}`:""}</div>
     <div class="save" id="psSave">기록 저장 중…</div></div></div>`;
   $("psResult").innerHTML=`${banner}
     <div class="card">
-      <div class="label">정답 본문과 비교 — 빨간 단어가 틀리거나 빠진 곳</div>
+      <div class="label">정답 본문과 비교 — 빨간 단어가 정답, 괄호는 내가 쓴 답</div>
       <div class="passage-diff">${html}</div>
-      <div style="font-size:12px;color:var(--soft);margin-top:10px">초록=맞음, 빨강=틀리거나 빠진 단어 (정답 본문 기준)</div>
+      <div style="font-size:12px;color:var(--soft);margin-top:10px">초록=맞음, 빨강=정답 단어(내가 틀리거나 빈칸), 괄호=내가 쓴 답</div>
     </div>
     <div class="dock"><button class="btn btn-ghost" onclick="renderPassageStudent()">다시 풀기</button>
       <button class="btn btn-main" onclick="listStudentExams()">다른 시험</button></div>`;
   window.scrollTo({top:0,behavior:"smooth"});
-  // 저장
   fetch(FB+"/results_grader_"+S_SLUG+".json",{method:"POST",body:JSON.stringify({
     name:S_STUDENT, exam:S_EXAM.title, score:res.score, total:100, wrong:[], kind:"passage", ts:new Date().toISOString()})})
     .then(()=>{const s=$("psSave");if(s){s.textContent="✓ 기록 저장 완료";}})
