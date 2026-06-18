@@ -83,6 +83,14 @@ input[type=text]{width:100%;font-family:inherit;font-size:15px;border:1.5px soli
 .qrow .pen{fill:none;stroke:#e0242b;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:300;stroke-dashoffset:300;animation:draw .5s ease-out forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
 .multi-tag{font-size:10px;color:var(--orange-d);background:var(--orange-l);border-radius:5px;padding:1px 5px;margin-left:5px;font-weight:700}
+.qfeed{margin-top:10px;border-radius:9px;padding:9px 11px;font-size:13px;line-height:1.55}
+.qfeed.ok{background:var(--okbg);border:1px solid #bfe3cf}
+.qfeed.bad{background:var(--badbg);border:1px solid #f3c0c2}
+.qfeed-line b{color:inherit}
+.qfeed.ok .qfeed-line b{color:var(--ok)}
+.qfeed.bad .qfeed-line b{color:var(--bad)}
+.qexpl{margin-top:7px;padding-top:7px;border-top:1px dashed rgba(0,0,0,.12);font-size:12.5px;color:#374151;line-height:1.6}
+.qexpl b{color:var(--ink)}
 
 /* score banner */
 .banner{background:linear-gradient(135deg,var(--green-l),#fff);border:1.5px solid var(--green);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px}
@@ -199,29 +207,15 @@ async function handlePDF(file){
   $("processBox").innerHTML=`<div class="state"><div class="spin"></div><div>PDF 분석 중…</div><div class="prog" id="prog">파일 읽는 중</div></div>`;
   const buf=await file.arrayBuffer();
   const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-  // 1) 정답 텍스트 추출 (컬럼 인지)
-  $("prog").textContent="정답 추출 중…";
+  // 정답·해설 텍스트 추출 — 읽기 순서(raw) 그대로 이어붙임 (컬럼 분리 X)
+  $("prog").textContent="정답·해설 추출 중…";
   let fullText="";
   for(let p=1;p<=pdf.numPages;p++){
     const page=await pdf.getPage(p);
     const tc=await page.getTextContent();
-    const vw=page.view; const mid=(vw[2]+vw[0])/2;
-    // 좌/우 컬럼 분리 후 위→아래 정렬
-    const items=tc.items.map(it=>({x:it.transform[4],y:it.transform[5],s:it.str}));
-    const left=items.filter(i=>i.x<mid), right=items.filter(i=>i.x>=mid);
-    fullText += colText(left)+"\n"+colText(right)+"\n";
+    fullText += tc.items.map(it=>it.str).join("") + "\n";
   }
   const answers=parseAnswers(fullText);
-  // 2) 해설 페이지를 이미지로 렌더 (학생에게 그대로 보여줄 용도)
-  A_PAGES=[];
-  for(let p=1;p<=pdf.numPages;p++){
-    $("prog").textContent=`해설 페이지 변환 중… (${p}/${pdf.numPages})`;
-    const page=await pdf.getPage(p);
-    const vp=page.getViewport({scale:1.5});
-    const cv=document.createElement("canvas"); cv.width=vp.width; cv.height=vp.height;
-    await page.render({canvasContext:cv.getContext("2d"),viewport:vp}).promise;
-    A_PAGES.push(cv.toDataURL("image/jpeg",0.7));
-  }
   if(!answers.length){
     $("processBox").innerHTML=`<div class="state"><div class="big">⚠</div>
       <div>정답을 자동으로 찾지 못했습니다.<br>아래에서 문항 수를 정하고 직접 입력해 주세요.</div></div>
@@ -230,82 +224,71 @@ async function handlePDF(file){
     return;
   }
   A_ANSWERS=answers;
+  A_PAGES=[];
   renderAnswerEditor();
 }
 
-// 컬럼 텍스트: y 내림차순(위가 큼)으로 줄 묶기
-function colText(items){
-  items=items.filter(i=>i.s.trim()!=="");
-  items.sort((a,b)=> (b.y-a.y) || (a.x-b.x));
-  const lines=[]; let cur=null, cy=null;
-  for(const it of items){
-    if(cy===null || Math.abs(it.y-cy)>4){ cur=[]; lines.push(cur); cy=it.y; }
-    cur.push(it.s);
-  }
-  return lines.map(l=>l.join(" ")).join("\n");
-}
-
-// 정답 파싱: "N)[정답] ..." 또는 "N) [정답] ..."
+// 정답+해설 파싱: "N)[정답] <답> [해설] <해설>" 블록을 다음 "N)[정답]" 전까지
 function parseAnswers(text){
   const circ="①②③④⑤⑥⑦⑧⑨⑩";
-  const re=/(\d+)\s*\)\s*\[정답\]\s*([^\n]*)/g;
+  const re=/(\d+)\s*\)\s*\[정답\]\s*([\s\S]*?)(?:\[해설\]\s*([\s\S]*?))?(?=\d+\s*\)\s*\[정답\]|$)/g;
   const map={}; let m;
   while((m=re.exec(text))){
     const n=+m[1]; if(map[n]) continue;
-    const raw=m[2].trim();
-    const picks=[...raw].filter(c=>circ.includes(c));
+    const ansRaw=(m[2]||"").trim();
+    let expl=(m[3]||"").trim().replace(/\s+/g," ");
+    const picks=[...ansRaw].filter(c=>circ.includes(c));
     if(picks.length){
-      const idx=[...new Set(picks.map(c=>circ.indexOf(c)))];
-      map[n]={n,type:"mc",a:idx,aText:""};
+      const idx=[...new Set(picks.map(c=>circ.indexOf(c)))].sort((a,b)=>a-b);
+      map[n]={n,type:"mc",a:idx,aText:"",expl};
     }else{
-      // 주관식: 첫 토막(해설 시작/큰 공백 전)
-      let t=raw.split(/\s{2,}|\[해설\]/)[0].trim();
-      map[n]={n,type:"sa",a:[],aText:t};
+      let t=ansRaw.split(/\s{2,}|[.\n]/)[0].trim();
+      map[n]={n,type:"sa",a:[],aText:t,expl};
     }
   }
   const nums=Object.keys(map).map(Number).sort((a,b)=>a-b);
   if(!nums.length) return [];
-  // 1..max 로 정렬, 빠진 건 빈칸
   const out=[];
   for(let i=1;i<=nums[nums.length-1];i++){
-    out.push(map[i]||{n:i,type:"mc",a:[],aText:""});
+    out.push(map[i]||{n:i,type:"mc",a:[],aText:"",expl:""});
   }
   return out;
 }
 function manualAnswers(){
   const n=parseInt($("manualN").value); if(!n||n<1){alert("문항 수를 숫자로 입력해 주세요.");return;}
-  A_ANSWERS=[]; for(let i=1;i<=n;i++) A_ANSWERS.push({n:i,type:"mc",a:[],aText:""});
+  A_ANSWERS=[]; for(let i=1;i<=n;i++) A_ANSWERS.push({n:i,type:"mc",a:[],aText:"",expl:""});
   renderAnswerEditor();
 }
 
 function renderAnswerEditor(){
   const filled=A_ANSWERS.filter(q=>q.type==="mc"?q.a.length:q.aText).length;
-  let h=`<div class="help">✅ 정답을 자동으로 추출했어요. 아래 표에서 확인하고, 틀린 곳은 바로 고치면 됩니다.<br>
-    객관식은 <b>번호(예: 3 또는 복수정답 2,5)</b>, 주관식은 <b>정답 단어</b>를 입력하세요. 비우면 그 문항은 채점에서 제외됩니다.</div>
+  const explCnt=A_ANSWERS.filter(q=>q.expl).length;
+  let h=`<div class="help">✅ 정답과 해설을 자동으로 추출했어요. 아래에서 확인하고 틀린 곳은 바로 고치면 됩니다.<br>
+    객관식은 <b>번호(예: 3 또는 복수정답 2,5)</b>, 주관식은 <b>정답 단어</b>. 해설은 학생 채점 후 각 문항 아래에 표시됩니다.</div>
     <div class="card">
-      <div class="akhead"><div class="t">정답표 (${A_ANSWERS.length}문항 · 입력됨 ${filled})</div>
-        <div style="display:flex;gap:6px"><button class="btn btn-ghost" style="padding:7px 12px;font-size:13px" onclick="addRow()">+ 문항</button></div>
+      <div class="akhead"><div class="t">정답·해설표 (${A_ANSWERS.length}문항 · 정답 ${filled} · 해설 ${explCnt})</div>
+        <button class="btn btn-ghost" style="padding:7px 12px;font-size:13px" onclick="addRow()">+ 문항</button>
       </div>
-      <div class="aktable" id="aktable">`;
+      <div id="aktable" style="display:flex;flex-direction:column;gap:10px">`;
   A_ANSWERS.forEach((q,i)=>{
     const val=q.type==="mc"?(q.a.map(x=>x+1).join(",")):q.aText;
-    h+=`<div class="akcell ${q.type==='sa'?'sa':''}" id="ak${i}">
-      <span class="n">${q.n}</span>
-      <input value="${esc(val)}" oninput="onAns(${i},this.value)" placeholder="${q.type==='sa'?'정답 단어':'번호'}">
-      <span class="ty ${q.type==='mc'?'mc':''}" onclick="toggleType(${i})" style="cursor:pointer" title="객/주관식 전환">${q.type==='sa'?'주관':'객관'}</span>
+    h+=`<div class="akcell ${q.type==='sa'?'sa':''}" id="ak${i}" style="flex-direction:column;align-items:stretch;gap:7px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="n">${q.n}</span>
+        <input value="${esc(val)}" oninput="onAns(${i},this.value)" placeholder="${q.type==='sa'?'정답 단어':'번호 (예: 3 또는 2,5)'}" style="flex:1">
+        <span class="ty ${q.type==='mc'?'mc':''}" onclick="toggleType(${i})" style="cursor:pointer" title="객/주관식 전환">${q.type==='sa'?'주관':'객관'}</span>
+      </div>
+      <textarea oninput="onExpl(${i},this.value)" placeholder="해설 (선택)" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit;resize:vertical;min-height:42px;color:#374151">${esc(q.expl||"")}</textarea>
     </div>`;
   });
   h+=`</div></div>
-    <div class="card">
-      <div class="label">해설 답안지 (학생에게 점수 아래로 보여집니다)</div>
-      <div style="font-size:13px;color:var(--soft)">${A_PAGES.length}페이지가 등록됩니다. 학생은 채점 후 이 해설을 그대로 볼 수 있어요.</div>
-    </div>
     <div class="dock">
       <button class="btn btn-ghost" onclick="renderAdminUpload()">다시 업로드</button>
       <button class="btn btn-main" onclick="saveExam()">🔥 시험 저장</button>
     </div>`;
   $("app").innerHTML=h;
 }
+function onExpl(i,v){ A_ANSWERS[i].expl=v; }
 function onAns(i,v){
   const q=A_ANSWERS[i];
   if(q.type==="mc"){
@@ -320,7 +303,7 @@ function toggleType(i){
   renderAnswerEditor();
 }
 function addRow(){
-  A_ANSWERS.push({n:A_ANSWERS.length+1,type:"mc",a:[],aText:""});
+  A_ANSWERS.push({n:A_ANSWERS.length+1,type:"mc",a:[],aText:"",expl:""});
   renderAnswerEditor();
 }
 
@@ -333,8 +316,7 @@ async function saveExam(){
   const payload={
     title:A_TITLE, slug, savedAt:new Date().toISOString(),
     n:A_ANSWERS.length,
-    answers:A_ANSWERS.map(q=>({n:q.n,type:q.type,a:q.a,aText:q.aText})),
-    explPages:A_PAGES
+    answers:A_ANSWERS.map(q=>({n:q.n,type:q.type,a:q.a,aText:q.aText,expl:q.expl||""}))
   };
   const box=document.createElement("div");
   try{
@@ -486,6 +468,16 @@ function gradeNow(){
       if(q.type==="mc"){
         q.a.forEach(x=>{ const el=$("o"+i+"_"+x); if(el&&!el.classList.contains("sel")) el.style.outline="2px solid var(--ok)"; });
       }
+      // 정답/내답 + 해설 (각 문항 아래)
+      const myStr = q.type==="mc"
+        ? (mine.length?mine.map(x=>CIRC[x]).join(", "):"(무응답)")
+        : (($("sa"+i)?$("sa"+i).value:"")||"(무응답)");
+      const ansStr = q.type==="mc" ? q.a.map(x=>CIRC[x]).join(", ") : esc(q.aText);
+      let info=`<div class="qfeed ${ok?'ok':'bad'}">
+        <div class="qfeed-line"><b>${ok?'○ 정답':'✗ 오답'}</b> &nbsp;|&nbsp; 내 답: ${esc(myStr)} &nbsp;|&nbsp; 정답: ${ansStr}</div>`;
+      if(q.expl) info+=`<div class="qexpl"><b>해설</b> ${esc(q.expl)}</div>`;
+      info+=`</div>`;
+      row.insertAdjacentHTML("beforeend",info);
     }
     if(q.type==="mc") for(let x=0;x<5;x++){ const el=$("o"+i+"_"+x); if(el) el.disabled=true; }
   });
@@ -497,15 +489,10 @@ function gradeNow(){
     <div class="pts">${score}<small> / 100점</small></div>
     <div class="line">${wrong.length?"틀린 문항: "+wrong.join(", ")+"번":"전부 정답! 🎉"}</div>
     <div class="save" id="saveState">기록 저장 중…</div></div>`;
-  // 해설 답안지 (점수 아래)
-  let explHtml="";
-  if(S_EXAM.explPages && S_EXAM.explPages.length){
-    explHtml=`<div class="explbox"><div class="eh">📘 해설 답안지</div>
-      <div class="explpages">${S_EXAM.explPages.map(src=>`<img src="${src}" loading="lazy">`).join("")}</div>
-      <div class="expl-note">위 해설을 보며 틀린 문항을 확인하세요.</div></div>`;
-  }
-  $("app").insertAdjacentHTML("afterbegin",banner+explHtml);
-  $("ansgrid").insertAdjacentHTML("beforebegin",`<div class="card" style="background:#fffafa;border-color:#f3c0c2"><b style="color:var(--bad)">📝 내 답안 (✗ 표시가 틀린 문항)</b></div>`);
+  $("app").insertAdjacentHTML("afterbegin",banner);
+  // 채점 후엔 한 문항씩 넓게 보이도록 1열로
+  const grid=$("ansgrid"); if(grid){ grid.style.gridTemplateColumns="1fr"; }
+  $("ansgrid").insertAdjacentHTML("beforebegin",`<div class="card" style="background:#fffafa;border-color:#f3c0c2"><b style="color:var(--bad)">📝 채점 결과 — 각 문항 아래에 정답·해설이 있어요</b></div>`);
   document.querySelector(".dock").innerHTML=`<button class="btn btn-ghost" onclick="renderAnswerSheet()">다시 풀기</button>
     <button class="btn btn-main" onclick="listStudentExams()">다른 시험</button>`;
   window.scrollTo({top:0,behavior:"smooth"});
@@ -530,7 +517,7 @@ async function renderResults(){
   $("app").innerHTML=`<div class="state"><div class="spin"></div>시험 목록 불러오는 중…</div>`;
   const data=await listExamsRaw();
   const exams=[];
-  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e&&e.answers) exams.push({slug:k,title:e.title,n:e.n||e.answers.length,savedAt:e.savedAt,explPages:e.explPages,answers:e.answers}); }
+  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e&&e.answers) exams.push({slug:k,title:e.title,n:e.n||e.answers.length,savedAt:e.savedAt,answers:e.answers}); }
   exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
   if(!exams.length){ $("app").innerHTML=`<div class="state"><div class="big">🗒️</div>등록된 시험이 없습니다.</div>`; return; }
   R_DATA.exams=exams;
@@ -578,7 +565,7 @@ async function loadResultGrid(){
   h+=`<div class="card" style="overflow:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
       <b>${esc(ex.title)}</b>
-      ${ex.explPages&&ex.explPages.length?`<button class="btn btn-line" style="padding:7px 13px;font-size:13px" onclick="showExpl()">📘 해설 보기</button>`:""}
+      <button class="btn btn-line" style="padding:7px 13px;font-size:13px" onclick="showExpl()">📘 정답·해설 보기</button>
     </div>
     <table style="border-collapse:separate;border-spacing:0;font-size:13px"><thead><tr>
       <th style="position:sticky;left:0;background:#fff;padding:0 10px;height:36px;text-align:left">학생</th>`;
@@ -598,15 +585,25 @@ async function loadResultGrid(){
   $("gridBox").innerHTML=h;
 }
 function showExpl(){
-  const ex=R_DATA.cur.ex;
+  const ex=R_DATA.cur.ex; const err=R_DATA.cur.err;
+  const CC=["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩"];
+  const rows=ex.answers.map(q=>{
+    const ans = q.type==="mc" ? (q.a||[]).map(x=>CC[x]).join(", ") : esc(q.aText||"");
+    const e = err[q.n]||0;
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:11px 13px">
+      <div style="font-weight:700;font-size:13.5px"><span style="color:var(--green-d)">${q.n}번</span>
+        &nbsp; 정답: ${ans||"—"} ${e?`<span style="color:var(--bad);font-size:12px;font-weight:600">· ${e}명 오답</span>`:""}</div>
+      ${q.expl?`<div style="font-size:13px;color:#374151;line-height:1.6;margin-top:6px">${esc(q.expl)}</div>`:""}
+    </div>`;
+  }).join("");
   const ov=document.createElement("div");
   ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;overflow:auto;padding:16px";
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
-  ov.innerHTML=`<div style="max-width:780px;margin:0 auto;background:#fff;border-radius:14px;padding:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <b style="font-size:15px">📘 해설 답안지</b>
+  ov.innerHTML=`<div style="max-width:720px;margin:0 auto;background:#fff;border-radius:14px;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <b style="font-size:15px">📘 ${esc(ex.title)} — 정답·해설</b>
       <button class="btn btn-ghost" style="padding:6px 12px" onclick="this.closest('div[style*=fixed]').remove()">닫기 ✕</button></div>
-    <div style="display:flex;flex-direction:column;gap:10px">${ex.explPages.map(s=>`<img src="${s}" style="width:100%;border:1px solid var(--line);border-radius:8px">`).join("")}</div></div>`;
+    <div style="display:flex;flex-direction:column;gap:9px">${rows}</div></div>`;
   document.body.appendChild(ov);
 }
 
