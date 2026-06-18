@@ -72,6 +72,7 @@ input[type=text]{width:100%;font-family:inherit;font-size:15px;border:1.5px soli
 .qrow.is-correct{border-color:#bfe3cf;background:#f6fcf9}
 .qrow.is-wrong{border-color:#f3c0c2;background:#fffafa}
 .qrow .qnum{font-size:12.5px;font-weight:700;color:var(--soft);margin-bottom:7px}
+.qimg{width:100%;border:1px solid var(--line);border-radius:8px;margin-bottom:10px;display:block}
 .opts{display:flex;gap:5px;flex-wrap:wrap}
 .opt{width:30px;height:30px;border-radius:8px;border:1.5px solid #d1d5db;background:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;display:flex;align-items:center;justify-content:center;padding:0}
 .opt:hover{border-color:var(--green)}
@@ -159,6 +160,7 @@ async function listExamsRaw(){
 /* ===================== 선생님(관리자) ===================== */
 let A_ANSWERS=[];      // [{n, type:'mc'|'sa', a:[idx]/'' , aText}]
 let A_PAGES=[];        // 해설 PDF 페이지 이미지 (dataURL)
+let A_QIMGS={};        // { 문항번호: dataURL } — 문제지 이미지
 let A_TITLE="";
 
 function renderAdminGate(){
@@ -193,12 +195,27 @@ function renderAdminUpload(){
       </div>
       <input type="file" id="file" accept="application/pdf" style="display:none">
     </div>
+    <div class="card">
+      <div class="label">3. 문제지 PDF 업로드 (선택)</div>
+      <div class="drop" id="qdrop" onclick="$('qfile').click()" style="border-color:#d6c7e0;background:#fbfafd">
+        <div class="ic">📝</div>
+        <div class="t" id="qdropT">학생이 받은 문제지 PDF를 여기에</div>
+        <div class="s">올리면 채점 결과에 문제 이미지가 함께 보입니다 · 없어도 됩니다</div>
+      </div>
+      <input type="file" id="qfile" accept="application/pdf" style="display:none">
+    </div>
     <div id="processBox"></div>`;
   const f=$("file"), drop=$("drop");
   f.addEventListener("change",e=>{ if(e.target.files[0]) handlePDF(e.target.files[0]); });
   ["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.style.borderColor="#1a7350";}));
   ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.style.borderColor="";}));
   drop.addEventListener("drop",e=>{ const file=e.dataTransfer.files[0]; if(file&&file.type==="application/pdf") handlePDF(file); });
+  // 문제지 업로드
+  const qf=$("qfile"), qdrop=$("qdrop");
+  qf.addEventListener("change",e=>{ if(e.target.files[0]) handleQuestionPDF(e.target.files[0]); });
+  ["dragover","dragenter"].forEach(ev=>qdrop.addEventListener(ev,e=>{e.preventDefault();qdrop.style.borderColor="#9333ea";}));
+  ["dragleave","drop"].forEach(ev=>qdrop.addEventListener(ev,e=>{e.preventDefault();qdrop.style.borderColor="";}));
+  qdrop.addEventListener("drop",e=>{ const file=e.dataTransfer.files[0]; if(file&&file.type==="application/pdf") handleQuestionPDF(file); });
 }
 
 async function handlePDF(file){
@@ -254,6 +271,61 @@ function parseAnswers(text){
   }
   return out;
 }
+
+// 문제지 PDF → 문항별 이미지 크롭
+async function handleQuestionPDF(file){
+  const t=$("qdropT"); if(t) t.textContent="문제지 분석 중…";
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  // 1) 문항 시작점 수집: 줄 맨앞 "N." (좌/우 컬럼)
+  const marks=[]; // {p,col,y,num}
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const tc=await page.getTextContent();
+    const vw=page.view; const W=vw[2]-vw[0], H=vw[3]-vw[1]; const mid=W/2;
+    tc.items.forEach(it=>{
+      const s=(it.str||"").trim();
+      const m=s.match(/^(\d+)\.$/);
+      if(m){
+        const x=it.transform[4]; const yTop=H-it.transform[5]; // 위에서부터의 거리
+        marks.push({p,col:x<mid?0:1,y:yTop,num:+m[1],x});
+      }
+    });
+  }
+  // 페이지→컬럼→y 정렬 후, 번호 단조증가만 채택(선택지/노이즈 제거)
+  marks.sort((a,b)=> a.p-b.p || a.col-b.col || a.y-b.y);
+  const seq=[]; let expect=1;
+  marks.forEach(mk=>{ if(mk.num===expect){ seq.push(mk); expect++; } });
+  if(!seq.length){ if(t) t.textContent="문항 번호를 못 찾았어요 (이 문제지는 이미지로 못 잘라요)"; return; }
+  // 2) 각 문항 크롭
+  A_QIMGS={};
+  for(let i=0;i<seq.length;i++){
+    const mk=seq[i];
+    const page=await pdf.getPage(mk.p);
+    const vw=page.view; const W=vw[2]-vw[0], H=vw[3]-vw[1]; const mid=W/2;
+    const xL = mk.col===0 ? 36 : mid+4;
+    const xR = mk.col===0 ? mid-4 : W-26;
+    let yB = H-34;
+    for(let j=i+1;j<seq.length;j++){
+      if(seq[j].p===mk.p && seq[j].col===mk.col && seq[j].y>mk.y+5){ yB=seq[j].y-3; break; }
+    }
+    const yT=Math.max(0,mk.y-6);
+    const scale=1.7;
+    const vp=page.getViewport({scale});
+    const cv=document.createElement("canvas");
+    cv.width=Math.round((xR-xL)*scale); cv.height=Math.round((yB-yT)*scale);
+    const ctx=cv.getContext("2d");
+    // 전체를 그린 뒤 잘라내기보다, viewport offset 으로 해당 영역만 렌더
+    const full=document.createElement("canvas"); full.width=vp.width; full.height=vp.height;
+    await page.render({canvasContext:full.getContext("2d"),viewport:vp}).promise;
+    ctx.drawImage(full, xL*scale, yT*scale, (xR-xL)*scale, (yB-yT)*scale, 0,0, cv.width, cv.height);
+    A_QIMGS[mk.num]=cv.toDataURL("image/jpeg",0.75);
+    if(t) t.textContent=`문제 이미지 만드는 중… (${i+1}/${seq.length})`;
+  }
+  if(t){ t.textContent=`✅ 문제지 ${seq.length}문항 이미지 준비 완료`; }
+  // 이미 정답표가 떠 있으면 다시 그려 안내 갱신
+  if(A_ANSWERS.length) renderAnswerEditor();
+}
 function manualAnswers(){
   const n=parseInt($("manualN").value); if(!n||n<1){alert("문항 수를 숫자로 입력해 주세요.");return;}
   A_ANSWERS=[]; for(let i=1;i<=n;i++) A_ANSWERS.push({n:i,type:"mc",a:[],aText:"",expl:""});
@@ -263,8 +335,9 @@ function manualAnswers(){
 function renderAnswerEditor(){
   const filled=A_ANSWERS.filter(q=>q.type==="mc"?q.a.length:q.aText).length;
   const explCnt=A_ANSWERS.filter(q=>q.expl).length;
+  const imgCnt=Object.keys(A_QIMGS).length;
   let h=`<div class="help">✅ 정답과 해설을 자동으로 추출했어요. 아래에서 확인하고 틀린 곳은 바로 고치면 됩니다.<br>
-    객관식은 <b>번호(예: 3 또는 복수정답 2,5)</b>, 주관식은 <b>정답 단어</b>. 해설은 학생 채점 후 각 문항 아래에 표시됩니다.</div>
+    객관식은 <b>번호(예: 3 또는 복수정답 2,5)</b>, 주관식은 <b>정답 단어</b>. 해설은 학생 채점 후 각 문항 아래에 표시됩니다.${imgCnt?`<br>🖼️ 문제지 이미지 ${imgCnt}개 준비됨 — 채점 결과에 문제가 함께 보입니다.`:``}</div>
     <div class="card">
       <div class="akhead"><div class="t">정답·해설표 (${A_ANSWERS.length}문항 · 정답 ${filled} · 해설 ${explCnt})</div>
         <button class="btn btn-ghost" style="padding:7px 12px;font-size:13px" onclick="addRow()">+ 문항</button>
@@ -316,7 +389,7 @@ async function saveExam(){
   const payload={
     title:A_TITLE, slug, savedAt:new Date().toISOString(),
     n:A_ANSWERS.length,
-    answers:A_ANSWERS.map(q=>({n:q.n,type:q.type,a:q.a,aText:q.aText,expl:q.expl||""}))
+    answers:A_ANSWERS.map(q=>({n:q.n,type:q.type,a:q.a,aText:q.aText,expl:q.expl||"",img:A_QIMGS[q.n]||""}))
   };
   const box=document.createElement("div");
   try{
@@ -405,6 +478,7 @@ function renderAnswerSheet(){
   A.forEach((q,i)=>{
     const multi = q.type==="mc" && q.a.length>1;
     h+=`<div class="qrow" id="qr${i}"><div class="qnum">${q.n}번${multi?'<span class="multi-tag">복수</span>':''}</div>`;
+    if(q.img) h+=`<img class="qimg" src="${q.img}" alt="${q.n}번 문제" loading="lazy">`;
     if(q.type==="mc"){
       h+=`<div class="opts">`;
       for(let j=0;j<5;j++) h+=`<button class="opt${multi?' multi':''}" id="o${i}_${j}" onclick="tap(${i},${j},${multi})">${CIRC[j]}</button>`;
@@ -415,7 +489,10 @@ function renderAnswerSheet(){
     h+=`</div>`;
   });
   h+=`</div><div class="dock"><button class="btn btn-main" onclick="gradeNow()">제출하고 채점하기</button></div>`;
-  $("app").innerHTML=h; window.scrollTo(0,0);
+  $("app").innerHTML=h;
+  const hasImg=A.some(q=>q.img);
+  if(hasImg){ const g=$("ansgrid"); if(g) g.style.gridTemplateColumns="1fr"; }
+  window.scrollTo(0,0);
 }
 function tap(i,j,multi){
   if(graded) return;
