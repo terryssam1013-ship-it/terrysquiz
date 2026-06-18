@@ -309,13 +309,14 @@ async function cropQuestionsFromPdf(pdf, onProg){
     const mk=seq[i];
     const page=await pdf.getPage(mk.p);
     const vw=page.view; const W=vw[2]-vw[0], H=vw[3]-vw[1]; const mid=W/2;
-    const xL = mk.col===0 ? 36 : mid+4;
-    const xR = mk.col===0 ? mid-4 : W-26;
-    let yB = H-34;
+    // 컬럼 좌우 여백을 넉넉히 (박스 테두리가 잘리지 않게)
+    const xL = mk.col===0 ? 28 : mid+2;
+    const xR = mk.col===0 ? mid-2 : W-18;
+    let yB = H-30;
     for(let j=i+1;j<seq.length;j++){
-      if(seq[j].p===mk.p && seq[j].col===mk.col && seq[j].y>mk.y+5){ yB=seq[j].y-3; break; }
+      if(seq[j].p===mk.p && seq[j].col===mk.col && seq[j].y>mk.y+5){ yB=seq[j].y-6; break; }
     }
-    const yT=Math.max(0,mk.y-6);
+    const yT=Math.max(0,mk.y-10);
     const scale=1.7;
     const vp=page.getViewport({scale});
     const full=document.createElement("canvas"); full.width=vp.width; full.height=vp.height;
@@ -498,7 +499,8 @@ function renderAnswerSheet(){
   A.forEach((q,i)=>{
     const multi = q.type==="mc" && q.a.length>1;
     h+=`<div class="qrow" id="qr${i}"><div class="qnum">${q.n}번${multi?'<span class="multi-tag">복수</span>':''}</div>`;
-    if(q.img) h+=`<img class="qimg" src="${q.img}" alt="${q.n}번 문제" loading="lazy">`;
+    // 문제 이미지는 채점 후에만 보여줌 (입력 중에는 숨김). 숨겨둔 채로 심어둠.
+    if(q.img) h+=`<img class="qimg" id="qimg${i}" src="${q.img}" alt="${q.n}번 문제" loading="lazy" style="display:none">`;
     if(q.type==="mc"){
       h+=`<div class="opts">`;
       for(let j=0;j<5;j++) h+=`<button class="opt${multi?' multi':''}" id="o${i}_${j}" onclick="tap(${i},${j},${multi})">${CIRC[j]}</button>`;
@@ -510,8 +512,6 @@ function renderAnswerSheet(){
   });
   h+=`</div><div class="dock"><button class="btn btn-main" onclick="gradeNow()">제출하고 채점하기</button></div>`;
   $("app").innerHTML=h;
-  const hasImg=A.some(q=>q.img);
-  if(hasImg){ const g=$("ansgrid"); if(g) g.style.gridTemplateColumns="1fr"; }
   window.scrollTo(0,0);
 }
 function tap(i,j,multi){
@@ -556,6 +556,7 @@ function gradeNow(){
     const row=$("qr"+i);
     if(has){
       row.classList.add(ok?"is-correct":"is-wrong");
+      const qimg=$("qimg"+i); if(qimg) qimg.style.display="block";
       const mk=document.createElement("div"); mk.className="mark";
       mk.innerHTML = ok
         ? `<svg viewBox="0 0 60 60"><path class="pen" d="M30 7 C46 7 55 18 55 30 C55 44 44 53 30 53 C15 53 5 43 5 29 C5 16 16 8 31 7"/></svg>`
