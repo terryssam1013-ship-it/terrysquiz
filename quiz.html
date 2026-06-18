@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>테리스 — 시험 풀기</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1a7350;--green-l:#e1f5ee;--green-d:#0f6e56;
+  --orange:#d97706;--orange-l:#fef3c7;--orange-d:#92400e;
+  --ink:#1a1a1a;--soft:#6b7280;--line:rgba(0,0,0,.08);
+  --ok:#16a34a;--okbg:#dcfce7;--bad:#dc2626;--badbg:#fee2e2;
+}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f4f1;color:var(--ink);min-height:100vh}
+.top{background:var(--green);color:#fff;padding:1.5rem 1.25rem 1.3rem;text-align:center}
+.top .academy{font-size:12px;opacity:.7;letter-spacing:.08em}
+.top h1{font-size:23px;font-weight:700;margin-top:4px}
+.wrap{max-width:760px;margin:0 auto;padding:1.2rem 1rem 4rem;width:100%}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.label{font-size:12px;font-weight:700;color:var(--soft);letter-spacing:.05em;text-transform:uppercase;margin-bottom:9px}
+input[type=text]{width:100%;font-family:inherit;font-size:15px;border:1.5px solid #d1d5db;border-radius:10px;padding:11px 13px;color:var(--ink)}
+.btn{border:none;border-radius:10px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-main{background:var(--green);color:#fff;width:100%;margin-top:10px}
+.btn-main:hover{background:var(--green-d)}
+.btn-main:disabled{background:#cbd5d1;cursor:not-allowed}
+
+.examlist{display:flex;flex-direction:column;gap:9px}
+.exam-item{display:flex;align-items:center;gap:13px;background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:14px 16px;cursor:pointer;transition:all .14s}
+.exam-item:hover{border-color:var(--green);box-shadow:0 3px 12px rgba(26,115,80,.1)}
+.exam-dot{width:11px;height:11px;border-radius:50%;background:var(--orange);flex-shrink:0}
+.exam-info{flex:1}
+.exam-title{font-size:15.5px;font-weight:700;margin-bottom:2px}
+.exam-meta{font-size:12.5px;color:var(--soft)}
+.exam-go{font-size:20px;color:#d1d5db}
+.exam-item:hover .exam-go{color:var(--green)}
+
+.state{background:#fff;border:1px solid var(--line);border-radius:14px;padding:34px 20px;text-align:center;color:var(--soft)}
+.state .big{font-size:30px;margin-bottom:8px}
+.spin{width:26px;height:26px;border:3px solid #e5e7eb;border-top-color:var(--green);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* exam sheet */
+.exam-head{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px;text-align:center}
+.exam-head .brand{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--green)}
+.exam-head h2{font-size:20px;font-weight:700;margin:5px 0}
+.exam-head .who{font-size:13px;color:var(--soft)}
+.q{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.q-n{display:inline-block;font-size:13px;font-weight:700;color:#fff;background:var(--green);border-radius:7px;padding:3px 9px;margin-bottom:9px}
+.q-text{font-size:15px;line-height:1.65;margin-bottom:13px;white-space:pre-wrap}
+.choices{display:flex;flex-direction:column;gap:7px}
+.choices label{display:flex;align-items:flex-start;gap:9px;font-size:14.5px;padding:10px 13px;border:1.5px solid #e5e7eb;border-radius:10px;cursor:pointer;line-height:1.45}
+.choices label:hover{border-color:var(--green);background:var(--green-l)}
+.choices input{margin-top:3px}
+.choices label.sel{border-color:var(--green);background:var(--green-l);font-weight:600}
+.choices label.is-answer{border-color:var(--ok);background:var(--okbg)}
+.choices label.is-wrongpick{border-color:var(--bad);background:var(--badbg)}
+.sa-blank{width:100%;font-family:inherit;font-size:15px;border:1.5px solid #d1d5db;border-radius:9px;padding:9px 12px}
+.sa-blank.is-ok{border-color:var(--ok);background:var(--okbg)}
+.sa-blank.is-bad{border-color:var(--bad);background:var(--badbg)}
+.verdict{display:none;margin-top:11px;font-size:13.5px;font-weight:700;padding:8px 11px;border-radius:9px}
+.verdict.ok{background:var(--okbg);color:var(--ok)}
+.verdict.bad{background:var(--badbg);color:var(--bad)}
+.expl{display:none;margin-top:9px;font-size:13.5px;line-height:1.65;background:#f9fafb;border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:#374151}
+
+.banner{background:linear-gradient(135deg,var(--green-l),#fff);border:1.5px solid var(--green);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px}
+.banner .pts{font-size:38px;font-weight:800;color:var(--green-d)}
+.banner .pts small{font-size:16px;color:var(--soft);font-weight:600}
+.banner .line{font-size:13.5px;color:var(--soft);margin-top:4px}
+.banner .save{font-size:12.5px;margin-top:8px;font-weight:600}
+.dock{position:sticky;bottom:0;display:flex;gap:9px;padding:12px;background:rgba(240,244,241,.95);backdrop-filter:blur(6px);border-top:1px solid var(--line);margin:0 -1rem}
+.dock .btn{flex:1;margin:0}
+.dock .btn-ghost{background:#fff;border:1.5px solid #d1d5db;color:#374151}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="academy">TERRY'S ENGLISH</div>
+  <h1>시험 풀기</h1>
+</div>
+<div class="wrap" id="app"></div>
+
+<script>
+const FB="https://terrys-d643a-default-rtdb.firebaseio.com";
+const CIRC=["①","②","③","④","⑤","⑥","⑦","⑧"];
+let STUDENT="", EXAM=null, SLUG="", graded=false;
+
+/* 학생 이름: URL ?student= 또는 sessionStorage, 없으면 입력받기 */
+function getStudent(){
+  try{
+    const p=new URLSearchParams(location.search).get('student');
+    if(p) return p;
+    return sessionStorage.getItem('terrys_embed_student')||'';
+  }catch(e){ return ''; }
+}
+
+function esc(t){ return (t==null?"":String(t)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m])); }
+function fmt(t){ return esc(t).replace(/\n/g,"<br>"); }
+
+/* ───── 시작: 이름 확인 → 시험 목록 ───── */
+function start(){
+  STUDENT=getStudent();
+  // URL 에 set= 이 있으면 바로 그 시험으로
+  const directSet=new URLSearchParams(location.search).get('set');
+  if(STUDENT){ if(directSet) openExam(directSet); else listExams(); }
+  else renderNameInput(directSet);
+}
+function renderNameInput(directSet){
+  document.getElementById("app").innerHTML=`
+    <div class="card">
+      <div class="label">학생 이름</div>
+      <input type="text" id="nm" placeholder="이름을 입력하세요" autocomplete="off">
+      <button class="btn btn-main" onclick="setName('${directSet||''}')">시작하기</button>
+    </div>`;
+  const nm=document.getElementById("nm");
+  nm.focus(); nm.addEventListener("keydown",e=>{ if(e.key==="Enter") setName(directSet||''); });
+}
+function setName(directSet){
+  const v=document.getElementById("nm").value.trim();
+  if(!v){ alert("이름을 입력해 주세요."); return; }
+  STUDENT=v;
+  try{ sessionStorage.setItem('terrys_embed_student',v); }catch(e){}
+  if(directSet) openExam(directSet); else listExams();
+}
+
+/* ───── 시험 목록 (Firebase exams 노드) ───── */
+async function listExams(){
+  document.getElementById("app").innerHTML=`<div class="state"><div class="spin"></div>시험 목록 불러오는 중…</div>`;
+  let data=null;
+  try{ data=await (await fetch(FB+"/exams.json")).json(); }
+  catch(e){ document.getElementById("app").innerHTML=`<div class="state"><div class="big">⚠</div>목록을 불러오지 못했습니다.<br>인터넷 연결을 확인해 주세요.</div>`; return; }
+  const exams=[];
+  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e&&e.questions) exams.push({slug:k,...e}); }
+  exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
+  if(!exams.length){ document.getElementById("app").innerHTML=`<div class="state"><div class="big">🗒️</div>아직 등록된 시험이 없습니다.<br><span style="font-size:12.5px">선생님이 pdf2quiz.html에서 시험을 저장하면 여기에 나타납니다.</span></div>`; return; }
+  let h=`<div class="card" style="background:var(--green-l);border-color:var(--green)"><b>${esc(STUDENT)}</b> 학생, 풀 시험을 선택하세요.</div><div class="examlist">`;
+  exams.forEach(e=>{
+    const mc=e.questions.filter(q=>q.type==="mc").length, sa=e.questions.length-mc;
+    h+=`<div class="exam-item" onclick="openExam('${esc(e.slug)}')">
+      <div class="exam-dot"></div>
+      <div class="exam-info"><div class="exam-title">${esc(e.title)}</div>
+        <div class="exam-meta">객관식 ${mc}${sa?` · 주관식 ${sa}`:""}문항 · 100점</div></div>
+      <div class="exam-go">›</div></div>`;
+  });
+  h+=`</div>`;
+  document.getElementById("app").innerHTML=h;
+}
+
+/* ───── 시험 열기 ───── */
+async function openExam(slug){
+  SLUG=slug; graded=false;
+  document.getElementById("app").innerHTML=`<div class="state"><div class="spin"></div>시험 불러오는 중…</div>`;
+  let e=null;
+  try{ e=await (await fetch(FB+"/exams/"+encodeURIComponent(slug)+".json")).json(); }
+  catch(err){}
+  if(!e||!e.questions){ document.getElementById("app").innerHTML=`<div class="state"><div class="big">⚠</div>시험을 찾을 수 없습니다.</div>`; return; }
+  EXAM=e;
+  renderExam();
+}
+
+function renderExam(){
+  let h=`<div class="exam-head"><div class="brand">TERRY'S ENGLISH</div>
+    <h2>${esc(EXAM.title)}</h2>
+    <div class="who">${esc(STUDENT)} 학생 · 총 ${EXAM.questions.length}문항 · 100점</div></div>`;
+  EXAM.questions.forEach((q,i)=>{
+    h+=`<div class="q" id="q${i}"><span class="q-n">${q.n}번</span>
+      <div class="q-text">${fmt(q.q)}</div>`;
+    if(q.type==="mc"){
+      h+=`<div class="choices">`;
+      q.c.forEach((c,j)=>{
+        h+=`<label data-c="${j}" onclick="pick(${i},${j})"><input type="radio" name="q${i}" value="${j}"><span>${CIRC[j]} ${esc(c)}</span></label>`;
+      });
+      h+=`</div>`;
+    }else{
+      h+=`<input class="sa-blank" id="sa${i}" placeholder="정답 입력" autocomplete="off">`;
+    }
+    h+=`<div class="verdict" id="v${i}"></div><div class="expl" id="e${i}"></div></div>`;
+  });
+  h+=`</div>`; // close
+  h=`<div>${h}<div class="dock" id="dock">
+    <button class="btn btn-main" onclick="submitExam()">제출하고 채점하기</button>
+  </div></div>`;
+  document.getElementById("app").innerHTML=h;
+  window.scrollTo(0,0);
+}
+function pick(i,j){
+  document.querySelectorAll(`#q${i} .choices label`).forEach(l=>l.classList.toggle("sel",+l.dataset.c===j));
+}
+function selectedOf(i){
+  const el=document.querySelector(`#q${i} input[name="q${i}"]:checked`);
+  return el?[+el.value]:[];
+}
+
+/* 주관식 느슨한 채점 (단어 순서·대체표현 허용) */
+function normWords(s){ return (s||"").toLowerCase().replace(/[^a-z0-9가-힣\s]/g," ").split(/\s+/).filter(Boolean); }
+function gradeSA(input,q){
+  const accepts = (q.accepts&&q.accepts.length)?q.accepts:[q.aText];
+  const inW=normWords(input).join(" ");
+  return accepts.some(a=>{ const aw=normWords(a).join(" "); return aw && inW===aw; })
+    || accepts.some(a=>{ const aw=normWords(a).join(" "); return aw && inW.includes(aw); });
+}
+
+function submitExam(){
+  if(graded) return;
+  let score=0, full=0; const wrong=[], wrongData=[];
+  EXAM.questions.forEach((q,i)=>{
+    full+=q.pts;
+    let ok=false, mySel=[], myText="";
+    if(q.type==="mc"){
+      mySel=selectedOf(i);
+      ok=mySel.length>0 && mySel.length===q.a.length && mySel.every(x=>q.a.includes(x));
+      document.querySelectorAll(`#q${i} .choices label`).forEach(l=>{
+        const j=+l.dataset.c; l.querySelector("input").disabled=true;
+        if(q.a.includes(j)) l.classList.add("is-answer");
+        if(mySel.includes(j)&&!q.a.includes(j)) l.classList.add("is-wrongpick");
+      });
+    }else{
+      myText=(document.getElementById("sa"+i).value||"").trim();
+      ok=gradeSA(myText,q);
+      const el=document.getElementById("sa"+i); el.disabled=true; el.classList.add(ok?"is-ok":"is-bad");
+    }
+    if(ok) score+=q.pts; else { wrong.push(q.n); wrongData.push({q,mySel,myText}); }
+    const v=document.getElementById("v"+i); v.style.display="block";
+    v.className="verdict "+(ok?"ok":"bad");
+    v.innerHTML=(ok?"○ 정답":"✗ 오답")+" &nbsp;|&nbsp; 정답: "+
+      (q.type==="mc"?q.a.map(x=>CIRC[x]).join(", "):esc(q.aText));
+    if(q.expl){ const ee=document.getElementById("e"+i); ee.style.display="block"; ee.innerHTML="<b>해설</b> &nbsp;"+fmt(q.expl); }
+  });
+  graded=true;
+
+  const banner=`<div class="banner">
+    <div style="font-size:13px;color:var(--soft)">${esc(STUDENT)} 학생의 점수</div>
+    <div class="pts">${score}<small> / 100점</small></div>
+    <div class="line">${wrong.length?"틀린 문항: "+wrong.join(", ")+"번":"전부 정답! 🎉"}</div>
+    <div class="save" id="saveState">기록 저장 중…</div></div>`;
+  document.getElementById("app").insertAdjacentHTML("afterbegin",banner);
+  document.getElementById("dock").innerHTML=`
+    <button class="btn btn-ghost" onclick="renderExam()">전체 다시 풀기</button>
+    <button class="btn btn-main" onclick="listExams()">다른 시험 풀기</button>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+
+  saveResult(score,wrong);
+}
+
+/* 결과 저장 — 기존 현황판과 동일한 형식/경로 */
+async function saveResult(score,wrong){
+  const st=document.getElementById("saveState");
+  const url=FB+"/results_reading_"+SLUG+".json";
+  try{
+    await fetch(url,{method:"POST",body:JSON.stringify({
+      name:STUDENT, exam:EXAM.title, score, total:100, wrong, ts:new Date().toISOString()})});
+    st.textContent="✓ 기록 저장 완료";
+    st.style.color="var(--green-d)";
+  }catch(e){ st.textContent="기록 저장 실패 (인터넷 확인)"; st.style.color="var(--bad)"; }
+}
+
+start();
+</script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>테리스 — 채점 현황판</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1a7350; --green-l:#e1f5ee; --green-d:#0f6e56;
+  --orange:#d97706; --orange-l:#fef3c7; --orange-d:#92400e;
+  --ink:#1a1a1a; --soft:#6b7280; --line:rgba(0,0,0,.08);
+  --ok:#16a34a; --okbg:#dcfce7; --bad:#dc2626; --badbg:#fee2e2;
+}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f4f1;color:var(--ink);min-height:100vh}
+
+/* header */
+.top{background:var(--green);color:#fff;padding:1.6rem 1.25rem 1.4rem}
+.top .wrap{max-width:1100px;margin:0 auto}
+.top .academy{font-size:12px;opacity:.7;letter-spacing:.08em}
+.top h1{font-size:24px;font-weight:700;margin-top:4px;letter-spacing:-.4px}
+.top .sub{font-size:13px;opacity:.75;margin-top:6px}
+
+.wrap{max-width:1100px;margin:0 auto;padding:1.2rem 1rem 3rem;width:100%}
+
+/* picker */
+.picker{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.picker-label{font-size:12px;font-weight:700;color:var(--soft);letter-spacing:.05em;text-transform:uppercase;margin-bottom:9px}
+.picker-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select,input[type=text]{font-family:inherit;font-size:14px;border:1.5px solid #d1d5db;border-radius:9px;padding:9px 12px;color:var(--ink);background:#fff;min-width:0}
+select{flex:1;min-width:220px;cursor:pointer}
+.btn{border:none;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn-main{background:var(--green);color:#fff}
+.btn-main:hover{background:var(--green-d)}
+.btn-ghost{background:#f3f4f6;color:#374151}
+.btn-ghost:hover{background:#e5e7eb}
+.picker-hint{font-size:12px;color:var(--soft);margin-top:9px;line-height:1.5}
+.manual{margin-top:10px;display:none}
+.manual.show{display:block}
+.manual input{width:100%;margin-bottom:8px}
+
+/* summary cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.card .k{font-size:11.5px;color:var(--soft);font-weight:600}
+.card .v{font-size:25px;font-weight:700;margin-top:3px;letter-spacing:-.5px}
+.card.accent .v{color:var(--orange-d)}
+
+/* review banner */
+.reco{background:linear-gradient(135deg,var(--orange-l) 0%,#fff 100%);border:1.5px solid var(--orange);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.reco-title{font-size:14px;font-weight:700;color:var(--orange-d);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.reco-chips{display:flex;flex-wrap:wrap;gap:7px}
+.reco-chip{background:#fff;border:1.5px solid var(--orange);color:var(--orange-d);border-radius:9px;padding:6px 11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.reco-chip:hover{background:var(--orange);color:#fff}
+.reco-chip .pct{font-weight:600;opacity:.8;font-size:11.5px;margin-left:4px}
+.reco-none{font-size:13px;color:var(--soft)}
+
+/* grid */
+.gridbox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;overflow:auto}
+.gridbox-head{display:flex;justify-content:space-between;align-items:center;padding:6px 8px 10px;gap:10px;flex-wrap:wrap}
+.gridbox-head .t{font-size:15px;font-weight:700}
+.legend{display:flex;gap:12px;font-size:12px;color:var(--soft);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.dot{width:13px;height:13px;border-radius:4px;display:inline-block}
+.dot.o{background:var(--okbg);border:1px solid var(--ok)}
+.dot.x{background:var(--badbg);border:1px solid var(--bad)}
+.dot.b{background:#f3f4f6;border:1px solid #d1d5db}
+
+table{border-collapse:separate;border-spacing:0;font-size:13px;width:auto}
+th,td{padding:0;text-align:center}
+.h-name{position:sticky;left:0;z-index:3;background:#fff}
+thead th{position:sticky;top:0;z-index:2;background:#fff}
+thead th.h-name{z-index:4}
+.qh{min-width:34px;height:38px;font-weight:700;cursor:pointer;border-bottom:2px solid #eef0ef;color:#374151}
+.qh:hover{background:var(--green-l);color:var(--green-d)}
+.qh.hot{color:var(--bad)}
+.qh .qe{display:block;font-size:9.5px;font-weight:600;color:var(--bad);line-height:1}
+.namecell{min-width:96px;max-width:150px;text-align:left;padding:0 12px;font-weight:700;height:40px;border-bottom:1px solid #f1f3f2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#fff}
+.cell{width:34px;height:40px;border-bottom:1px solid #f1f3f2;border-left:1px solid #f6f7f6;font-weight:700}
+.cell.o{background:var(--okbg);color:var(--ok)}
+.cell.x{background:var(--badbg);color:var(--bad);cursor:pointer}
+.cell.x:hover{outline:2px solid var(--bad);outline-offset:-2px}
+.cell.b{background:#fafafa;color:#d1d5db}
+.scorecell{min-width:60px;font-weight:700;padding:0 10px;border-bottom:1px solid #f1f3f2;border-left:2px solid #eef0ef;background:#fff}
+.errrow td{border-top:2px solid #eef0ef;font-size:11.5px;font-weight:700;color:var(--bad);height:30px;background:#fff}
+.errrow .namecell{color:var(--soft);font-size:11.5px;font-weight:700}
+.cnt{font-size:11px;color:var(--soft);font-weight:600}
+
+/* states */
+.state{background:#fff;border:1px solid var(--line);border-radius:14px;padding:34px 20px;text-align:center;color:var(--soft)}
+.state .big{font-size:30px;margin-bottom:8px}
+.state .msg{font-size:14px;line-height:1.6}
+.spin{width:26px;height:26px;border:3px solid #e5e7eb;border-top-color:var(--green);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.ov.show{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:620px;width:100%;max-height:86vh;overflow:auto;padding:22px}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.modal-qn{font-size:13px;font-weight:700;color:var(--orange-d);background:var(--orange-l);border-radius:8px;padding:4px 10px;display:inline-block}
+.modal-x{border:none;background:#f3f4f6;border-radius:9px;width:32px;height:32px;font-size:18px;cursor:pointer;color:#6b7280}
+.modal-x:hover{background:#e5e7eb}
+.m-q{font-size:15px;line-height:1.65;margin:6px 0 14px;white-space:pre-wrap}
+.m-choices{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.m-choice{font-size:14px;padding:9px 12px;border:1px solid #e5e7eb;border-radius:9px;line-height:1.4}
+.m-choice.ans{background:var(--okbg);border-color:var(--ok);font-weight:600}
+.m-ans{font-size:14px;background:var(--green-l);border:1px solid var(--green);border-radius:9px;padding:10px 12px;margin-bottom:12px}
+.m-ans b{color:var(--green-d)}
+.m-expl{font-size:13.5px;line-height:1.7;background:#f9fafb;border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:#374151}
+.m-expl b{color:var(--ink)}
+.m-wrongby{font-size:12.5px;color:var(--bad);margin-bottom:12px;font-weight:600}
+.m-note{font-size:12.5px;color:var(--soft);background:#f9fafb;border-radius:9px;padding:10px 12px}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap" style="padding:0">
+  <div class="academy">TERRY'S ACADEMY</div>
+  <h1>채점 현황판</h1>
+  <div class="sub">학생들이 PDF 시험을 풀면, 누가 어느 문제를 틀렸는지 한눈에 — 오답풀이할 문제를 바로 확인하세요.</div>
+</div></div>
+
+<div class="wrap">
+
+  <div class="picker">
+    <div class="picker-label">시험 선택</div>
+    <div class="picker-row">
+      <select id="setSel"><option value="">— 등록된 시험 불러오는 중 —</option></select>
+      <button class="btn btn-main" onclick="loadSelected()">불러오기</button>
+      <button class="btn btn-ghost" onclick="toggleManual()">직접 입력</button>
+    </div>
+    <div class="manual" id="manual">
+      <input type="text" id="mSlug" placeholder="시험 슬러그 또는 DB 경로  (예:  pdf_donga_yjm_l2  또는  /results_reading_pdf_donga_yjm_l2.json)">
+      <button class="btn btn-main" onclick="loadManual()">이 시험 불러오기</button>
+    </div>
+    <div class="picker-hint">목록은 메뉴(index.html)에 등록된 시험에서 자동으로 채워집니다. 목록에 없으면 <b>직접 입력</b>으로 슬러그를 넣어 주세요.</div>
+  </div>
+
+  <div id="out"></div>
+</div>
+
+<div class="ov" id="ov" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const FB="https://terrys-d643a-default-rtdb.firebaseio.com";
+
+/* ───────── 시험 목록 자동 수집 (메뉴 STRUCTURE에서) ───────── */
+// 메뉴 override가 있으면 그걸, 없으면 비어있는 채로 → 직접 입력 안내
+function collectSets(){
+  let S=null;
+  try{ S=JSON.parse(localStorage.getItem("terry_structure_override")||"null"); }catch(e){}
+  if(!S){ try{ const m=JSON.parse(localStorage.getItem("pq_menu")||"null"); if(m&&m.obj) S=m.obj; }catch(e){} }
+  const sets=[]; const seen={};
+  function pushTest(t,path){
+    if(!t||!t.db) return;
+    const slug=dbToSlug(t.db);
+    if(seen[slug]) return; seen[slug]=1;
+    sets.push({title:(path?path+" · ":"")+(t.title||slug), slug, db:normDb(t.db), file:t.file||""});
+  }
+  function walkTests(tests,path){ (tests||[]).forEach(t=>pushTest(t,path)); }
+  function walkLevels(levels,path){ (levels||[]).forEach(l=>walkTests(l.tests,path+(l.title?" "+l.title:""))); }
+  if(S){
+    for(const ck in S){
+      const cat=S[ck];
+      (cat.books||[]).forEach(b=>{ if(b.tests)walkTests(b.tests,b.title); if(b.levels)walkLevels(b.levels,b.title); });
+      (cat.grades||[]).forEach(g=>{
+        (g.books||[]).forEach(b=>{ if(b.tests)walkTests(b.tests,b.title); if(b.levels)walkLevels(b.levels,b.title); });
+      });
+    }
+  }
+  return sets;
+}
+function normDb(db){ // → "/results_xxx.json"
+  db=db.trim();
+  if(!db.startsWith("/")) db="/"+db;
+  if(!db.endsWith(".json")) db+=".json";
+  return db;
+}
+function dbToSlug(db){
+  return db.replace(/^\/+/,"").replace(/\.json$/,"").replace(/^results_reading_/,"").replace(/^results_/,"");
+}
+function slugToDb(slug){
+  slug=slug.trim().replace(/^\/+/,"").replace(/\.json$/,"");
+  if(slug.startsWith("results_")) return "/"+slug+".json";
+  return "/results_reading_"+slug+".json";
+}
+
+let SETS=collectSets();
+const EXAMS_BY_SLUG={};  // Firebase exams 캐시 (문제·정답·해설)
+
+// Firebase exams 노드에서 저장된 시험을 자동으로 목록에 추가 (파일 불필요)
+async function discoverFirebaseExams(){
+  let data=null;
+  try{ data=await (await fetch(FB+"/exams.json")).json(); }catch(e){ return; }
+  if(!data||typeof data!=="object") return;
+  const seen={}; SETS.forEach(s=>seen[s.slug]=1);
+  const extra=[];
+  for(const slug in data){
+    const e=data[slug]; if(!e) continue;
+    EXAMS_BY_SLUG[slug]=e;
+    if(!seen[slug]){
+      extra.push({ title:(e.title||slug)+"  🔥", slug, db:"/results_reading_"+slug+".json", file:"", savedAt:e.savedAt||"" });
+      seen[slug]=1;
+    }
+  }
+  extra.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
+  SETS=[...extra,...SETS];
+  fillSelect();
+}
+function fillSelect(){
+  const sel=document.getElementById("setSel");
+  const keep=sel.value;
+  if(!SETS.length){ sel.innerHTML='<option value="">목록 없음 — "직접 입력"을 사용하세요</option>'; return; }
+  sel.innerHTML='<option value="">— 시험을 선택하세요 —</option>'+
+    SETS.map((s,i)=>`<option value="${i}">${esc(s.title)}</option>`).join("");
+  if(keep) sel.value=keep;
+}
+fillSelect();
+discoverFirebaseExams();
+
+function toggleManual(){ document.getElementById("manual").classList.toggle("show"); }
+function loadSelected(){
+  const i=document.getElementById("setSel").value;
+  if(i==="") { alert("시험을 먼저 선택해 주세요."); return; }
+  const s=SETS[i]; load(s.db, s.slug, s.title, s.file);
+}
+function loadManual(){
+  const v=document.getElementById("mSlug").value.trim();
+  if(!v){ alert("슬러그 또는 DB 경로를 입력해 주세요."); return; }
+  const db= v.includes("results_")||v.startsWith("/") ? normDb(v) : slugToDb(v);
+  const slug=dbToSlug(db);
+  load(db, slug, slug, "");
+}
+
+/* ───────── 메인: 결과 불러오기 + 그리드 ───────── */
+let CUR={};   // {db,slug,title,file, records:[], grid, students, qNums, errByQ}
+let QDATA=null; // window.QUIZ_DATA 캐시
+
+async function load(db, slug, title, file){
+  CUR={db,slug,title,file}; QDATA=null;
+  const out=document.getElementById("out");
+  out.innerHTML=`<div class="state"><div class="spin"></div><div class="msg">${esc(title)}<br>결과를 불러오는 중…</div></div>`;
+  let data=null;
+  try{
+    const r=await fetch(FB+db);
+    data=await r.json();
+  }catch(e){
+    out.innerHTML=`<div class="state"><div class="big">⚠</div><div class="msg">결과를 불러오지 못했습니다.<br>인터넷 연결을 확인해 주세요.</div></div>`;
+    return;
+  }
+  // 시험 문제 데이터(문제·정답·해설): Firebase exams 우선, 없으면 data 파일 폴백
+  QDATA=null;
+  if(EXAMS_BY_SLUG[slug] && EXAMS_BY_SLUG[slug].questions){
+    QDATA=EXAMS_BY_SLUG[slug];
+  }else{
+    loadQuizData(file, slug);
+  }
+
+  const recs=[];
+  if(data && typeof data==="object"){
+    for(const k in data){ const v=data[k]; if(v&&v.name) recs.push(v); }
+  }
+  if(!recs.length){
+    out.innerHTML=`<div class="state"><div class="big">🗒️</div><div class="msg"><b>${esc(title)}</b><br>아직 제출된 결과가 없습니다.<br><span style="font-size:12.5px">학생이 시험을 풀고 제출하면 여기에 표시됩니다.</span></div></div>`;
+    return;
+  }
+  render(recs);
+}
+
+// data/<slug>.js 의 window.QUIZ_DATA 를 로드 (문제/정답/해설)
+function loadQuizData(file, slug){
+  // 후보 경로들 시도
+  const cands=[];
+  if(slug) cands.push("data/"+slug+".js", slug+".js");
+  // file 이 quiz2.html?set=xxx 형태면 그 set 도
+  const m=(file||"").match(/set=([^&]+)/);
+  if(m){ cands.push("data/"+m[1]+".js", m[1]+".js"); }
+  let i=0;
+  function tryNext(){
+    if(i>=cands.length) return;
+    const sc=document.createElement("script");
+    sc.src=cands[i++]+"?t="+Date.now();
+    sc.onload=()=>{ if(window.QUIZ_DATA){ QDATA=window.QUIZ_DATA; } };
+    sc.onerror=tryNext;
+    document.head.appendChild(sc);
+  }
+  tryNext();
+}
+
+function render(recs){
+  // 학생별 최고점 1건만 (동점이면 최신)
+  const best={};
+  recs.forEach(r=>{
+    const cur=best[r.name];
+    const sc=typeof r.score==="number"?r.score:0;
+    if(!cur || sc>cur.score || (sc===cur.score && (r.ts||"")>(cur.ts||""))) best[r.name]={...r,score:sc};
+  });
+  const students=Object.keys(best).sort((a,b)=>best[b].score-best[a].score);
+
+  // 문항 번호 집합: wrong 배열에 등장하는 최대 번호까지 1..N
+  let maxN=0;
+  students.forEach(n=>{ (best[n].wrong||[]).forEach(w=>{ if(+w>maxN)maxN=+w; }); });
+  // QUIZ_DATA 있으면 그 문항 수 우선
+  if(QDATA && QDATA.questions) maxN=Math.max(maxN, QDATA.questions.length);
+  if(maxN===0) maxN=1;
+  const qNums=[]; for(let i=1;i<=maxN;i++) qNums.push(i);
+
+  // 오답 집계
+  const errByQ={}; qNums.forEach(q=>errByQ[q]=0);
+  students.forEach(n=>{ (best[n].wrong||[]).forEach(w=>{ if(errByQ[w]!=null)errByQ[w]++; }); });
+
+  CUR.best=best; CUR.students=students; CUR.qNums=qNums; CUR.errByQ=errByQ;
+
+  const nStu=students.length;
+  const avg=Math.round(students.reduce((s,n)=>s+best[n].score,0)/nStu);
+  const hardest=qNums.filter(q=>errByQ[q]>0).sort((a,b)=>errByQ[b]-errByQ[a]);
+
+  // 추천: 오답률 높은 문항 (틀린 학생이 1명 이상, 상위)
+  const reco=hardest.slice(0,8);
+
+  let html="";
+  // 요약 카드
+  html+=`<div class="cards">
+    <div class="card"><div class="k">응시 학생</div><div class="v">${nStu}<span style="font-size:14px;color:var(--soft)">명</span></div></div>
+    <div class="card"><div class="k">문항 수</div><div class="v">${maxN}<span style="font-size:14px;color:var(--soft)">문항</span></div></div>
+    <div class="card"><div class="k">평균 점수</div><div class="v">${avg}<span style="font-size:14px;color:var(--soft)">점</span></div></div>
+    <div class="card accent"><div class="k">오답 있는 문항</div><div class="v">${hardest.length}<span style="font-size:14px;color:var(--soft)">개</span></div></div>
+  </div>`;
+
+  // 추천 배너
+  html+=`<div class="reco"><div class="reco-title">🎯 오답풀이 추천 문항 <span style="font-weight:600;font-size:12px;color:var(--orange-d);opacity:.8">— 틀린 학생이 많은 순</span></div>`;
+  if(reco.length){
+    html+=`<div class="reco-chips">`+reco.map(q=>{
+      const pct=Math.round(errByQ[q]/nStu*100);
+      return `<button class="reco-chip" onclick="openQ(${q})">${q}번<span class="pct">${errByQ[q]}명·${pct}%</span></button>`;
+    }).join("")+`</div>`;
+  }else{
+    html+=`<div class="reco-none">🎉 모든 학생이 전 문항 정답입니다.</div>`;
+  }
+  html+=`</div>`;
+
+  // 그리드
+  html+=`<div class="gridbox">
+    <div class="gridbox-head">
+      <div class="t">${esc(CUR.title)}</div>
+      <div class="legend">
+        <span><i class="dot o"></i>정답</span>
+        <span><i class="dot x"></i>오답</span>
+        <span><i class="dot b"></i>미응시</span>
+        <span style="color:var(--bad)">빨강 번호 = 오답 많은 문항 (클릭)</span>
+      </div>
+    </div>
+    <table><thead><tr>
+      <th class="h-name namecell" style="height:38px">학생</th>`;
+  qNums.forEach(q=>{
+    const e=errByQ[q]; const hot=nStu>0 && e/nStu>=0.5 && e>0;
+    html+=`<th class="qh${hot?' hot':''}" onclick="openQ(${q})" title="${q}번 — ${e}명 오답">${q}${e>0?`<span class="qe">${e}</span>`:""}</th>`;
+  });
+  html+=`<th class="qh scorecell" style="cursor:default">점수</th></tr></thead><tbody>`;
+
+  students.forEach(n=>{
+    const rec=best[n];
+    const wrongSet={}; (rec.wrong||[]).forEach(w=>wrongSet[+w]=1);
+    const answered = (rec.wrong!=null); // 제출했으면 wrong 배열 존재
+    html+=`<tr><td class="namecell" title="${esc(n)}">${esc(n)}</td>`;
+    qNums.forEach(q=>{
+      if(wrongSet[q]){ html+=`<td class="cell x" onclick="openQ(${q})" title="${esc(n)} — ${q}번 오답">✗</td>`; }
+      else { html+=`<td class="cell o">○</td>`; }
+    });
+    html+=`<td class="scorecell">${rec.score}점</td></tr>`;
+  });
+
+  // 문항별 오답 합계 행
+  html+=`<tr class="errrow"><td class="namecell">오답 합계</td>`;
+  qNums.forEach(q=>{ const e=errByQ[q]; html+=`<td class="cell" style="background:${e>0?'#fff5f5':'#fff'};color:${e>0?'var(--bad)':'#d1d5db'}">${e||"·"}</td>`; });
+  html+=`<td class="scorecell"></td></tr>`;
+
+  html+=`</tbody></table></div>`;
+  document.getElementById("out").innerHTML=html;
+}
+
+/* ───────── 문제·정답·해설 팝업 ───────── */
+function openQ(n){
+  const nStu=CUR.students.length;
+  const e=CUR.errByQ[n]||0;
+  const wrongStudents=CUR.students.filter(s=>(CUR.best[s].wrong||[]).map(Number).includes(n));
+  let q=null;
+  if(QDATA && QDATA.questions) q=QDATA.questions.find(x=>+x.n===n);
+
+  const CIRC=["①","②","③","④","⑤","⑥","⑦","⑧"];
+  let body=`<div class="modal-head">
+    <span class="modal-qn">${n}번 문항</span>
+    <button class="modal-x" onclick="closeModal()">✕</button>
+  </div>`;
+  body+=`<div class="m-wrongby">✗ ${e}명 오답 ${nStu?`(${Math.round(e/nStu*100)}%)`:""}${wrongStudents.length?` — ${wrongStudents.map(esc).join(", ")}`:""}</div>`;
+
+  if(q){
+    body+=`<div class="m-q">${fmt(q.q||"")}</div>`;
+    if(q.type!=="sa" && Array.isArray(q.c) && q.c.length){
+      const ans = Array.isArray(q.a)?q.a:(q.a!=null?[q.a]:[]);
+      body+=`<div class="m-choices">`+q.c.map((c,j)=>
+        `<div class="m-choice${ans.includes(j)?' ans':''}">${CIRC[j]||(j+1)} ${esc(c)}${ans.includes(j)?' ✓':''}</div>`).join("")+`</div>`;
+    }else{
+      body+=`<div class="m-ans"><b>정답:</b> ${esc(q.a||q.aText||"")}</div>`;
+    }
+    if(q.expl) body+=`<div class="m-expl"><b>해설</b><br>${fmt(q.expl)}</div>`;
+    else body+=`<div class="m-note">이 문항의 해설 데이터가 없습니다.</div>`;
+  }else{
+    body+=`<div class="m-note">📄 이 문항의 문제·정답·해설 데이터를 찾지 못했습니다.<br>
+      선생님이 <b>pdf2quiz.html에서 "🔥 시험 저장"</b>으로 저장한 시험은 문제 내용까지 자동으로 표시됩니다.<br>
+      (그리드의 오답 표시는 데이터와 무관하게 정상 동작합니다.)</div>`;
+  }
+  document.getElementById("modal").innerHTML=body;
+  document.getElementById("ov").classList.add("show");
+}
+function closeModal(){ document.getElementById("ov").classList.remove("show"); }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape")closeModal(); });
+
+/* ───────── util ───────── */
+function esc(t){ return (t==null?"":String(t)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m])); }
+function fmt(t){ return esc(t).replace(/\n/g,"<br>"); }
+</script>
+</body>
+</html>
