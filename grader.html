@@ -622,8 +622,30 @@ async function renderResults(){
     <select id="rSel" onchange="loadResultGrid()" style="width:100%;font-family:inherit;font-size:15px;border:1.5px solid #d1d5db;border-radius:10px;padding:11px 13px;cursor:pointer">
       <option value="">— 시험을 선택하세요 —</option>
       ${exams.map((e,i)=>`<option value="${i}">${esc(e.title)}</option>`).join("")}
-    </select></div><div id="gridBox"></div>`;
+    </select></div><div id="gridBox"></div>
+    <div class="card" style="margin-top:14px">
+      <div class="label">🗑️ 시험 관리 (삭제)</div>
+      <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.5">필요 없는 시험을 삭제합니다. 삭제하면 그 시험의 정답·문제·학생 결과가 모두 사라지고 되돌릴 수 없어요.</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${exams.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 12px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)}</div>
+            <div style="font-size:11.5px;color:var(--soft)">${e.n}문항 · ${(e.savedAt||"").slice(0,10)}</div>
+          </div>
+          <button class="btn" style="background:#fff;border:1.5px solid #fecaca;color:var(--bad);padding:7px 13px;font-size:13px" onclick="deleteExam('${esc(e.slug)}','${esc(e.title).replace(/'/g,"")}')">삭제</button>
+        </div>`).join("")}
+      </div>
+    </div>`;
   $("app").innerHTML=h;
+}
+async function deleteExam(slug,title){
+  if(!confirm(`'${title}' 시험을 삭제할까요?\n\n정답·문제·학생 결과가 모두 삭제되며 되돌릴 수 없습니다.`)) return;
+  try{
+    await fetch(FB+"/grader_exams/"+encodeURIComponent(slug)+".json",{method:"DELETE"});
+    await fetch(FB+"/results_grader_"+slug+".json",{method:"DELETE"});
+    alert("삭제했습니다.");
+    renderResults();
+  }catch(e){ alert("삭제 실패: "+e.message); }
 }
 async function loadResultGrid(){
   const i=$("rSel").value; if(i==="") { $("gridBox").innerHTML=""; return; }
