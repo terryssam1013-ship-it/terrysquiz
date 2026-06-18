@@ -816,6 +816,19 @@ async function previewExam(slug){
   box.innerHTML=head+`<div style="font-size:12.5px;color:var(--soft);margin-bottom:10px">${(e.answers||[]).length}문항 · 문제 이미지 ${imgCnt}개</div>
     <div style="display:flex;flex-direction:column;gap:9px">${rows}</div>`;
 }
+async function deleteStudent(name){
+  const ex=R_DATA.cur && R_DATA.cur.ex; if(!ex) return;
+  if(!confirm(`'${name}' 학생의 '${ex.title}' 기록을 삭제할까요?\n(이 시험의 해당 학생 결과만 지워집니다)`)) return;
+  try{
+    const data=await (await fetch(FB+"/results_grader_"+ex.slug+".json")).json();
+    const dels=[];
+    if(data&&typeof data==="object"){
+      for(const k in data){ if(data[k]&&data[k].name===name){ dels.push(fetch(FB+"/results_grader_"+ex.slug+"/"+k+".json",{method:"DELETE"})); } }
+    }
+    await Promise.all(dels);
+    loadResultGrid();
+  }catch(e){ alert("삭제 실패: "+e.message); }
+}
 async function toggleVisible(slug,curVisible){
   const next = curVisible?false:true;
   try{
@@ -858,7 +871,9 @@ async function loadResultGrid(){
     <div class="card"><div style="font-weight:800;margin-bottom:10px">${esc(ex.title)} — 본문 채점 결과</div>
     <div style="display:flex;flex-direction:column;gap:7px">`;
     students.forEach(s=>{ h+=`<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:10px;padding:9px 13px">
-      <span style="font-weight:700">${esc(s)}</span><span style="font-weight:800;color:var(--brand-d)">${best[s].score}점</span></div>`; });
+      <span style="font-weight:700">${esc(s)}</span>
+      <span style="display:inline-flex;align-items:center;gap:10px"><span style="font-weight:800;color:var(--brand-d)">${best[s].score}점</span>
+      <button title="이 학생 기록 삭제" onclick="deleteStudent('${esc(s).replace(/'/g,"")}')" style="background:#fff;border:1px solid #fecaca;color:var(--bad);cursor:pointer;font-size:12px;border-radius:6px;padding:3px 8px">삭제</button></span></div>`; });
     h+=`</div><div style="font-size:12px;color:var(--soft);margin-top:10px">본문 채점은 맞은 단어 비율로 점수를 냅니다. 사진 제출은 인식 오류가 있을 수 있어요.</div></div>`;
     $("gridBox").innerHTML=h; return;
   }
@@ -894,7 +909,9 @@ async function loadResultGrid(){
   h+=`<th style="min-width:54px;border-left:2px solid #eef0ef">점수</th></tr></thead><tbody>`;
   students.forEach(s=>{
     const ws={}; (best[s].wrong||[]).forEach(w=>ws[+w]=1);
-    h+=`<tr><td style="position:sticky;left:0;background:#fff;padding:0 10px;height:38px;font-weight:700;white-space:nowrap">${esc(s)}</td>`;
+    h+=`<tr><td style="position:sticky;left:0;background:#fff;padding:0 10px;height:38px;font-weight:700;white-space:nowrap">
+      <span style="display:inline-flex;align-items:center;gap:7px">${esc(s)}
+      <button title="이 학생 기록 삭제" onclick="deleteStudent('${esc(s).replace(/'/g,"")}')" style="border:none;background:#fff;color:var(--bad);cursor:pointer;font-size:13px;border:1px solid #fecaca;border-radius:6px;width:20px;height:20px;line-height:1;padding:0">✕</button></span></td>`;
     qNums.forEach(n=>{ const x=ws[n];
       h+=`<td style="width:32px;height:38px;border-bottom:1px solid #f1f3f2;font-weight:700;background:${x?'var(--badbg)':'var(--okbg)'};color:${x?'var(--bad)':'var(--ok)'}">${x?'✗':'○'}</td>`; });
     h+=`<td style="border-left:2px solid #eef0ef;font-weight:700;padding:0 8px">${best[s].score}</td></tr>`;
