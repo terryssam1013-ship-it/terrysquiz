@@ -168,6 +168,8 @@ select:focus{outline:none;border-color:var(--brand)!important;box-shadow:0 0 0 4
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 .passage-diff{font-size:16px;line-height:2;word-spacing:1px}
 .navtabs{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+.backbtn{margin-bottom:12px;padding:9px 16px;font-size:14px}
+.resume-note{background:var(--amber-l);border:1px solid #fde2a8;color:var(--amber-d);border-radius:11px;padding:9px 13px;font-size:12.5px;font-weight:600;margin-bottom:12px}
 .navtab{flex:1;min-width:fit-content;text-align:center;text-decoration:none;font-size:13.5px;font-weight:700;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink-2);box-shadow:var(--shadow);white-space:nowrap;transition:all .14s}
 .navtab:hover{border-color:#c8ccdd}
 .navtab.on{background:linear-gradient(135deg,var(--brand),var(--violet));color:#fff;border-color:transparent;box-shadow:0 6px 16px -7px rgba(91,91,240,.7)}
@@ -235,6 +237,7 @@ async function listExamsRaw(){
 let A_ANSWERS=[];      // [{n, type:'mc'|'sa', a:[idx]/'' , aText}]
 let A_PAGES=[];        // 해설 PDF 페이지 이미지 (dataURL)
 let A_QIMGS={};        // { 문항번호: dataURL } — 문제지 이미지
+let A_PDF="";          // 원본 정답·해설 PDF (dataURL)
 let A_TITLE="";
 
 function renderAdminGate(){
@@ -297,6 +300,8 @@ async function handlePDF(file){
   $("examTitle").value=A_TITLE;
   $("processBox").innerHTML=`<div class="state"><div class="spin"></div><div>PDF 분석 중…</div><div class="prog" id="prog">파일 읽는 중</div></div>`;
   const buf=await file.arrayBuffer();
+  // 원본 PDF를 dataURL로 보관 (나중에 미리보기로 그대로 열람)
+  try{ A_PDF=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);}); }catch(e){ A_PDF=""; }
   const pdf=await pdfjsLib.getDocument({data:buf}).promise;
   // 정답·해설 텍스트 추출 — 읽기 순서(raw) 그대로 이어붙임 (컬럼 분리 X)
   $("prog").textContent="정답·해설 추출 중…";
@@ -325,27 +330,25 @@ async function handlePDF(file){
 // 정답+해설 파싱: "N)[정답] <답> [해설] <해설>" 블록을 다음 "N)[정답]" 전까지
 function parseAnswers(text){
   const circ="①②③④⑤⑥⑦⑧⑨⑩";
-  const re=/(\d+)\s*\)\s*\[정답\]\s*([\s\S]*?)(?:\[해설\]\s*([\s\S]*?))?(?=\d+\s*\)\s*\[정답\]|$)/g;
-  const map={}; let m;
+  // 'N)[정답]' 블록을 순서대로 수집 (번호는 신뢰하지 않고 등장 순서로 1..N 재부여)
+  const re=/(\d{1,3})\s*\)\s*\[정답\]\s*([\s\S]*?)(?:\[해설\]\s*([\s\S]*?))?(?=\d{1,3}\s*\)\s*\[정답\]|$)/g;
+  const items=[]; let m;
   while((m=re.exec(text))){
-    const n=+m[1]; if(map[n]) continue;
-    const ansRaw=(m[2]||"").trim();
-    let expl=(m[3]||"").trim().replace(/\s+/g," ");
-    const picks=[...ansRaw].filter(c=>circ.includes(c));
-    if(picks.length){
+    const ansRaw=(m[2]||"").trim().replace(/\s+/g," ");
+    const expl=(m[3]||"").trim().replace(/\s+/g," ");
+    items.push({ansRaw,expl});
+  }
+  if(!items.length) return [];
+  const out=items.map((it,i)=>{
+    const n=i+1;
+    const picks=[...it.ansRaw].filter(c=>circ.includes(c));
+    const stripped=it.ansRaw.replace(/[①②③④⑤⑥⑦⑧⑨⑩\s,，·]/g,"");
+    if(picks.length && stripped.length===0){
       const idx=[...new Set(picks.map(c=>circ.indexOf(c)))].sort((a,b)=>a-b);
-      map[n]={n,type:"mc",a:idx,aText:"",expl};
-    }else{
-      let t=ansRaw.split(/\s{2,}|[.\n]/)[0].trim();
-      map[n]={n,type:"sa",a:[],aText:t,expl};
+      return {n,type:"mc",a:idx,aText:"",expl:it.expl};
     }
-  }
-  const nums=Object.keys(map).map(Number).sort((a,b)=>a-b);
-  if(!nums.length) return [];
-  const out=[];
-  for(let i=1;i<=nums[nums.length-1];i++){
-    out.push(map[i]||{n:i,type:"mc",a:[],aText:"",expl:""});
-  }
+    return {n,type:"sa",a:[],aText:it.ansRaw,expl:it.expl};
+  });
   return out;
 }
 
@@ -483,7 +486,7 @@ async function saveExam(){
   const slug=slugify(A_TITLE);
   const payload={
     title:A_TITLE, slug, savedAt:new Date().toISOString(),
-    n:A_ANSWERS.length, visible:true,
+    n:A_ANSWERS.length, visible:true, pdf:A_PDF||"",
     answers:A_ANSWERS.map(q=>({n:q.n,type:q.type,a:q.a,aText:q.aText,expl:q.expl||"",img:A_QIMGS[q.n]||""}))
   };
   const box=document.createElement("div");
@@ -568,12 +571,18 @@ async function openStudentExam(slug){
   if(!e.answers){ $("app").innerHTML=`<div class="state"><div class="big">⚠</div>시험을 찾을 수 없습니다.</div>`; return; }
   renderAnswerSheet();
 }
+function leaveExam(){
+  // 풀던 답은 자동저장돼 있으니 안내 후 목록으로
+  saveDraft();
+  listStudentExams();
+}
 
 function renderAnswerSheet(){
   $("topTitle").textContent="답안 입력";
   $("topSub").textContent="종이 시험지를 보고 답만 입력하세요";
   const A=S_EXAM.answers;
-  let h=`<div class="card" style="text-align:center">
+  let h=`<button class="btn btn-ghost backbtn" onclick="leaveExam()">← 목록으로</button>
+    <div class="card" style="text-align:center">
     <div style="font-size:13px;color:var(--soft)">${esc(S_STUDENT)} 학생</div>
     <div style="font-size:18px;font-weight:700;margin-top:3px">${esc(S_EXAM.title)}</div>
     <div style="font-size:12.5px;color:var(--soft);margin-top:3px">${A.length}문항 · 답만 입력하고 제출하세요</div></div>
@@ -588,12 +597,15 @@ function renderAnswerSheet(){
       for(let j=0;j<5;j++) h+=`<button class="opt${multi?' multi':''}" id="o${i}_${j}" onclick="tap(${i},${j},${multi})">${CIRC[j]}</button>`;
       h+=`</div>`;
     }else{
-      h+=`<input class="sa-in" id="sa${i}" placeholder="정답 입력" autocomplete="off">`;
+      h+=`<input class="sa-in" id="sa${i}" placeholder="정답 입력" autocomplete="off" oninput="saveDraft()">`;
     }
     h+=`</div>`;
   });
-  h+=`</div><div class="dock"><button class="btn btn-main" onclick="gradeNow()">제출하고 채점하기</button></div>`;
+  h+=`</div><div class="dock"><button class="btn btn-ghost" onclick="leaveExam()">← 목록으로</button><button class="btn btn-main" onclick="gradeNow()">제출하고 채점하기</button></div>`;
   $("app").innerHTML=h;
+  applyMCDraft();
+  const d=loadDraft();
+  if(d){ const note=document.createElement("div"); note.className="resume-note"; note.textContent="이어풀기 — 지난번 입력한 답을 불러왔어요"; $("app").insertBefore(note, $("app").firstChild.nextSibling); }
   window.scrollTo(0,0);
 }
 function tap(i,j,multi){
@@ -607,6 +619,29 @@ function tap(i,j,multi){
     S_SEL[i]=[j];
     for(let x=0;x<5;x++){ const el=$("o"+i+"_"+x); if(el) el.classList.toggle("sel",x===j); }
   }
+  saveDraft();
+}
+
+/* ---------- 임시저장(자동) : 풀던 답을 이 기기에 보관 ---------- */
+function draftKey(){ return "terrys_draft_"+(S_STUDENT||"_")+"_"+(S_SLUG||"_"); }
+function saveDraft(){
+  if(graded) return;
+  try{
+    const sa={};
+    document.querySelectorAll("[id^='sa']").forEach(el=>{ if(el.id.match(/^sa\d+$/)) sa[el.id]=el.value; });
+    localStorage.setItem(draftKey(), JSON.stringify({sel:S_SEL, sa, ts:Date.now()}));
+  }catch(e){}
+}
+function loadDraft(){
+  try{ const r=localStorage.getItem(draftKey()); return r?JSON.parse(r):null; }catch(e){ return null; }
+}
+function clearDraft(){ try{ localStorage.removeItem(draftKey()); }catch(e){} }
+function applyMCDraft(){
+  const d=loadDraft(); if(!d) return;
+  if(d.sel){ S_SEL=d.sel;
+    Object.keys(S_SEL).forEach(i=>{ (S_SEL[i]||[]).forEach(j=>{ const el=$("o"+i+"_"+j); if(el) el.classList.add("sel"); }); });
+  }
+  if(d.sa){ Object.keys(d.sa).forEach(id=>{ const el=$(id); if(el) el.value=d.sa[id]; }); }
 }
 
 function normWords(s){ return (s||"").toLowerCase().replace(/[^a-z0-9가-힣\s]/g," ").split(/\s+/).filter(Boolean); }
@@ -663,6 +698,7 @@ function gradeNow(){
   });
   score=Math.round(score);
   graded=true;
+  clearDraft();
 
   // 틀린 문제를 맨 위로 정렬 (오답 → 정답 → 채점안함 순, 각 그룹 내 원래 번호 순서 유지)
   const gridEl=$("ansgrid");
@@ -720,8 +756,8 @@ async function renderResults(){
       <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.5">‘노출 ON’ 인 시험만 학생 목록에 보입니다. 이번 주 볼 시험만 켜 두세요. 삭제하면 정답·문제·학생 결과가 모두 사라지고 되돌릴 수 없어요.</div>
       <div style="display:flex;flex-direction:column;gap:8px">
         ${exams.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;border:1.5px solid ${e.visible?'var(--green)':'var(--line)'};background:${e.visible?'var(--green-l)':'#fafafa'};border-radius:10px;padding:9px 12px">
-          <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)}</div>
+          <div style="flex:1;min-width:0;cursor:pointer" onclick="previewExam('${esc(e.slug)}')">
+            <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)} <span style="color:var(--brand);font-size:12px">🔍</span></div>
             <div style="font-size:11.5px;color:var(--soft)">${e.kind==="passage"?"본문 채점":e.n+"문항"} · ${(e.savedAt||"").slice(0,10)} · ${e.visible?'<b style="color:var(--green-d)">학생에게 노출 중</b>':'<span>숨김</span>'}</div>
           </div>
           <button class="btn" style="padding:7px 12px;font-size:12.5px;${e.visible?'background:var(--green);color:#fff;border:none':'background:#fff;border:1.5px solid #d1d5db;color:#374151'}" onclick="toggleVisible('${esc(e.slug)}',${e.visible?1:0})">${e.visible?'노출 ON':'노출 OFF'}</button>
@@ -730,6 +766,43 @@ async function renderResults(){
       </div>
     </div>`;
   $("app").innerHTML=h;
+}
+async function previewExam(slug){
+  const ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;overflow:auto;padding:16px";
+  ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+  ov.innerHTML=`<div style="max-width:720px;margin:0 auto;background:#fff;border-radius:14px;padding:16px"><div class="state"><div class="spin"></div>불러오는 중…</div></div>`;
+  document.body.appendChild(ov);
+  const e=await fetchExam(slug);
+  const box=ov.firstChild;
+  if(!e){ box.innerHTML=`<div style="text-align:center">시험을 찾을 수 없습니다.<br><button class="btn btn-ghost" style="margin-top:10px" onclick="this.closest('div[style*=fixed]').remove()">닫기</button></div>`; return; }
+  const CC=["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩"];
+  const head=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px">
+      <b style="font-size:15px">${esc(e.title)}</b>
+      <button class="btn btn-ghost" style="padding:6px 12px" onclick="this.closest('div[style*=fixed]').remove()">닫기 ✕</button></div>`;
+  // 원본 PDF가 저장돼 있으면 그대로 보여줌
+  if(e.pdf){
+    box.innerHTML=head+`<div class="label">업로드한 원본 PDF</div>
+      <iframe src="${e.pdf}" style="width:100%;height:70vh;border:1px solid var(--line);border-radius:10px;background:#fff"></iframe>
+      <div style="margin-top:8px"><a href="${e.pdf}" download="${esc(e.title)}.pdf" class="btn btn-line" style="display:inline-block;text-decoration:none;padding:8px 14px;font-size:13px">PDF 내려받기</a></div>`;
+    return;
+  }
+  if(e.kind==="passage"){
+    box.innerHTML=head+`<div class="label">정답 본문</div>
+      <div style="font-size:14.5px;line-height:1.8;white-space:pre-wrap;color:var(--ink-2)">${esc(e.text||"")}</div>`;
+    return;
+  }
+  const rows=(e.answers||[]).map(q=>{
+    const ans = q.type==="mc" ? (q.a||[]).map(x=>CC[x]).join(", ") : esc(q.aText||"");
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px">
+      ${q.img?`<img src="${q.img}" style="width:100%;border:1px solid var(--line);border-radius:8px;margin-bottom:8px">`:""}
+      <div style="font-weight:700;font-size:13.5px"><span style="color:var(--brand-d)">${q.n}번</span> · 정답: ${ans||"—"} <span style="font-size:11px;color:var(--soft)">(${q.type==="mc"?"객관식":"서술형"})</span></div>
+      ${q.expl?`<div style="font-size:12.5px;color:#374151;line-height:1.6;margin-top:6px">${esc(q.expl)}</div>`:""}
+    </div>`;
+  }).join("");
+  const imgCnt=(e.answers||[]).filter(q=>q.img).length;
+  box.innerHTML=head+`<div style="font-size:12.5px;color:var(--soft);margin-bottom:10px">${(e.answers||[]).length}문항 · 문제 이미지 ${imgCnt}개</div>
+    <div style="display:flex;flex-direction:column;gap:9px">${rows}</div>`;
 }
 async function toggleVisible(slug,curVisible){
   const next = curVisible?false:true;
@@ -930,6 +1003,7 @@ function renderPassageStudent(){
   $("topSub").textContent="빈칸 비율을 고르거나, 전체를 입력/사진으로 제출하세요";
   PS_GRADED=false; PS_BLANKS=null;
   $("app").innerHTML=`
+    <button class="btn btn-ghost backbtn" onclick="leaveExam()">← 목록으로</button>
     <div class="card" style="text-align:center">
       <div style="font-size:13px;color:var(--soft)">${esc(S_STUDENT)} 학생</div>
       <div style="font-size:18px;font-weight:800;margin-top:3px">${esc(S_EXAM.title)}</div>
@@ -947,7 +1021,11 @@ function renderPassageStudent(){
     </div>
     <div id="psArea"></div>
     <div id="psResult"></div>`;
-  startBlank(40); // 기본값
+  // 이어풀기: 저장된 방식이 있으면 복원, 없으면 빈칸 40%
+  const d=loadDraft();
+  if(d && d.pmode==="full"){ startFull(); }
+  else if(d && d.pmode==="blank" && d.ppct){ startBlank(d.ppct); }
+  else { startBlank(40); }
   window.scrollTo(0,0);
 }
 function setActiveMode(m){
@@ -961,15 +1039,32 @@ function pickBlankIdx(toks,pct){
   const idx=[...cand]; for(let k=idx.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[idx[k],idx[j]]=[idx[j],idx[k]];}
   return new Set(idx.slice(0,Math.min(want,idx.length)));
 }
+function savePassageDraft(){
+  if(PS_GRADED) return;
+  try{
+    const o={ts:Date.now()};
+    if(PS_MODE==="full"){ o.pmode="full"; o.pfull=($("psText")?$("psText").value:""); }
+    else if(PS_MODE==="blank" && PS_BLANKS){
+      o.pmode="blank"; o.ppct=PS_BLANKS.pct; o.pblankList=PS_BLANKS.blankList;
+      const fills={}; PS_BLANKS.blankList.forEach((tokIdx,k)=>{ const el=$("bk"+k); fills[k]=el?el.value:""; });
+      o.pfills=fills;
+    }
+    localStorage.setItem(draftKey(), JSON.stringify(o));
+  }catch(e){}
+}
 function startBlank(pct){
   PS_MODE="blank"; setActiveMode("b"+pct);
   const toks=tokenize(S_EXAM.text);
-  const blanks=pickBlankIdx(toks,pct);
-  const blankList=[...blanks].sort((a,b)=>a-b);
-  PS_BLANKS={toks, blankList};
+  // 같은 비율의 저장된 빈칸 배치가 있으면 재사용 (이어풀기 정합성)
+  const d=loadDraft();
+  let blankList;
+  if(d && d.pmode==="blank" && d.ppct===pct && Array.isArray(d.pblankList)){ blankList=d.pblankList.slice(); }
+  else { blankList=[...pickBlankIdx(toks,pct)].sort((a,b)=>a-b); }
+  const blanks=new Set(blankList);
+  PS_BLANKS={toks, blankList, pct};
   let bi=0;
   const body=toks.map((t,i)=>{
-    if(blanks.has(i)){ const id=bi++; return `<input class="blank-in" id="bk${id}" data-idx="${i}" autocomplete="off" autocapitalize="off" spellcheck="false">`; }
+    if(blanks.has(i)){ const id=bi++; return `<input class="blank-in" id="bk${id}" data-idx="${i}" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="savePassageDraft()">`; }
     return `<span class="w-plain">${esc(t)}</span>`;
   }).join(" ");
   $("psArea").innerHTML=`<div class="card">
@@ -977,14 +1072,21 @@ function startBlank(pct){
     <div class="passage-fill">${body}</div>
     <button class="btn btn-main btn-wide" onclick="gradeBlank()">빈칸 채점하기</button>
   </div>`;
+  // 저장된 입력 복원
+  if(d && d.pmode==="blank" && d.ppct===pct && d.pfills){
+    Object.keys(d.pfills).forEach(k=>{ const el=$("bk"+k); if(el) el.value=d.pfills[k]; });
+  }
+  savePassageDraft();
 }
 function startFull(){
   PS_MODE="full"; setActiveMode("full"); PS_BLANKS=null;
   $("psArea").innerHTML=`<div class="card">
     <div class="label">전체 쓰기 — 외운 영어 본문을 입력하세요</div>
-    <textarea id="psText" placeholder="외운 영어 본문을 여기에 입력하세요" style="width:100%;min-height:180px;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;font-size:15px;font-family:inherit;line-height:1.7;background:#fbfbfe;resize:vertical"></textarea>
+    <textarea id="psText" placeholder="외운 영어 본문을 여기에 입력하세요" oninput="savePassageDraft()" style="width:100%;min-height:180px;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;font-size:15px;font-family:inherit;line-height:1.7;background:#fbfbfe;resize:vertical"></textarea>
     <button class="btn btn-main btn-wide" onclick="gradePassageTyped()">입력한 답 채점하기</button>
   </div>`;
+  const d=loadDraft(); if(d && d.pmode==="full" && d.pfull && $("psText")) $("psText").value=d.pfull;
+  savePassageDraft();
 }
 function startPhoto(){
   PS_MODE="photo"; setActiveMode("photo"); PS_BLANKS=null;
@@ -1043,6 +1145,7 @@ function diffWords(ans, stu){
 
 function showPassageResult(res, note){
   PS_GRADED=true;
+  clearDraft();
   const html=res.tokens.map(w=>{
     if(w.s==="plain") return `<span class="w-plain">${esc(w.t)}</span>`;
     if(w.s==="ok") return `<span class="w-ok">${esc(w.t)}</span>`;
