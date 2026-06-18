@@ -3,124 +3,175 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>테리스 — 답안 채점기</title>
+<title>테리스 실전평가</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --green:#1a7350;--green-l:#e1f5ee;--green-d:#0f6e56;
-  --orange:#d97706;--orange-l:#fef3c7;--orange-d:#92400e;
-  --ink:#1a1a1a;--soft:#6b7280;--line:rgba(0,0,0,.08);
-  --ok:#16a34a;--okbg:#dcfce7;--bad:#dc2626;--badbg:#fee2e2;
+  /* canvas + ink */
+  --bg:#eef1f8; --bg2:#e7ebf6; --surface:#ffffff;
+  --ink:#16182a; --ink-2:#3a3f55; --soft:#7b8198; --line:#e7e9f2;
+  /* brand: indigo → violet */
+  --brand:#5b5bf0; --brand-d:#4a44d6; --brand-l:#ececfe; --violet:#8b5cf6;
+  /* semantic */
+  --ok:#0d9f6e; --ok-d:#0a7d57; --ok-l:#dcfaef;
+  --bad:#f43f6b; --bad-d:#d62a55; --bad-l:#ffe7ed;
+  --amber:#f59e0b; --amber-l:#fef3c7; --amber-d:#92560a;
+  --shadow:0 1px 2px rgba(22,24,42,.04), 0 8px 24px -12px rgba(22,24,42,.18);
+  --shadow-lg:0 2px 6px rgba(22,24,42,.06), 0 24px 48px -20px rgba(70,68,214,.32);
+  /* legacy aliases → new palette */
+  --green:var(--ok); --green-d:var(--ok-d); --green-l:var(--ok-l);
+  --orange:var(--amber); --orange-d:var(--amber-d); --orange-l:var(--amber-l);
 }
-body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f4f1;color:var(--ink);min-height:100vh}
-.top{background:var(--green);color:#fff;padding:1.4rem 1.25rem 1.2rem;text-align:center}
-.top .academy{font-size:12px;opacity:.7;letter-spacing:.08em}
-.top h1{font-size:22px;font-weight:700;margin-top:4px}
-.top .sub{font-size:12.5px;opacity:.78;margin-top:5px}
-.wrap{max-width:820px;margin:0 auto;padding:1.2rem 1rem 4rem;width:100%}
+*{ -webkit-tap-highlight-color:transparent }
+body{
+  font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);
+  background-image:radial-gradient(1200px 480px at 50% -120px, #dfe3fb 0%, rgba(238,241,248,0) 70%);
+  color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased; letter-spacing:-.01em;
+}
 
-/* role tabs (admin) */
-.tabs{display:flex;gap:8px;margin-bottom:14px;justify-content:center;flex-wrap:wrap}
-.tab{border:1.5px solid #d1d5db;background:#fff;color:#374151;border-radius:999px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
-.tab.on{border-color:var(--green);background:var(--green-l);color:var(--green-d)}
+/* ---------- header ---------- */
+.top{
+  position:relative; overflow:hidden; text-align:center; color:#fff;
+  padding:2.1rem 1.25rem 1.7rem;
+  background:linear-gradient(135deg,#5b5bf0 0%,#7c4ff0 52%,#9b5cf0 100%);
+}
+.top::after{ /* soft sheen */
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(420px 180px at 80% -40px, rgba(255,255,255,.22), transparent 70%);
+  pointer-events:none;
+}
+.top .academy{font-size:11px;font-weight:700;opacity:.82;letter-spacing:.22em;text-transform:uppercase}
+.top h1{font-size:26px;font-weight:800;margin-top:7px;letter-spacing:-.02em}
+.top .sub{font-size:13px;opacity:.86;margin-top:7px;font-weight:500}
+.wrap{max-width:840px;margin:0 auto;padding:1.4rem 1rem 5rem;width:100%}
 
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px}
-.label{font-size:12px;font-weight:700;color:var(--soft);letter-spacing:.05em;text-transform:uppercase;margin-bottom:9px}
-input[type=text]{width:100%;font-family:inherit;font-size:15px;border:1.5px solid #d1d5db;border-radius:10px;padding:11px 13px;color:var(--ink)}
-.btn{border:none;border-radius:10px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
-.btn-main{background:var(--green);color:#fff}
-.btn-main:hover{background:var(--green-d)}
-.btn-main:disabled{background:#cbd5d1;cursor:not-allowed}
-.btn-ghost{background:#fff;border:1.5px solid #d1d5db;color:#374151}
-.btn-line{background:#fff;border:1.5px solid var(--green);color:var(--green-d)}
-.btn-wide{width:100%;margin-top:10px}
+/* ---------- cards ---------- */
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:18px;
+  padding:18px 20px; margin-bottom:14px; box-shadow:var(--shadow);
+}
+.label{font-size:11px;font-weight:800;color:var(--soft);letter-spacing:.1em;text-transform:uppercase;margin-bottom:11px}
 
-.drop{border:2px dashed #c7d6cf;border-radius:14px;padding:28px 18px;text-align:center;cursor:pointer;transition:all .15s;background:#fafdfb}
-.drop:hover{border-color:var(--green);background:var(--green-l)}
-.drop .ic{font-size:30px;margin-bottom:8px}
+/* ---------- inputs ---------- */
+input[type=text]{
+  width:100%;font-family:inherit;font-size:15.5px;border:1.5px solid var(--line);
+  border-radius:13px;padding:13px 15px;color:var(--ink);background:#fbfbfe;transition:all .16s
+}
+input[type=text]:focus{outline:none;border-color:var(--brand);background:#fff;box-shadow:0 0 0 4px var(--brand-l)}
+input[type=text]::placeholder{color:#a6abc0}
+select{transition:all .16s}
+select:focus{outline:none;border-color:var(--brand)!important;box-shadow:0 0 0 4px var(--brand-l)}
+
+/* ---------- buttons ---------- */
+.btn{border:none;border-radius:13px;padding:13px 20px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .08s ease, box-shadow .16s, background .16s, border-color .16s}
+.btn:active{transform:translateY(1px)}
+.btn-main{background:linear-gradient(135deg,var(--brand),var(--violet));color:#fff;box-shadow:0 8px 20px -8px rgba(91,91,240,.6)}
+.btn-main:hover{box-shadow:0 10px 26px -8px rgba(91,91,240,.7)}
+.btn-main:disabled{background:#c7cadb;color:#fff;cursor:not-allowed;box-shadow:none}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink-2)}
+.btn-ghost:hover{border-color:#c8ccdd;background:#fafbff}
+.btn-line{background:var(--brand-l);border:1.5px solid transparent;color:var(--brand-d)}
+.btn-line:hover{background:#e1e1fd}
+.btn-wide{width:100%;margin-top:12px}
+
+/* ---------- dropzone ---------- */
+.drop{border:2px dashed #cdd2e6;border-radius:16px;padding:30px 18px;text-align:center;cursor:pointer;transition:all .16s;background:#fafbff}
+.drop:hover{border-color:var(--brand);background:var(--brand-l)}
+.drop .ic{font-size:32px;margin-bottom:9px}
 .drop .t{font-size:15px;font-weight:700}
-.drop .s{font-size:12.5px;color:var(--soft);margin-top:4px}
+.drop .s{font-size:12.5px;color:var(--soft);margin-top:5px;line-height:1.5}
 
-/* answer-key editing table */
-.akhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap}
-.akhead .t{font-size:15px;font-weight:700}
-.aktable{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.akcell{border:1.5px solid #e5e7eb;border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px}
-.akcell .n{font-size:13px;font-weight:700;color:var(--green-d);min-width:26px}
+/* ---------- answer-key editor ---------- */
+.akhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+.akhead .t{font-size:15.5px;font-weight:800}
+.aktable{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px}
+.akcell{border:1.5px solid var(--line);border-radius:13px;padding:9px 11px;display:flex;align-items:center;gap:9px;background:#fbfbfe}
+.akcell .n{font-size:13px;font-weight:800;color:var(--brand-d);min-width:26px}
 .akcell input{flex:1;border:none;font-size:14px;font-family:inherit;color:var(--ink);min-width:0;outline:none;background:transparent}
-.akcell.sa{border-color:var(--orange);background:#fffdf7}
-.akcell .ty{font-size:10px;font-weight:700;color:var(--orange-d);background:var(--orange-l);border-radius:5px;padding:1px 5px}
-.akcell .ty.mc{color:var(--green-d);background:var(--green-l)}
+.akcell.sa{border-color:#fce4b8;background:#fffdf6}
+.akcell .ty{font-size:10px;font-weight:800;color:var(--amber-d);background:var(--amber-l);border-radius:6px;padding:2px 6px}
+.akcell .ty.mc{color:var(--brand-d);background:var(--brand-l)}
 
-.help{font-size:13px;color:var(--soft);background:#f0faf5;border:1px solid #c7e8d9;border-radius:10px;padding:11px 14px;margin-bottom:14px;line-height:1.6}
+.help{font-size:13px;color:var(--ink-2);background:linear-gradient(135deg,#f1f1fe,#fafaff);border:1px solid #e3e3fb;border-radius:14px;padding:13px 16px;margin-bottom:14px;line-height:1.65}
 
-/* exam list (student) */
-.examlist{display:flex;flex-direction:column;gap:9px}
-.exam-item{display:flex;align-items:center;gap:13px;background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:14px 16px;cursor:pointer;transition:all .14s}
-.exam-item:hover{border-color:var(--green);box-shadow:0 3px 12px rgba(26,115,80,.1)}
-.exam-dot{width:11px;height:11px;border-radius:50%;background:var(--orange);flex-shrink:0}
-.exam-info{flex:1}
-.exam-title{font-size:15.5px;font-weight:700;margin-bottom:2px}
+/* ---------- exam list (student) ---------- */
+.examlist{display:flex;flex-direction:column;gap:11px}
+.exam-item{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;cursor:pointer;transition:all .16s;box-shadow:var(--shadow)}
+.exam-item:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:#d6d8ec}
+.exam-dot{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--violet));flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:800;box-shadow:0 6px 14px -6px rgba(91,91,240,.7)}
+.exam-info{flex:1;min-width:0}
+.exam-title{font-size:16px;font-weight:700;margin-bottom:3px;letter-spacing:-.01em}
 .exam-meta{font-size:12.5px;color:var(--soft)}
-.exam-go{font-size:20px;color:#d1d5db}
-.exam-item:hover .exam-go{color:var(--green)}
+.exam-go{font-size:22px;color:#cfd3e6;transition:transform .16s}
+.exam-item:hover .exam-go{color:var(--brand);transform:translateX(3px)}
 
-/* student answer entry */
-.ansgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
-.qrow{border:1.5px solid #e5e7eb;border-radius:12px;padding:10px 11px;position:relative}
-.qrow.is-correct{border-color:#bfe3cf;background:#f6fcf9}
-.qrow.is-wrong{border-color:#f3c0c2;background:#fffafa}
-.qrow .qnum{font-size:12.5px;font-weight:700;color:var(--soft);margin-bottom:7px}
-.qimg{width:100%;border:1px solid var(--line);border-radius:8px;margin-bottom:10px;display:block}
-.opts{display:flex;gap:5px;flex-wrap:wrap}
-.opt{width:30px;height:30px;border-radius:8px;border:1.5px solid #d1d5db;background:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;display:flex;align-items:center;justify-content:center;padding:0}
-.opt:hover{border-color:var(--green)}
-.opt.sel{border-color:var(--green);background:var(--green);color:#fff}
-.opt.multi.sel{background:var(--green-d)}
-.sa-in{width:100%;border:1.5px solid #d1d5db;border-radius:8px;padding:7px 9px;font-size:14px;font-family:inherit}
-.qrow .mark{position:absolute;top:4px;right:6px;width:36px;height:36px;pointer-events:none}
+/* ---------- answer entry ---------- */
+.ansgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:12px}
+.qrow{border:1px solid var(--line);border-radius:16px;padding:13px 13px;position:relative;background:var(--surface);box-shadow:var(--shadow);transition:border-color .2s,background .2s}
+.qrow.is-correct{border-color:#bef0db;background:linear-gradient(180deg,#f4fdf9,#fff)}
+.qrow.is-wrong{border-color:#fcccd8;background:linear-gradient(180deg,#fff5f7,#fff)}
+.qrow .qnum{font-size:12.5px;font-weight:800;color:var(--soft);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.qimg{width:100%;border:1px solid var(--line);border-radius:11px;margin-bottom:11px;display:block}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opt{width:34px;height:34px;border-radius:10px;border:1.5px solid #d7daea;background:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink-2);display:flex;align-items:center;justify-content:center;padding:0;transition:all .12s}
+.opt:hover{border-color:var(--brand);color:var(--brand-d)}
+.opt.sel{border-color:transparent;background:linear-gradient(135deg,var(--brand),var(--violet));color:#fff;box-shadow:0 5px 12px -5px rgba(91,91,240,.7)}
+.opt.multi.sel{background:linear-gradient(135deg,var(--brand-d),var(--violet))}
+.opt:disabled{cursor:default}
+.sa-in{width:100%;border:1.5px solid #d7daea;border-radius:10px;padding:9px 11px;font-size:14px;font-family:inherit;background:#fbfbfe}
+.sa-in:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-l)}
+.qrow .mark{position:absolute;top:7px;right:9px;width:38px;height:38px;pointer-events:none}
 .qrow .mark svg{width:100%;height:100%;overflow:visible}
-.qrow .pen{fill:none;stroke:#e0242b;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:300;stroke-dashoffset:300;animation:draw .5s ease-out forwards}
+.qrow .pen{fill:none;stroke:var(--bad);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:300;stroke-dashoffset:300;animation:draw .5s ease-out forwards}
+.qrow.is-correct .pen{stroke:var(--ok)}
 @keyframes draw{to{stroke-dashoffset:0}}
-.multi-tag{font-size:10px;color:var(--orange-d);background:var(--orange-l);border-radius:5px;padding:1px 5px;margin-left:5px;font-weight:700}
-.qfeed{margin-top:10px;border-radius:9px;padding:9px 11px;font-size:13px;line-height:1.55}
-.qfeed.ok{background:var(--okbg);border:1px solid #bfe3cf}
-.qfeed.bad{background:var(--badbg);border:1px solid #f3c0c2}
-.qfeed-line b{color:inherit}
-.qfeed.ok .qfeed-line b{color:var(--ok)}
-.qfeed.bad .qfeed-line b{color:var(--bad)}
-.qexpl{margin-top:7px;padding-top:7px;border-top:1px dashed rgba(0,0,0,.12);font-size:12.5px;color:#374151;line-height:1.6}
+.multi-tag{font-size:10px;color:var(--amber-d);background:var(--amber-l);border-radius:6px;padding:2px 6px;font-weight:800}
+.qfeed{margin-top:11px;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.55}
+.qfeed.ok{background:var(--ok-l);border:1px solid #b8f0da}
+.qfeed.bad{background:var(--bad-l);border:1px solid #fcccd8}
+.qfeed-line b{font-weight:800}
+.qfeed.ok .qfeed-line b{color:var(--ok-d)}
+.qfeed.bad .qfeed-line b{color:var(--bad-d)}
+.qexpl{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(22,24,42,.14);font-size:12.5px;color:var(--ink-2);line-height:1.65}
 .qexpl b{color:var(--ink)}
 
-/* score banner */
-.banner{background:linear-gradient(135deg,var(--green-l),#fff);border:1.5px solid var(--green);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px}
-.banner .pts{font-size:38px;font-weight:800;color:var(--green-d)}
-.banner .pts small{font-size:16px;color:var(--soft);font-weight:600}
-.banner .line{font-size:13.5px;color:var(--soft);margin-top:4px}
-.banner .save{font-size:12.5px;margin-top:8px;font-weight:600}
+/* ---------- score banner ---------- */
+.banner{position:relative;overflow:hidden;background:linear-gradient(135deg,#5b5bf0,#8b5cf6);color:#fff;border-radius:20px;padding:24px 20px;text-align:center;margin-bottom:16px;box-shadow:var(--shadow-lg)}
+.banner::after{content:"";position:absolute;inset:0;background:radial-gradient(360px 140px at 78% -30px,rgba(255,255,255,.22),transparent 70%);pointer-events:none}
+.banner > div{position:relative}
+.banner .who{font-size:12.5px;opacity:.92;font-weight:600;letter-spacing:.01em}
+.banner .pts{font-size:46px;font-weight:800;line-height:1.05;margin-top:2px;letter-spacing:-.02em}
+.banner .pts small{font-size:17px;opacity:.8;font-weight:600}
+.banner .line{font-size:13.5px;opacity:.9;margin-top:6px}
+.banner .save{font-size:12px;margin-top:9px;font-weight:600;opacity:.85}
 
-/* explanation PDF viewer */
-.explbox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
-.explbox .eh{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+/* ---------- explanation viewer ---------- */
+.explbox{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.explbox .eh{font-size:14px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .explpages{display:flex;flex-direction:column;gap:10px;align-items:center}
-.explpages img{width:100%;max-width:760px;border:1px solid var(--line);border-radius:8px}
+.explpages img{width:100%;max-width:760px;border:1px solid var(--line);border-radius:10px}
 .expl-note{font-size:12.5px;color:var(--soft);margin-top:8px;text-align:center}
 
-.dock{position:sticky;bottom:0;display:flex;gap:9px;padding:12px;background:rgba(240,244,241,.95);backdrop-filter:blur(6px);border-top:1px solid var(--line);margin:14px -1rem 0}
-.dock .btn{flex:1}
+/* ---------- sticky action dock ---------- */
+.dock{position:sticky;bottom:0;display:flex;gap:10px;padding:14px 0 16px;margin:18px 0 0;background:linear-gradient(180deg,rgba(238,241,248,0),var(--bg) 30%)}
+.dock .btn{flex:1;border-radius:14px;box-shadow:var(--shadow)}
 
-.state{background:#fff;border:1px solid var(--line);border-radius:14px;padding:34px 20px;text-align:center;color:var(--soft)}
-.state .big{font-size:30px;margin-bottom:8px}
-.spin{width:26px;height:26px;border:3px solid #e5e7eb;border-top-color:var(--green);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 12px}
+/* ---------- states / spinner ---------- */
+.state{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:40px 22px;text-align:center;color:var(--soft);box-shadow:var(--shadow);line-height:1.6}
+.state .big{font-size:34px;margin-bottom:10px}
+.spin{width:30px;height:30px;border:3px solid var(--brand-l);border-top-color:var(--brand);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 14px}
 @keyframes sp{to{transform:rotate(360deg)}}
 .prog{font-size:13px;color:var(--soft);margin-top:8px}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 </style>
 </head>
 <body>
 <div class="top">
   <div class="academy">TERRY'S ENGLISH</div>
-  <h1 id="topTitle">답안 채점기</h1>
+  <h1 id="topTitle">테리스 실전평가</h1>
   <div class="sub" id="topSub">종이 시험지로 풀고, 답만 입력하면 자동채점</div>
 </div>
 <div class="wrap" id="app"></div>
@@ -409,7 +460,7 @@ async function saveExam(){
   const slug=slugify(A_TITLE);
   const payload={
     title:A_TITLE, slug, savedAt:new Date().toISOString(),
-    n:A_ANSWERS.length,
+    n:A_ANSWERS.length, visible:true,
     answers:A_ANSWERS.map(q=>({n:q.n,type:q.type,a:q.a,aText:q.aText,expl:q.expl||"",img:A_QIMGS[q.n]||""}))
   };
   const box=document.createElement("div");
@@ -468,9 +519,9 @@ async function listStudentExams(){
   $("app").innerHTML=`<div class="state"><div class="spin"></div>시험 목록 불러오는 중…</div>`;
   const data=await listExamsRaw();
   const exams=[];
-  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e&&e.answers) exams.push({slug:k,...e}); }
+  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e&&e.answers && e.visible!==false) exams.push({slug:k,...e}); }
   exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
-  if(!exams.length){ $("app").innerHTML=`<div class="state"><div class="big">🗒️</div>아직 등록된 시험이 없습니다.</div>`; return; }
+  if(!exams.length){ $("app").innerHTML=`<div class="state"><div class="big">🗒️</div>지금 풀 수 있는 시험이 없습니다.<br><span style="font-size:13px;color:var(--soft)">선생님이 이번 주 시험을 열면 여기에 보여요.</span></div>`; return; }
   let h=`<div class="card" style="background:var(--green-l);border-color:var(--green)"><b>${esc(S_STUDENT)}</b> 학생, 풀 시험을 선택하세요.</div><div class="examlist">`;
   exams.forEach(e=>{ h+=`<div class="exam-item" onclick="openStudentExam('${esc(e.slug)}')">
     <div class="exam-dot"></div><div class="exam-info"><div class="exam-title">${esc(e.title)}</div>
@@ -592,7 +643,7 @@ function gradeNow(){
   }
 
   const banner=`<div class="banner">
-    <div style="font-size:13px;color:var(--soft)">${esc(S_STUDENT)} 학생의 점수</div>
+    <div class="who">${esc(S_STUDENT)} 학생의 점수</div>
     <div class="pts">${score}<small> / 100점</small></div>
     <div class="line">${wrong.length?"틀린 문항: "+wrong.join(", ")+"번":"전부 정답! 🎉"}</div>
     <div class="save" id="saveState">기록 저장 중…</div></div>`;
@@ -624,7 +675,7 @@ async function renderResults(){
   $("app").innerHTML=`<div class="state"><div class="spin"></div>시험 목록 불러오는 중…</div>`;
   const data=await listExamsRaw();
   const exams=[];
-  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e&&e.answers) exams.push({slug:k,title:e.title,n:e.n||e.answers.length,savedAt:e.savedAt,answers:e.answers}); }
+  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e&&e.answers) exams.push({slug:k,title:e.title,n:e.n||e.answers.length,savedAt:e.savedAt,answers:e.answers,visible:e.visible!==false}); }
   exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
   if(!exams.length){ $("app").innerHTML=`<div class="state"><div class="big">🗒️</div>등록된 시험이 없습니다.</div>`; return; }
   R_DATA.exams=exams;
@@ -634,19 +685,27 @@ async function renderResults(){
       ${exams.map((e,i)=>`<option value="${i}">${esc(e.title)}</option>`).join("")}
     </select></div><div id="gridBox"></div>
     <div class="card" style="margin-top:14px">
-      <div class="label">🗑️ 시험 관리 (삭제)</div>
-      <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.5">필요 없는 시험을 삭제합니다. 삭제하면 그 시험의 정답·문제·학생 결과가 모두 사라지고 되돌릴 수 없어요.</div>
+      <div class="label">📅 주간 시험 관리</div>
+      <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.5">‘노출 ON’ 인 시험만 학생 목록에 보입니다. 이번 주 볼 시험만 켜 두세요. 삭제하면 정답·문제·학생 결과가 모두 사라지고 되돌릴 수 없어요.</div>
       <div style="display:flex;flex-direction:column;gap:8px">
-        ${exams.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 12px">
+        ${exams.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;border:1.5px solid ${e.visible?'var(--green)':'var(--line)'};background:${e.visible?'var(--green-l)':'#fafafa'};border-radius:10px;padding:9px 12px">
           <div style="flex:1;min-width:0">
             <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)}</div>
-            <div style="font-size:11.5px;color:var(--soft)">${e.n}문항 · ${(e.savedAt||"").slice(0,10)}</div>
+            <div style="font-size:11.5px;color:var(--soft)">${e.n}문항 · ${(e.savedAt||"").slice(0,10)} · ${e.visible?'<b style="color:var(--green-d)">학생에게 노출 중</b>':'<span>숨김</span>'}</div>
           </div>
-          <button class="btn" style="background:#fff;border:1.5px solid #fecaca;color:var(--bad);padding:7px 13px;font-size:13px" onclick="deleteExam('${esc(e.slug)}','${esc(e.title).replace(/'/g,"")}')">삭제</button>
+          <button class="btn" style="padding:7px 12px;font-size:12.5px;${e.visible?'background:var(--green);color:#fff;border:none':'background:#fff;border:1.5px solid #d1d5db;color:#374151'}" onclick="toggleVisible('${esc(e.slug)}',${e.visible?1:0})">${e.visible?'노출 ON':'노출 OFF'}</button>
+          <button class="btn" style="background:#fff;border:1.5px solid #fecaca;color:var(--bad);padding:7px 11px;font-size:12.5px" onclick="deleteExam('${esc(e.slug)}','${esc(e.title).replace(/'/g,"")}')">삭제</button>
         </div>`).join("")}
       </div>
     </div>`;
   $("app").innerHTML=h;
+}
+async function toggleVisible(slug,curVisible){
+  const next = curVisible?false:true;
+  try{
+    await fetch(FB+"/grader_exams/"+encodeURIComponent(slug)+"/visible.json",{method:"PUT",body:JSON.stringify(next)});
+    renderResults();
+  }catch(e){ alert("변경 실패: "+e.message); }
 }
 async function deleteExam(slug,title){
   if(!confirm(`'${title}' 시험을 삭제할까요?\n\n정답·문제·학생 결과가 모두 삭제되며 되돌릴 수 없습니다.`)) return;
