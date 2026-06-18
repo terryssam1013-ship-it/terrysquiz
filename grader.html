@@ -582,6 +582,15 @@ function gradeNow(){
   score=Math.round(score);
   graded=true;
 
+  // 틀린 문제를 맨 위로 정렬 (오답 → 정답 → 채점안함 순, 각 그룹 내 원래 번호 순서 유지)
+  const gridEl=$("ansgrid");
+  if(gridEl){
+    const rows=[...gridEl.children];
+    const rank=el=> el.classList.contains("is-wrong")?0 : el.classList.contains("is-correct")?1 : 2;
+    rows.sort((a,b)=> rank(a)-rank(b));
+    rows.forEach(r=>gridEl.appendChild(r));
+  }
+
   const banner=`<div class="banner">
     <div style="font-size:13px;color:var(--soft)">${esc(S_STUDENT)} 학생의 점수</div>
     <div class="pts">${score}<small> / 100점</small></div>
@@ -590,7 +599,7 @@ function gradeNow(){
   $("app").insertAdjacentHTML("afterbegin",banner);
   // 채점 후엔 한 문항씩 넓게 보이도록 1열로
   const grid=$("ansgrid"); if(grid){ grid.style.gridTemplateColumns="1fr"; }
-  $("ansgrid").insertAdjacentHTML("beforebegin",`<div class="card" style="background:#fffafa;border-color:#f3c0c2"><b style="color:var(--bad)">📝 채점 결과 — 각 문항 아래에 정답·해설이 있어요</b></div>`);
+  $("ansgrid").insertAdjacentHTML("beforebegin",`<div class="card" style="background:#fffafa;border-color:#f3c0c2"><b style="color:var(--bad)">📝 채점 결과 — 틀린 문제부터 보여드려요 (각 문항 아래 정답·해설)</b></div>`);
   document.querySelector(".dock").innerHTML=`<button class="btn btn-ghost" onclick="renderAnswerSheet()">다시 풀기</button>
     <button class="btn btn-main" onclick="listStudentExams()">다른 시험</button>`;
   window.scrollTo({top:0,behavior:"smooth"});
