@@ -608,7 +608,7 @@ async function listStudentExams(){
       exams.push({slug:k,...e});
     }
   }
-  exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
+  exams.sort((a,b)=>{ const oa=(typeof a.order==="number"?a.order:(8e12-new Date(a.savedAt||0).getTime())); const ob=(typeof b.order==="number"?b.order:(8e12-new Date(b.savedAt||0).getTime())); return oa-ob; });
   const hdr=`<div class="card" style="background:var(--green-l);border-color:var(--green);display:flex;justify-content:space-between;align-items:center;gap:10px">
     <div><b>${esc(S_STUDENT)}</b> 학생${S_SCHOOL?` · <b>${esc(S_SCHOOL)}</b>`:""}</div>
     <button class="btn btn-ghost" style="padding:6px 11px;font-size:12.5px" onclick="changeSchool()">학교 바꾸기</button></div>`;
@@ -807,15 +807,17 @@ async function renderResults(){
   $("app").innerHTML=`<div class="state"><div class="spin"></div>시험 목록 불러오는 중…</div>`;
   const data=await listExamsRaw();
   const exams=[];
-  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e && (e.answers||e.kind==="passage")) exams.push({slug:k,title:e.title,n:e.kind==="passage"?"본문":(e.n||e.answers.length),kind:e.kind||"mc",school:e.school||"",grade:e.grade||"",savedAt:e.savedAt,answers:e.answers||[],visible:e.visible!==false}); }
-  exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
+  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e && (e.answers||e.kind==="passage")) exams.push({slug:k,title:e.title,n:e.kind==="passage"?"본문":(e.n||e.answers.length),kind:e.kind||"mc",school:e.school||"",grade:e.grade||"",order:(typeof e.order==="number"?e.order:null),savedAt:e.savedAt,answers:e.answers||[],visible:e.visible!==false}); }
+  // 그룹 안 정렬: 수동 order 우선(작을수록 위), 없으면 최신 등록 먼저
+  const ordVal=e=> (e.order!=null? e.order : (8e12 - new Date(e.savedAt||0).getTime()));
+  exams.sort((a,b)=> ordVal(a)-ordVal(b));
   if(!exams.length){ $("app").innerHTML=`<div class="state"><div class="big">🗒️</div>등록된 시험이 없습니다.</div>`; return; }
   R_DATA.exams=exams;
-  const optGroups=esc;
   // 그룹키: 학년 > 학교
   const groupKey=e=> (e.grade||"기타")+" · "+(e.school||"기타");
   const groups={}; exams.forEach((e,i)=>{ (groups[groupKey(e)]=groups[groupKey(e)]||[]).push(i); });
-  const gKeys=Object.keys(groups).sort();
+  // 학년이 먼저 오도록 그룹키 정렬 (중1<중2<중3 자연스럽게)
+  const gKeys=Object.keys(groups).sort((a,b)=>a.localeCompare(b,'ko'));
   let h=navTabs("results")+`<div class="card"><div class="label">시험 선택</div>
     <select id="rSel" onchange="loadResultGrid()" style="width:100%;font-family:inherit;font-size:15px;border:1.5px solid #d1d5db;border-radius:10px;padding:11px 13px;cursor:pointer">
       <option value="">— 시험을 선택하세요 —</option>
@@ -827,13 +829,17 @@ async function renderResults(){
       ${gKeys.map(g=>`
         <div style="font-size:12.5px;font-weight:800;color:var(--brand-d);margin:12px 0 7px;padding-left:2px">${esc(g)}</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-        ${groups[g].map(i=>{const e=exams[i];return `<div style="display:flex;align-items:center;gap:10px;border:1.5px solid ${e.visible?'var(--green)':'var(--line)'};background:${e.visible?'var(--green-l)':'#fafafa'};border-radius:10px;padding:9px 12px">
+        ${groups[g].map((i,pos)=>{const e=exams[i];return `<div style="display:flex;align-items:center;gap:8px;border:1.5px solid ${e.visible?'var(--green)':'var(--line)'};background:${e.visible?'var(--green-l)':'#fafafa'};border-radius:10px;padding:9px 12px">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <button title="위로" onclick="moveExam('${esc(e.slug)}',-1)" ${pos===0?'disabled':''} style="border:1px solid var(--line);background:#fff;border-radius:6px;width:24px;height:21px;line-height:1;cursor:${pos===0?'default':'pointer'};opacity:${pos===0?'.35':'1'};font-size:11px">▲</button>
+            <button title="아래로" onclick="moveExam('${esc(e.slug)}',1)" ${pos===groups[g].length-1?'disabled':''} style="border:1px solid var(--line);background:#fff;border-radius:6px;width:24px;height:21px;line-height:1;cursor:${pos===groups[g].length-1?'default':'pointer'};opacity:${pos===groups[g].length-1?'.35':'1'};font-size:11px">▼</button>
+          </div>
           <div style="flex:1;min-width:0;cursor:pointer" onclick="previewExam('${esc(e.slug)}')">
             <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)} <span style="color:var(--brand);font-size:12px">🔍</span></div>
             <div style="font-size:11.5px;color:var(--soft)">${e.kind==="passage"?"본문 채점":e.n+"문항"} · ${(e.savedAt||"").slice(0,10)} · ${e.visible?'<b style="color:var(--green-d)">학생에게 노출 중</b>':'<span>숨김</span>'}</div>
           </div>
-          <button class="btn" style="padding:7px 12px;font-size:12.5px;${e.visible?'background:var(--green);color:#fff;border:none':'background:#fff;border:1.5px solid #d1d5db;color:#374151'}" onclick="toggleVisible('${esc(e.slug)}',${e.visible?1:0})">${e.visible?'노출 ON':'노출 OFF'}</button>
-          <button class="btn" style="background:#fff;border:1.5px solid #fecaca;color:var(--bad);padding:7px 11px;font-size:12.5px" onclick="deleteExam('${esc(e.slug)}','${esc(e.title).replace(/'/g,"")}')">삭제</button>
+          <button class="btn" style="padding:7px 11px;font-size:12.5px;${e.visible?'background:var(--green);color:#fff;border:none':'background:#fff;border:1.5px solid #d1d5db;color:#374151'}" onclick="toggleVisible('${esc(e.slug)}',${e.visible?1:0})">${e.visible?'ON':'OFF'}</button>
+          <button class="btn" style="background:#fff;border:1.5px solid #fecaca;color:var(--bad);padding:7px 10px;font-size:12.5px" onclick="deleteExam('${esc(e.slug)}','${esc(e.title).replace(/'/g,"")}')">삭제</button>
         </div>`;}).join("")}
         </div>`).join("")}
     </div>`;
@@ -888,6 +894,25 @@ async function deleteStudent(name){
     await Promise.all(dels);
     loadResultGrid();
   }catch(e){ alert("삭제 실패: "+e.message); }
+}
+async function moveExam(slug, dir){
+  const exams=R_DATA.exams||[];
+  const cur=exams.find(e=>e.slug===slug); if(!cur) return;
+  const gk=(cur.grade||"기타")+" · "+(cur.school||"기타");
+  // 같은 그룹의 현재 표시 순서
+  const group=exams.filter(e=> ((e.grade||"기타")+" · "+(e.school||"기타"))===gk );
+  const pos=group.findIndex(e=>e.slug===slug);
+  const tgt=pos+dir;
+  if(tgt<0||tgt>=group.length) return;
+  // 현재 그룹에 연속 order 값 부여(정렬 깨짐 방지) 후 두 개 swap
+  group.forEach((e,idx)=>{ e.order=idx; });
+  const a=group[pos], b=group[tgt];
+  const tmp=a.order; a.order=b.order; b.order=tmp;
+  try{
+    // 그룹 전체 order를 저장(안정적)
+    await Promise.all(group.map(e=> fetch(FB+"/grader_exams/"+encodeURIComponent(e.slug)+"/order.json",{method:"PUT",body:JSON.stringify(e.order)})));
+    renderResults();
+  }catch(err){ alert("순서 변경 실패: "+err.message); }
 }
 async function toggleVisible(slug,curVisible){
   const next = curVisible?false:true;
