@@ -384,7 +384,25 @@ function parseAnswers(text){
       const idx=[...new Set(picks.map(c=>circ.indexOf(c)))].sort((a,b)=>a-b);
       return {n,type:"mc",a:idx,aText:"",expl:it.expl};
     }
-    return {n,type:"sa",a:[],aText:ansHead.trim()||it.ansRaw,expl:it.expl};
+    // 정답 기호가 비어 있는 경우:
+    //  - ansHead에 글자가 있으면 주관식(서술형) 정답으로 본다
+    //  - 완전히 비어 있으면(옛 족보 PDF처럼 원문자가 텍스트로 안 읽힘)
+    //    객관식이되 정답 미상으로 두어 해설은 살리고 정답칸만 비운다
+    if(ansHead.trim().length===0){
+      return {n,type:"mc",a:[],aText:"",expl:it.expl,_needAns:true};
+    }
+    // 구분자(쉼표·점·공백)만 남은 경우도 정답 미상으로 처리
+    if(/^[\s,，.·]+$/.test(ansHead)){
+      return {n,type:"mc",a:[],aText:"",expl:it.expl,_needAns:true};
+    }
+    // 2단 레이아웃 PDF에서 옆 컬럼 텍스트가 섞여 들어오면
+    // ansHead에 한글/긴 영문 문장이 묻는다. 이런 건 진짜 주관식 정답이 아니므로
+    // 정답 미상(_needAns)으로 비워 두어 직접 입력하게 한다.
+    const looksContaminated = /[가-힣]/.test(ansHead) || ansHead.trim().length>40;
+    if(looksContaminated){
+      return {n,type:"mc",a:[],aText:"",expl:it.expl,_needAns:true};
+    }
+    return {n,type:"sa",a:[],aText:ansHead.trim(),expl:it.expl};
   });
   return out;
 }
@@ -453,7 +471,15 @@ function renderAnswerEditor(){
   const filled=A_ANSWERS.filter(q=>q.type==="mc"?q.a.length:q.aText).length;
   const explCnt=A_ANSWERS.filter(q=>q.expl).length;
   const imgCnt=Object.keys(A_QIMGS).length;
-  let h=`<div class="help">✅ 정답과 해설을 자동으로 추출했어요. 아래에서 확인하고 틀린 곳은 바로 고치면 됩니다.<br>
+  // 정답 기호를 못 읽은 문항(옛 족보 PDF처럼 ①②③이 텍스트로 안 들어간 경우)
+  const needAns=A_ANSWERS.filter(q=>q._needAns).map(q=>q.n);
+  let h="";
+  if(needAns.length){
+    h+=`<div class="help" style="background:#fff7ed;border-color:#fdba74;color:#9a3412">
+      ⚠️ 이 PDF는 정답 기호(①②③④⑤)가 그림으로 박혀 있어 <b>정답만 자동으로 못 읽었어요.</b><br>
+      문항·해설은 자동으로 채워 뒀으니, 아래 <b>비어 있는 정답칸(${needAns.length}개)</b>에 PDF를 보며 번호만 입력하면 됩니다.</div>`;
+  }
+  h+=`<div class="help">✅ 정답과 해설을 자동으로 추출했어요. 아래에서 확인하고 틀린 곳은 바로 고치면 됩니다.<br>
     객관식은 <b>번호(예: 3 또는 복수정답 2,5)</b>, 주관식은 <b>정답 단어</b>. 해설은 학생 채점 후 각 문항 아래에 표시됩니다.${imgCnt?`<br>🖼️ 문제지 이미지 ${imgCnt}개 준비됨 — 채점 결과에 문제가 함께 보입니다.`:``}</div>
     <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;${imgCnt?'background:var(--green-l);border-color:var(--green)':'background:#fbfafd;border-color:#d6c7e0'}">
       <div style="font-size:13.5px;${imgCnt?'color:var(--green-d)':'color:#6b21a8'}">
@@ -469,10 +495,12 @@ function renderAnswerEditor(){
       <div id="aktable" style="display:flex;flex-direction:column;gap:10px">`;
   A_ANSWERS.forEach((q,i)=>{
     const val=q.type==="mc"?(q.a.map(x=>x+1).join(",")):q.aText;
+    const empty=(q.type==="mc"?q.a.length===0:!q.aText);
+    const hl=empty?"border:2px solid #fb923c;background:#fff7ed":"";
     h+=`<div class="akcell ${q.type==='sa'?'sa':''}" id="ak${i}" style="flex-direction:column;align-items:stretch;gap:7px">
       <div style="display:flex;align-items:center;gap:8px">
         <span class="n">${q.n}</span>
-        <input value="${esc(val)}" oninput="onAns(${i},this.value)" placeholder="${q.type==='sa'?'정답 단어':'번호 (예: 3 또는 2,5)'}" style="flex:1">
+        <input value="${esc(val)}" oninput="onAns(${i},this.value)" placeholder="${q.type==='sa'?'정답 단어':'번호 (예: 3 또는 2,5)'}" style="flex:1;${hl}">
         <span class="ty ${q.type==='mc'?'mc':''}" onclick="toggleType(${i})" style="cursor:pointer" title="객/주관식 전환">${q.type==='sa'?'주관':'객관'}</span>
       </div>
       <textarea oninput="onExpl(${i},this.value)" placeholder="해설 (선택)" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit;resize:vertical;min-height:42px;color:#374151">${esc(q.expl||"")}</textarea>
