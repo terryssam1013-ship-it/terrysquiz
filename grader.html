@@ -1119,8 +1119,11 @@ async function renderResults(){
             <button class="btn" title="위로" ${i===0?'disabled':''} onclick="moveExam(${i},-1)" style="padding:0;width:24px;height:20px;font-size:12px;line-height:1;background:${i===0?'#f3f4f6':'#fff'};border:1px solid #d1d5db;color:${i===0?'#cbd5e1':'#374151'};border-radius:6px;cursor:${i===0?'default':'pointer'}">▲</button>
             <button class="btn" title="아래로" ${i===exams.length-1?'disabled':''} onclick="moveExam(${i},1)" style="padding:0;width:24px;height:20px;font-size:12px;line-height:1;background:${i===exams.length-1?'#f3f4f6':'#fff'};border:1px solid #d1d5db;color:${i===exams.length-1?'#cbd5e1':'#374151'};border-radius:6px;cursor:${i===exams.length-1?'default':'pointer'}">▼</button>
           </div>
-          <div style="flex:1;min-width:0;cursor:pointer" onclick="previewExam('${esc(e.slug)}')">
-            <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)} <span style="color:var(--brand);font-size:12px">🔍</span></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px">
+              <span style="cursor:pointer;overflow:hidden;text-overflow:ellipsis" onclick="previewExam('${esc(e.slug)}')">${esc(e.title)} <span style="color:var(--brand);font-size:12px">🔍</span></span>
+              <button class="btn" title="제목 수정" onclick="renameExam('${esc(e.slug)}',this)" data-title="${esc(e.title).replace(/"/g,'&quot;')}" style="flex-shrink:0;padding:0;width:24px;height:22px;font-size:12px;line-height:1;background:#fff;border:1px solid #d1d5db;color:#374151;border-radius:6px;cursor:pointer">✏️</button>
+            </div>
             <div style="font-size:11.5px;color:var(--soft)">${e.kind==="passage"?"본문 채점":e.n+"문항"} · ${(e.savedAt||"").slice(0,10)} · ${e.visible?'<b style="color:var(--green-d)">학생에게 노출 중</b>':'<span>숨김</span>'}</div>
           </div>
           <button class="btn" style="padding:7px 12px;font-size:12.5px;${e.visible?'background:var(--green);color:#fff;border:none':'background:#fff;border:1.5px solid #d1d5db;color:#374151'}" onclick="toggleVisible('${esc(e.slug)}',${e.visible?1:0})">${e.visible?'노출 ON':'노출 OFF'}</button>
@@ -1204,6 +1207,20 @@ async function moveExam(i, dir){
     ));
     renderResults();
   }catch(e){ alert("순서 저장 실패: "+e.message); renderResults(); }
+}
+// 시험 제목 수정: 새 제목을 입력받아 Firebase에 저장 → 목록·학생화면 모두 반영
+async function renameExam(slug, btn){
+  const cur=(btn&&btn.getAttribute("data-title"))||"";
+  const next=prompt("새 시험 제목을 입력하세요.", cur);
+  if(next===null) return;            // 취소
+  const title=next.trim();
+  if(!title){ alert("제목을 비울 수 없습니다."); return; }
+  if(title===cur) return;            // 변경 없음
+  try{
+    await fetch(FB+"/grader_exams/"+encodeURIComponent(slug)+"/title.json",
+      {method:"PUT",body:JSON.stringify(title)});
+    renderResults();
+  }catch(e){ alert("제목 저장 실패: "+e.message); }
 }
 async function deleteExam(slug,title){
   if(!confirm(`'${title}' 시험을 삭제할까요?\n\n정답·문제·학생 결과가 모두 삭제되며 되돌릴 수 없습니다.`)) return;
