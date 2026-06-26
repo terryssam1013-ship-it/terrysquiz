@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>테리스 실전평가</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.0/tesseract.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -249,6 +250,7 @@ let A_PAGES=[];        // 해설 PDF 페이지 이미지 (dataURL)
 let A_QIMGS={};        // { 문항번호: dataURL } — 문제지 이미지
 let A_PDF="";          // 원본 정답·해설 PDF (dataURL)
 let A_TITLE="";
+let A_ANSWER_TABLE_IMG="";  // 정답표(grid형) 캡처 이미지 — 선생님 확인용
 
 function isAdmin(){ try{ return localStorage.getItem("terrys_admin")==="1"; }catch(e){ return false; } }
 function setAdmin(on){ try{ on?localStorage.setItem("terrys_admin","1"):localStorage.removeItem("terrys_admin"); }catch(e){} }
@@ -319,10 +321,8 @@ async function handlePDF(file){
   $("examTitle").value=A_TITLE;
   $("processBox").innerHTML=`<div class="state"><div class="spin"></div><div>PDF 분석 중…</div><div class="prog" id="prog">파일 읽는 중</div></div>`;
   const buf=await file.arrayBuffer();
-  // 원본 PDF를 dataURL로 보관 (나중에 미리보기로 그대로 열람)
   try{ A_PDF=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);}); }catch(e){ A_PDF=""; }
   const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-  // 정답·해설 텍스트 추출 — 읽기 순서(raw) 그대로 이어붙임 (컬럼 분리 X)
   $("prog").textContent="정답·해설 추출 중…";
   let fullText="";
   for(let p=1;p<=pdf.numPages;p++){
@@ -330,7 +330,29 @@ async function handlePDF(file){
     const tc=await page.getTextContent();
     fullText += tc.items.map(it=>it.str).join("") + "\n";
   }
-  const answers=parseAnswers(fullText);
+  let answers=parseAnswers(fullText);
+
+  // 정답을 거의 못 읽었으면(블록형 아님) → 정답표(grid)형 PDF로 보고 표 OCR 시도
+  const gotKeys = answers.filter(q=>q.type==="mc"?q.a.length:q.aText).length;
+  if(answers.length===0 || gotKeys < answers.length*0.3){
+    try{
+      $("prog").textContent="정답표 인식 중…";
+      const tableAns=await parseAnswerTable(pdf,(d,t)=>{ const pr=$("prog"); if(pr) pr.textContent=`정답표 인식 중… (${d}/${t})`; });
+      if(tableAns && tableAns.answers.length){
+        // 표에서 얻은 정답과 (블록형으로 얻은) 해설을 합친다
+        const explByN={}; answers.forEach(q=>{ if(q.expl) explByN[q.n]=q.expl; });
+        // 블록형 해설을 못 얻었으면 'N.' 해설 텍스트에서 추출 시도
+        if(Object.keys(explByN).length===0){
+          const ex2=parseDotExplanations(fullText);
+          Object.assign(explByN, ex2);
+        }
+        tableAns.answers.forEach(q=>{ if(explByN[q.n]) q.expl=explByN[q.n]; });
+        answers=tableAns.answers;
+        A_ANSWER_TABLE_IMG = tableAns.tableImg || "";
+      }
+    }catch(e){ /* 표 인식 실패 → 아래 분기로 */ }
+  }
+
   if(!answers.length){
     $("processBox").innerHTML=`<div class="state"><div class="big">⚠</div>
       <div>정답을 자동으로 찾지 못했습니다.<br>아래에서 문항 수를 정하고 직접 입력해 주세요.</div></div>
@@ -340,33 +362,312 @@ async function handlePDF(file){
   }
   A_ANSWERS=answers;
   A_PAGES=[];
-  // 같은 파일에서 문제 이미지도 함께 추출 (문제+해설 합본 대응)
+  // 블록형 PDF에서 정답 동그라미가 작은 '이미지'로 박혀 텍스트로 안 읽힌 경우
+  // (예: 옛 족보 N) [중] ④) → 해설 페이지의 작은 동그라미를 OCR로 읽어 채운다.
+  const needImg=A_ANSWERS.filter(q=>q._needAns).length;
+  if(needImg && !A_ANSWER_TABLE_IMG){
+    try{
+      $("prog").textContent=`정답 기호 자동 인식 중… (0/${needImg})`;
+      await recoverAnswersByImage(pdf,(d,t)=>{ const pr=$("prog"); if(pr) pr.textContent=`정답 기호 자동 인식 중… (${d}/${t})`; });
+    }catch(e){}
+  }
   $("prog").textContent="문제 이미지 만드는 중…";
   try{ await cropQuestionsFromPdf(pdf, (i,n)=>{ const pr=$("prog"); if(pr) pr.textContent=`문제 이미지 만드는 중… (${i}/${n})`; }); }catch(e){ /* 이미지 실패해도 채점은 가능 */ }
   renderAnswerEditor();
 }
 
-// 정답+해설 파싱: "N)[정답] <답> [해설] <해설>" 블록을 다음 "N)[정답]" 전까지
+// 블록형 PDF의 작은 동그라미 이미지 → 문항번호 옆 첫 동그라미만 OCR
+async function recoverAnswersByImage(pdf, onProg){
+  if(!window.Tesseract) return;
+  const needNums=new Set(A_ANSWERS.filter(q=>q._needAns).map(q=>q.n));
+  if(!needNums.size) return;
+  const OPS=pdfjsLib.OPS;
+  const mul=(a,b)=>[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];
+  const groupCanvas={}; const collected={};
+  let done=0;
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const vp=page.getViewport({scale:1});
+    const tc=await page.getTextContent();
+    // 문항 시작 'N)' 위치 (블록 시작)
+    const qmarks=[];
+    tc.items.forEach(it=>{
+      const m=(it.str||"").match(/^\s*(\d{1,3})\)/);
+      if(m){ const x=it.transform[4], y=vp.height-it.transform[5]; qmarks.push({n:parseInt(m[1],10),x,y}); }
+    });
+    if(!qmarks.length) continue;
+    // 작은 이미지 좌표 수집
+    const ops=await page.getOperatorList();
+    let ctm=[1,0,0,1,0,0]; const stack=[]; const spots=[];
+    for(let i=0;i<ops.fnArray.length;i++){
+      const fn=ops.fnArray[i], args=ops.argsArray[i];
+      if(fn===OPS.save) stack.push(ctm.slice());
+      else if(fn===OPS.restore) ctm=stack.pop()||[1,0,0,1,0,0];
+      else if(fn===OPS.transform) ctm=mul(ctm,args);
+      else if(fn===OPS.paintImageXObject||fn===OPS.paintInlineImageXObject||fn===OPS.paintImageMaskXObject){
+        const w=Math.hypot(ctm[0],ctm[1]), h=Math.hypot(ctm[2],ctm[3]);
+        spots.push({w,h,x:ctm[4],y:vp.height-ctm[5]-h});
+      }
+    }
+    const small=spots.filter(s=>s.w>=5&&s.w<=18&&s.h>=5&&s.h<=18);
+    if(!small.length) continue;
+    const SC=6;
+    const big=document.createElement("canvas");
+    big.width=Math.ceil(vp.width*SC); big.height=Math.ceil(vp.height*SC);
+    await page.render({canvasContext:big.getContext("2d"), viewport:page.getViewport({scale:SC})}).promise;
+    // 각 문항번호에 대해: 같은 줄(y±9), 번호 오른쪽, 가장 가까운 동그라미 1개만
+    for(const q of qmarks){
+      if(!needNums.has(q.n)) continue;
+      let best=null,bd=1e9;
+      for(const s of small){
+        const sy=s.y+s.h/2, sx=s.x;
+        if(Math.abs(sy-q.y)<9 && sx>q.x && sx-q.x<120){
+          const d=sx-q.x; if(d<bd){bd=d;best=s;}
+        }
+      }
+      if(!best) continue;
+      const pad=Math.max(2,best.w*0.15);
+      const c=document.createElement("canvas");
+      c.width=Math.round((best.w+pad*2)*SC*2); c.height=Math.round((best.h+pad*2)*SC*2);
+      c.getContext("2d").drawImage(big,(best.x-pad)*SC,(best.y-pad)*SC,(best.w+pad*2)*SC,(best.h+pad*2)*SC,0,0,c.width,c.height);
+      const r=await ocrCircleDigit(c);
+      if(r.digit && r.conf>=0.5){ collected[q.n]={d:r.digit,conf:r.conf}; }
+      done++; if(onProg) onProg(done, needNums.size);
+    }
+  }
+  // 채움
+  for(const q of A_ANSWERS){
+    if(!q._needAns) continue;
+    const g=collected[q.n];
+    if(g){ q.a=[g.d-1]; q.type="mc"; q._lowConf=g.conf<0.75; delete q._needAns; }
+  }
+}
+
+// 해설이 'N. <원문자>' 형식일 때 해설 텍스트만 뽑아 문항번호→해설 매핑
+function parseDotExplanations(text){
+  const out={};
+  // "12.\n해설\n<본문>" 또는 "12. ... 해설 ..." 형태. 해설 키워드 뒤 문장을 다음 'N.' 전까지
+  const re=/(\d{1,2})\s*\.\s*(?:해설)?\s*([\s\S]*?)(?=\d{1,2}\s*\.\s*해설|\d{1,2}\s*\.\s|$)/g;
+  // 위 정규식은 과하게 잡힐 수 있어 보수적으로: '해설' 단어가 들어간 블록만 사용
+  const blocks=text.split(/(?=\b\d{1,2}\s*\.\s*해설)/);
+  blocks.forEach(b=>{
+    const m=b.match(/^(\d{1,2})\s*\.\s*해설\s*([\s\S]*)/);
+    if(m){
+      const n=parseInt(m[1],10);
+      let body=(m[2]||"").replace(/\s+/g," ").trim();
+      // 다음 문항/꼬리말 제거
+      body=body.split(/AOBC학원|콘텐츠산업|I410-/)[0].trim();
+      if(body && body.length>4) out[n]=body.slice(0,600);
+    }
+  });
+  return out;
+}
+
+// ===== 정답표(grid형) PDF 처리 =====
+// 족보 신형: 마지막 '정답 및 해설' 페이지 상단에 1~N 정답이 표로 모여 있고,
+// 정답 동그라미(①②③④⑤)가 벡터 그림이라 텍스트로 안 읽힌다.
+// 표의 '번호' 텍스트 위치를 찾아, 그 오른쪽 칸을 잘라 OCR로 정답을 읽는다.
+// OCR은 100% 신뢰가 어려우므로 다수결+신뢰도를 매기고, 낮으면 _needAns로 표시.
+async function parseAnswerTable(pdf, onProg){
+  if(!window.Tesseract) return null;
+  // 1) 정답표가 있는 페이지 찾기: '정답 및 해설' 또는 '주관식' 텍스트 + 1~30 숫자 격자
+  let tablePage=-1, numCells=null, pageObj=null, vpRef=null;
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const tc=await page.getTextContent();
+    const vp=page.getViewport({scale:1});
+    const txt=tc.items.map(it=>it.str).join(" ");
+    if(!/정답\s*및\s*해설|주관식/.test(txt)) continue;
+    // 숫자 셀 위치 수집 (1~40 정수, 페이지 상단 영역)
+    const nums=[];
+    tc.items.forEach(it=>{
+      const s=(it.str||"").trim();
+      if(/^\d{1,2}$/.test(s)){
+        const n=parseInt(s,10);
+        if(n>=1&&n<=40){
+          const x=it.transform[4], y=vp.height-it.transform[5];
+          nums.push({n,x,y,w:it.width||6});
+        }
+      }
+    });
+    // 격자처럼 보이려면 같은 y에 여러 숫자가 줄지어 있어야 함
+    if(nums.length>=10){
+      // 헤더/꼬리말의 외톨이 숫자 제거: 열(x) 클러스터가 3개 이상 반복되는 영역만 채택
+      const colHist={};
+      nums.forEach(c=>{ const k=Math.round(c.x/8)*8; colHist[k]=(colHist[k]||0)+1; });
+      const mainCols=Object.keys(colHist).filter(k=>colHist[k]>=3).map(Number);
+      if(mainCols.length>=3){
+        const near=(x)=> mainCols.some(c=>Math.abs(c-x)<=14);
+        const grid=nums.filter(c=>near(c.x));
+        // 행(y) 클러스터가 연속적인 구간만 (헤더 y=27, 꼬리 y=800+ 제거)
+        const ysAll=[...new Set(grid.map(c=>Math.round(c.y)))].sort((a,b)=>a-b);
+        // 가장 촘촘한 연속 행 구간 찾기
+        let bandRows=[], cur=[ysAll[0]];
+        for(let k=1;k<ysAll.length;k++){
+          if(ysAll[k]-ysAll[k-1]<=26) cur.push(ysAll[k]);
+          else { if(cur.length>bandRows.length) bandRows=cur; cur=[ysAll[k]]; }
+        }
+        if(cur.length>bandRows.length) bandRows=cur;
+        const yMinB=Math.min(...bandRows)-6, yMaxB=Math.max(...bandRows)+6;
+        const gridF=grid.filter(c=>c.y>=yMinB&&c.y<=yMaxB);
+        if(gridF.length>=10){
+          tablePage=p; numCells=gridF; pageObj=page; vpRef=vp; break;
+        }
+      }
+    }
+  }
+  if(tablePage<0) return null;
+
+  // 2) 번호 셀 정리: 같은 번호 첫 등장만, y/x 정렬
+  const seen=new Map();
+  numCells.sort((a,b)=> (Math.round(a.y)-Math.round(b.y))|| (a.x-b.x));
+  numCells.forEach(c=>{ if(!seen.has(c.n)) seen.set(c.n,c); });
+  const maxN=Math.max(...seen.keys());
+  // 표는 보통 5열. 행 간격/열 간격 추정
+  const ys=[...new Set([...seen.values()].map(c=>Math.round(c.y)))].sort((a,b)=>a-b);
+  const rowGap = ys.length>1 ? (ys[ys.length-1]-ys[0])/(ys.length-1) : 16;
+
+  // 3) 표 영역을 고해상도로 렌더 (선생님 확인용 이미지로도 사용)
+  const allX=[...seen.values()].map(c=>c.x), allY=[...seen.values()].map(c=>c.y);
+  const minX=Math.min(...allX)-6, maxX=Math.max(...allX)+70;
+  const minY=Math.min(...allY)-12, maxY=Math.max(...allY)+rowGap*0.7+12;
+  const SC=3;
+  const tvp=pageObj.getViewport({scale:SC});
+  const tcanvas=document.createElement("canvas");
+  tcanvas.width=Math.ceil(vpRef.width*SC); tcanvas.height=Math.ceil(vpRef.height*SC);
+  await pageObj.render({canvasContext:tcanvas.getContext("2d"), viewport:tvp}).promise;
+  // 확인용 표 이미지 crop
+  const timg=document.createElement("canvas");
+  timg.width=Math.round((maxX-minX)*SC); timg.height=Math.round((maxY-minY)*SC);
+  timg.getContext("2d").drawImage(tcanvas, minX*SC, minY*SC, (maxX-minX)*SC, (maxY-minY)*SC, 0,0, timg.width, timg.height);
+  const tableImg=timg.toDataURL("image/png");
+
+  // 4) 각 번호 오른쪽 칸을 잘라 OCR (다수결+신뢰도)
+  const OSC=8; // OCR용 추가 배율 (표 렌더 위에서 다시 키움)
+  const results={}; const conf={};
+  const keys=[...seen.keys()].sort((a,b)=>a-b);
+  let done=0;
+  for(const n of keys){
+    const c=seen.get(n);
+    // 정답 동그라미: 번호 오른쪽 약 +14~+44pt, 세로 중앙
+    const cx=c.x + (c.w||6) + 22;
+    const cy=c.y;
+    const r=9;
+    // 표 렌더 캔버스에서 해당 영역 추출
+    const sx=(cx-r)*SC, sy=(cy-r)*SC, sw=2*r*SC, sh=2*r*SC;
+    const cell=document.createElement("canvas"); cell.width=Math.round(sw*2); cell.height=Math.round(sh*2);
+    cell.getContext("2d").drawImage(tcanvas, sx, sy, sw, sh, 0,0, cell.width, cell.height);
+    const d=await ocrCircleDigit(cell);
+    results[n]=d.digit; conf[n]=d.conf;
+    done++; if(onProg) onProg(done, keys.length);
+  }
+
+  // 5) answer 객체로 변환. 주관식 칸(숫자 대신 '주관식')은 sa로.
+  //    표 텍스트에서 '주관식' 위치를 알아내기 어려우므로, OCR 실패+빈칸을 주관식 후보로 둠
+  const answers=[];
+  for(let n=1;n<=maxN;n++){
+    if(!seen.has(n)) continue;
+    const d=results[n], cf=conf[n]||0;
+    if(d && cf>=0.55){
+      answers.push({n,type:"mc",a:[d-1],aText:"",expl:"", _lowConf: cf<0.75});
+    }else{
+      // 못 읽음 → 정답 미상(객관식 가정). 선생님이 표 보고 채움
+      answers.push({n,type:"mc",a:[],aText:"",expl:"", _needAns:true});
+    }
+  }
+  return {answers, tableImg};
+}
+
+// 동그라미 친 숫자 1장 → {digit, conf} (다수결)
+async function ocrCircleDigit(canvas){
+  if(!window.Tesseract) return {digit:null,conf:0};
+  const votes=[];
+  // 테두리(원) 제거 비율을 바꿔가며 여러 번 인식
+  for(const mfrac of [0.16,0.22,0.28]){
+    const masked=maskBorder(canvas, mfrac);
+    try{
+      const {data}=await Tesseract.recognize(masked,'eng',{
+        tessedit_char_whitelist:'12345',
+        tessedit_pageseg_mode:'10'
+      });
+      const t=(data.text||"").replace(/[^1-5]/g,"");
+      if(t) votes.push(parseInt(t[0],10));
+    }catch(e){}
+  }
+  if(!votes.length) return {digit:null,conf:0};
+  const cnt={}; votes.forEach(v=>cnt[v]=(cnt[v]||0)+1);
+  let best=null,bn=0; for(const k in cnt){ if(cnt[k]>bn){bn=cnt[k];best=+k;} }
+  return {digit:best, conf:bn/votes.length};
+}
+// 캔버스 가장자리(원 테두리)를 흰색으로 지워 안쪽 숫자만 남김
+function maskBorder(canvas, frac){
+  const c=document.createElement("canvas"); c.width=canvas.width; c.height=canvas.height;
+  const ctx=c.getContext("2d");
+  ctx.fillStyle="#fff"; ctx.fillRect(0,0,c.width,c.height);
+  const m=Math.round(Math.min(c.width,c.height)*frac);
+  ctx.drawImage(canvas, m,m, c.width-2*m, c.height-2*m, m,m, c.width-2*m, c.height-2*m);
+  // 대비 강화(이진화 비슷)
+  const id=ctx.getImageData(0,0,c.width,c.height); const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    const lum=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
+    const v=lum<135?0:255; d[i]=d[i+1]=d[i+2]=v;
+  }
+  ctx.putImageData(id,0,0);
+  return c;
+}
+
+// 정답+해설 파싱: 두 형식 지원
+//   (구) "N) [정답] <답> [해설] <해설>"
+//   (신) "N) [난이도] <답> [해설] <해설>"   ← 예: "1) [중상] ④" / "1) [중]"
+// 2단 레이아웃 PDF는 블록 순서가 섞일 수 있으므로 '실제 번호 N'으로 정렬한다.
+// 정답 원문자가 텍스트로 안 읽히면(_needAns) 나중에 이미지 OCR로 채운다.
 function parseAnswers(text){
   const circ="①②③④⑤⑥⑦⑧⑨⑩";
-  // 'N)[정답]' 블록을 순서대로 수집 (번호는 신뢰하지 않고 등장 순서로 1..N 재부여)
-  const re=/(\d{1,3})\s*\)\s*\[정답\]\s*([\s\S]*?)(?:\[해설\]\s*([\s\S]*?))?(?=\d{1,3}\s*\)\s*\[정답\]|$)/g;
+  const blockStart=String.raw`(\d{1,3})\s*\)\s*\[(?:정답|[가-힣]{1,3})\]`;
+  const re=new RegExp(
+    blockStart + String.raw`\s*([\s\S]*?)(?:\[해설\]\s*([\s\S]*?))?(?=` + blockStart + String.raw`|$)`,
+    "g"
+  );
   const items=[]; let m;
   while((m=re.exec(text))){
+    const num=parseInt(m[1],10);
     const ansRaw=(m[2]||"").trim().replace(/\s+/g," ");
     const expl=(m[3]||"").trim().replace(/\s+/g," ");
-    items.push({ansRaw,expl});
+    items.push({num,ansRaw,expl});
   }
   if(!items.length) return [];
-  const out=items.map((it,i)=>{
-    const n=i+1;
-    const picks=[...it.ansRaw].filter(c=>circ.includes(c));
-    const stripped=it.ansRaw.replace(/[①②③④⑤⑥⑦⑧⑨⑩\s,，·]/g,"");
+  // 같은 번호 중복 매칭 시 원문자(정답)가 있는 쪽 우선
+  const byNum=new Map();
+  for(const it of items){
+    const has=[...it.ansRaw].some(c=>circ.includes(c));
+    const prev=byNum.get(it.num);
+    if(!prev){ byNum.set(it.num,it); continue; }
+    const prevHas=[...prev.ansRaw].some(c=>circ.includes(c));
+    if(has && !prevHas) byNum.set(it.num,it);
+  }
+  const sorted=[...byNum.values()].sort((a,b)=>a.num-b.num);
+  const out=sorted.map(it=>{
+    const n=it.num;
+    // 정답: 난이도 표기 직후 맨 앞 연속 원문자만 인정 (해설 본문 원문자는 [해설] 뒤로 분리됨)
+    const headMatch=it.ansRaw.match(/^[\s]*([①②③④⑤⑥⑦⑧⑨⑩][①②③④⑤⑥⑦⑧⑨⑩\s,，·]*)/);
+    const ansHead=headMatch?headMatch[1]:it.ansRaw;
+    const picks=[...ansHead].filter(c=>circ.includes(c));
+    const stripped=ansHead.replace(/[①②③④⑤⑥⑦⑧⑨⑩\s,，·]/g,"");
     if(picks.length && stripped.length===0){
       const idx=[...new Set(picks.map(c=>circ.indexOf(c)))].sort((a,b)=>a-b);
       return {n,type:"mc",a:idx,aText:"",expl:it.expl};
     }
-    return {n,type:"sa",a:[],aText:it.ansRaw,expl:it.expl};
+    if(ansHead.trim().length===0){
+      return {n,type:"mc",a:[],aText:"",expl:it.expl,_needAns:true};
+    }
+    if(/^[\s,，.·]+$/.test(ansHead)){
+      return {n,type:"mc",a:[],aText:"",expl:it.expl,_needAns:true};
+    }
+    // 옆 컬럼 오염(한글/긴 영문)이면 정답 미상으로 비움
+    if(/[가-힣]/.test(ansHead) || ansHead.trim().length>40){
+      return {n,type:"mc",a:[],aText:"",expl:it.expl,_needAns:true};
+    }
+    return {n,type:"sa",a:[],aText:ansHead.trim(),expl:it.expl};
   });
   return out;
 }
@@ -435,7 +736,24 @@ function renderAnswerEditor(){
   const filled=A_ANSWERS.filter(q=>q.type==="mc"?q.a.length:q.aText).length;
   const explCnt=A_ANSWERS.filter(q=>q.expl).length;
   const imgCnt=Object.keys(A_QIMGS).length;
-  let h=`<div class="help">✅ 정답과 해설을 자동으로 추출했어요. 아래에서 확인하고 틀린 곳은 바로 고치면 됩니다.<br>
+  const needAns=A_ANSWERS.filter(q=>q._needAns).map(q=>q.n);
+  const lowConf=A_ANSWERS.filter(q=>q._lowConf && !q._needAns).map(q=>q.n);
+  let h="";
+  // 정답표(grid형) 캡처가 있으면 맨 위에 띄워 대조하기 쉽게
+  if(A_ANSWER_TABLE_IMG){
+    h+=`<div class="card" style="background:#fff7ed;border-color:#fdba74">
+      <div style="font-size:13.5px;color:#9a3412;font-weight:700;margin-bottom:8px">📋 이 PDF는 정답이 '표'로 되어 있어 자동 인식했어요</div>
+      <div style="font-size:12.5px;color:#9a3412;margin-bottom:10px;line-height:1.6">
+        표 안 정답 동그라미는 그림이라 인식이 100% 정확하진 않아요. 아래 <b>실제 정답표</b>를 보며,
+        ${needAns.length?`못 읽은 <b>${needAns.length}개</b> 칸과 `:''}${lowConf.length?`불확실한 <b>${lowConf.length}개</b>(주황) 칸을 `:''}확인·수정해 주세요.</div>
+      <img src="${A_ANSWER_TABLE_IMG}" style="width:100%;max-width:560px;border:1px solid var(--line);border-radius:8px;display:block">
+    </div>`;
+  }
+  if(needAns.length && !A_ANSWER_TABLE_IMG){
+    h+=`<div class="help" style="background:#fff7ed;border-color:#fdba74;color:#9a3412">
+      ⚠️ 정답 자동 인식이 안 된 문항이 <b>${needAns.length}개</b> 있어요. 아래 주황색 칸에 번호를 입력해 주세요. (${needAns.join(", ")}번)</div>`;
+  }
+  h+=`<div class="help">✅ 정답과 해설을 자동으로 추출했어요. 아래에서 확인하고 틀린 곳은 바로 고치면 됩니다.<br>
     객관식은 <b>번호(예: 3 또는 복수정답 2,5)</b>, 주관식은 <b>정답 단어</b>. 해설은 학생 채점 후 각 문항 아래에 표시됩니다.${imgCnt?`<br>🖼️ 문제지 이미지 ${imgCnt}개 준비됨 — 채점 결과에 문제가 함께 보입니다.`:``}</div>
     <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;${imgCnt?'background:var(--green-l);border-color:var(--green)':'background:#fbfafd;border-color:#d6c7e0'}">
       <div style="font-size:13.5px;${imgCnt?'color:var(--green-d)':'color:#6b21a8'}">
@@ -451,10 +769,13 @@ function renderAnswerEditor(){
       <div id="aktable" style="display:flex;flex-direction:column;gap:10px">`;
   A_ANSWERS.forEach((q,i)=>{
     const val=q.type==="mc"?(q.a.map(x=>x+1).join(",")):q.aText;
+    const empty=(q.type==="mc"?q.a.length===0:!q.aText);
+    const hl = empty ? "border:2px solid #fb923c;background:#fff7ed"
+             : (q._lowConf ? "border:2px solid #fbbf24;background:#fffbeb" : "");
     h+=`<div class="akcell ${q.type==='sa'?'sa':''}" id="ak${i}" style="flex-direction:column;align-items:stretch;gap:7px">
       <div style="display:flex;align-items:center;gap:8px">
         <span class="n">${q.n}</span>
-        <input value="${esc(val)}" oninput="onAns(${i},this.value)" placeholder="${q.type==='sa'?'정답 단어':'번호 (예: 3 또는 2,5)'}" style="flex:1">
+        <input value="${esc(val)}" oninput="onAns(${i},this.value)" placeholder="${q.type==='sa'?'정답 단어':'번호 (예: 3 또는 2,5)'}" style="flex:1;${hl}">
         <span class="ty ${q.type==='mc'?'mc':''}" onclick="toggleType(${i})" style="cursor:pointer" title="객/주관식 전환">${q.type==='sa'?'주관':'객관'}</span>
       </div>
       <textarea oninput="onExpl(${i},this.value)" placeholder="해설 (선택)" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit;resize:vertical;min-height:42px;color:#374151">${esc(q.expl||"")}</textarea>
