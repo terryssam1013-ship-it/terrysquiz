@@ -271,6 +271,8 @@ function examKey(e){
   }
   // 학교 토큰을 못 찾으면 두 번째 토큰을 학교로 간주
   if(!school && parts.length>=2) school=parts[1];
+  // 학교명 끝의 학년 숫자 제거해 같은 학교끼리 묶이게 (푸른중3 = 푸른중)
+  school=school.replace(/(중|고)\d+$/, "$1");
   return {grade, school, title:t};
 }
 // 시험 정렬:
@@ -1265,8 +1267,11 @@ async function renderResults(){
       ${exams.map((e,i)=>`<option value="${i}">${esc(e.title)}</option>`).join("")}
     </select></div><div id="gridBox"></div>
     <div class="card" style="margin-top:14px">
-      <div class="label">📅 주간 시험 관리</div>
-      <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.5">↑↓ 버튼으로 순서를 바꿀 수 있어요. 이 순서대로 학생 목록에도 보입니다. ‘노출 ON’ 인 시험만 학생에게 보이고, 삭제하면 정답·문제·학생 결과가 모두 사라져 되돌릴 수 없어요.</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div class="label" style="margin:0">📅 주간 시험 관리</div>
+        <button class="btn btn-line" style="padding:6px 12px;font-size:12.5px" onclick="resetExamOrder()">↕️ 학년·학교순 자동정렬</button>
+      </div>
+      <div style="font-size:12.5px;color:var(--soft);margin:8px 0 10px;line-height:1.5">기본은 <b>중1→중2→중3</b>, 학교별로 자동 정렬돼요. ↑↓로 직접 바꿀 수도 있고, 위 버튼을 누르면 자동정렬로 되돌아갑니다. ‘노출 ON’ 인 시험만 학생에게 보입니다.</div>
       <div style="display:flex;flex-direction:column;gap:8px">
         ${exams.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;border:1.5px solid ${e.visible?'var(--green)':'var(--line)'};background:${e.visible?'var(--green-l)':'#fafafa'};border-radius:10px;padding:9px 12px">
           <div style="display:flex;flex-direction:column;gap:2px">
@@ -1411,7 +1416,17 @@ async function moveExam(i, dir){
     renderResults();
   }catch(e){ alert("순서 저장 실패: "+e.message); renderResults(); }
 }
-// 시험 제목 수정: 새 제목을 입력받아 Firebase에 저장 → 목록·학생화면 모두 반영
+// 모든 시험의 수동 순서(order)를 지워 학년·학교순 자동정렬로 되돌린다.
+async function resetExamOrder(){
+  if(!confirm("순서를 학년·학교순 자동정렬로 되돌릴까요?\n(직접 ↑↓로 바꿔둔 순서는 사라집니다)")) return;
+  const list=(R_DATA.exams||[]).slice();
+  try{
+    await Promise.all(list.map(e=>
+      fetch(FB+"/grader_exams/"+encodeURIComponent(e.slug)+"/order.json",{method:"DELETE"})
+    ));
+    renderResults();
+  }catch(e){ alert("초기화 실패: "+e.message); renderResults(); }
+}
 async function renameExam(slug, btn){
   const cur=(btn&&btn.getAttribute("data-title"))||"";
   const next=prompt("새 시험 제목을 입력하세요.", cur);
