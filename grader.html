@@ -1048,7 +1048,20 @@ function leaveExam(){
 function renderAnswerSheet(){
   $("topTitle").textContent="답안 입력";
   $("topSub").textContent="종이 시험지를 보고 답만 입력하세요";
-  const A=S_EXAM.answers;
+  // 깨진/옛 데이터 방어: answers가 없거나 각 문항 필드가 비어도 안전하게 보정
+  let A=Array.isArray(S_EXAM.answers)?S_EXAM.answers:[];
+  A=A.map((q,idx)=>({
+    n: (q&&q.n)||idx+1,
+    type: (q&&q.type)||"mc",
+    a: Array.isArray(q&&q.a)?q.a:[],
+    aText: (q&&q.aText)||"",
+    expl: (q&&q.expl)||""
+  }));
+  S_EXAM.answers=A;
+  if(!A.length){
+    $("app").innerHTML=`<div class="state"><div class="big">⚠</div>이 시험은 정답 정보가 비어 있어요.<br><span style="font-size:13px;color:var(--soft)">선생님이 이 시험을 다시 저장해야 합니다.</span><br><button class="btn btn-main" style="margin-top:12px" onclick="listStudentExams()">목록으로</button></div>`;
+    return;
+  }
   let h=`<button class="btn btn-ghost backbtn" onclick="leaveExam()">← 목록으로</button>
     <div class="card" style="text-align:center">
     <div style="font-size:13px;color:var(--soft)">${esc(S_STUDENT)} 학생</div>
