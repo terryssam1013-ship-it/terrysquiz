@@ -607,21 +607,21 @@ async function parseAnswerTable(pdf, onProg){
   }
 
   // 6) 해설 페이지 전체를 이미지로 캡처 (해설이 그림이라 텍스트 추출 불가한 경우)
-  //    정답표 페이지 '이후'로, '해설' 글자가 있는 페이지들을 통째로 담는다.
+  //    정답표 페이지부터 담는다 — 이 페이지에 1~8번 해설이 함께 있는 경우가 있어서.
   const explImgs=[];
   try{
-    for(let p=tablePage+1; p<=pdf.numPages; p++){
+    for(let p=tablePage; p<=pdf.numPages; p++){
       const page=await pdf.getPage(p);
       const tc=await page.getTextContent();
       const txt=tc.items.map(it=>it.str).join(" ");
-      if(!/해설/.test(txt)) continue; // 해설 페이지만
+      if(!/해설/.test(txt)) continue; // 해설 글자가 있는 페이지만
       // 해설은 텍스트 가독성만 있으면 되므로 적당한 화질로(용량 절감)
       const vp=page.getViewport({scale:1.6});
       const cv=document.createElement("canvas");
       cv.width=Math.ceil(vp.width); cv.height=Math.ceil(vp.height);
       await page.render({canvasContext:cv.getContext("2d"), viewport:vp}).promise;
       explImgs.push(cv.toDataURL("image/jpeg",0.6));
-      if(explImgs.length>=8) break; // 안전 상한
+      if(explImgs.length>=9) break; // 안전 상한
     }
   }catch(e){}
 
