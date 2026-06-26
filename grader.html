@@ -919,6 +919,7 @@ async function saveExam(){
   const light={
     title:A_TITLE, slug, savedAt:new Date().toISOString(),
     n:A_ANSWERS.length, visible:true,
+    answers:lightAnswers,
     hasMedia: !!(A_PDF || (A_EXPL_IMGS&&A_EXPL_IMGS.length) || Object.keys(A_QIMGS).length)
   };
   // 미디어(무거움). 용량이 너무 크면 단계적으로 줄임.
@@ -1027,11 +1028,15 @@ async function listStudentExams(){
 async function openStudentExam(slug){
   S_SLUG=slug; graded=false; S_SEL={};
   $("app").innerHTML=`<div class="state"><div class="spin"></div>시험 불러오는 중…</div>`;
-  const e=await fetchExam(slug);
-  if(!e){ $("app").innerHTML=`<div class="state"><div class="big">⚠</div>시험을 찾을 수 없습니다.</div>`; return; }
+  let e=null;
+  try{ e=await fetchExam(slug); }catch(err){ e=null; }
+  if(!e){ $("app").innerHTML=`<div class="state"><div class="big">⚠</div>시험을 불러오지 못했어요.<br><button class="btn btn-main" style="margin-top:12px" onclick="listStudentExams()">목록으로</button></div>`; return; }
   S_EXAM=e;
   if(e.kind==="passage"){ renderPassageStudent(); return; }
-  if(!e.answers){ $("app").innerHTML=`<div class="state"><div class="big">⚠</div>시험을 찾을 수 없습니다.</div>`; return; }
+  if(!Array.isArray(e.answers) || !e.answers.length){
+    $("app").innerHTML=`<div class="state"><div class="big">⚠</div>이 시험은 정답 정보가 비어 있어요.<br><span style="font-size:13px;color:var(--soft)">선생님이 이 시험을 다시 저장해야 합니다.</span><br><button class="btn btn-main" style="margin-top:12px" onclick="listStudentExams()">목록으로</button></div>`;
+    return;
+  }
   renderAnswerSheet();
 }
 function leaveExam(){
