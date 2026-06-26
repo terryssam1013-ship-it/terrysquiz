@@ -109,6 +109,13 @@ select:focus{outline:none;border-color:var(--brand)!important;box-shadow:0 0 0 4
 
 /* ---------- answer entry ---------- */
 .ansgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:12px}
+/* ---------- results grid (성적표) ---------- */
+.rgrid{width:max-content}
+.rgrid th,.rgrid td{box-sizing:border-box;overflow:hidden}
+.rgrid thead th{height:34px;vertical-align:middle;background:#fff;border-bottom:2px solid #eef0ef}
+.rgrid td{vertical-align:middle}
+.rgrid-name{position:sticky;background:#fff;z-index:2;box-shadow:1px 0 0 #eef0ef}
+.rgrid thead .rgrid-name{z-index:3}
 .qrow{border:1px solid var(--line);border-radius:16px;padding:13px 13px;position:relative;background:var(--surface);box-shadow:var(--shadow);transition:border-color .2s,background .2s}
 .qrow.is-correct{border-color:#bef0db;background:linear-gradient(180deg,#f4fdf9,#fff)}
 .qrow.is-wrong{border-color:#fcccd8;background:linear-gradient(180deg,#fff5f7,#fff)}
@@ -339,70 +346,27 @@ async function handlePDF(file){
   renderAnswerEditor();
 }
 
-// 정답+해설 파싱: 두 가지 형식 모두 지원
-//   (구) "N) [정답] <답> [해설] <해설>"
-//   (신) "N) [난이도] <답> [해설] <해설>"   ← 예: "1) [중상] ④"
-// 2단 레이아웃 PDF에서 블록 순서가 뒤섞일 수 있으므로 '실제 번호 N'으로 정렬한다.
+// 정답+해설 파싱: "N)[정답] <답> [해설] <해설>" 블록을 다음 "N)[정답]" 전까지
 function parseAnswers(text){
   const circ="①②③④⑤⑥⑦⑧⑨⑩";
-  // 블록 시작 = "N) [정답]"  또는  "N) [한글난이도]"  (난이도: 상/중상/중/중하/하 등)
-  const blockStart=String.raw`(\d{1,3})\s*\)\s*\[(?:정답|[가-힣]{1,3})\]`;
-  const re=new RegExp(
-    blockStart + String.raw`\s*([\s\S]*?)(?:\[해설\]\s*([\s\S]*?))?(?=` + blockStart + String.raw`|$)`,
-    "g"
-  );
+  // 'N)[정답]' 블록을 순서대로 수집 (번호는 신뢰하지 않고 등장 순서로 1..N 재부여)
+  const re=/(\d{1,3})\s*\)\s*\[정답\]\s*([\s\S]*?)(?:\[해설\]\s*([\s\S]*?))?(?=\d{1,3}\s*\)\s*\[정답\]|$)/g;
   const items=[]; let m;
   while((m=re.exec(text))){
-    const num=parseInt(m[1],10);
     const ansRaw=(m[2]||"").trim().replace(/\s+/g," ");
     const expl=(m[3]||"").trim().replace(/\s+/g," ");
-    items.push({num,ansRaw,expl});
+    items.push({ansRaw,expl});
   }
   if(!items.length) return [];
-
-  // 같은 번호가 중복 매칭되면 정답(원문자)이 있는 쪽을 우선 채택
-  const byNum=new Map();
-  for(const it of items){
-    const hasPick=[...it.ansRaw].some(c=>circ.includes(c));
-    const prev=byNum.get(it.num);
-    if(!prev){ byNum.set(it.num,it); continue; }
-    const prevHas=[...prev.ansRaw].some(c=>circ.includes(c));
-    if(hasPick && !prevHas) byNum.set(it.num,it);
-  }
-  // 실제 번호 순서로 정렬
-  const sorted=[...byNum.values()].sort((a,b)=>a.num-b.num);
-
-  const out=sorted.map(it=>{
-    const n=it.num;
-    // 정답: 난이도 표기 직후 맨 앞에 연속으로 오는 원문자만 인정
-    // (해설 본문 속 ①②...는 이미 [해설] 뒤로 분리돼 있음)
-    const headMatch=it.ansRaw.match(/^[\s]*([①②③④⑤⑥⑦⑧⑨⑩][①②③④⑤⑥⑦⑧⑨⑩\s,，·]*)/);
-    const ansHead=headMatch?headMatch[1]:it.ansRaw;
-    const picks=[...ansHead].filter(c=>circ.includes(c));
-    const stripped=ansHead.replace(/[①②③④⑤⑥⑦⑧⑨⑩\s,，·]/g,"");
+  const out=items.map((it,i)=>{
+    const n=i+1;
+    const picks=[...it.ansRaw].filter(c=>circ.includes(c));
+    const stripped=it.ansRaw.replace(/[①②③④⑤⑥⑦⑧⑨⑩\s,，·]/g,"");
     if(picks.length && stripped.length===0){
       const idx=[...new Set(picks.map(c=>circ.indexOf(c)))].sort((a,b)=>a-b);
       return {n,type:"mc",a:idx,aText:"",expl:it.expl};
     }
-    // 정답 기호가 비어 있는 경우:
-    //  - ansHead에 글자가 있으면 주관식(서술형) 정답으로 본다
-    //  - 완전히 비어 있으면(옛 족보 PDF처럼 원문자가 텍스트로 안 읽힘)
-    //    객관식이되 정답 미상으로 두어 해설은 살리고 정답칸만 비운다
-    if(ansHead.trim().length===0){
-      return {n,type:"mc",a:[],aText:"",expl:it.expl,_needAns:true};
-    }
-    // 구분자(쉼표·점·공백)만 남은 경우도 정답 미상으로 처리
-    if(/^[\s,，.·]+$/.test(ansHead)){
-      return {n,type:"mc",a:[],aText:"",expl:it.expl,_needAns:true};
-    }
-    // 2단 레이아웃 PDF에서 옆 컬럼 텍스트가 섞여 들어오면
-    // ansHead에 한글/긴 영문 문장이 묻는다. 이런 건 진짜 주관식 정답이 아니므로
-    // 정답 미상(_needAns)으로 비워 두어 직접 입력하게 한다.
-    const looksContaminated = /[가-힣]/.test(ansHead) || ansHead.trim().length>40;
-    if(looksContaminated){
-      return {n,type:"mc",a:[],aText:"",expl:it.expl,_needAns:true};
-    }
-    return {n,type:"sa",a:[],aText:ansHead.trim(),expl:it.expl};
+    return {n,type:"sa",a:[],aText:it.ansRaw,expl:it.expl};
   });
   return out;
 }
@@ -471,15 +435,7 @@ function renderAnswerEditor(){
   const filled=A_ANSWERS.filter(q=>q.type==="mc"?q.a.length:q.aText).length;
   const explCnt=A_ANSWERS.filter(q=>q.expl).length;
   const imgCnt=Object.keys(A_QIMGS).length;
-  // 정답 기호를 못 읽은 문항(옛 족보 PDF처럼 ①②③이 텍스트로 안 들어간 경우)
-  const needAns=A_ANSWERS.filter(q=>q._needAns).map(q=>q.n);
-  let h="";
-  if(needAns.length){
-    h+=`<div class="help" style="background:#fff7ed;border-color:#fdba74;color:#9a3412">
-      ⚠️ 이 PDF는 정답 기호(①②③④⑤)가 그림으로 박혀 있어 <b>정답만 자동으로 못 읽었어요.</b><br>
-      문항·해설은 자동으로 채워 뒀으니, 아래 <b>비어 있는 정답칸(${needAns.length}개)</b>에 PDF를 보며 번호만 입력하면 됩니다.</div>`;
-  }
-  h+=`<div class="help">✅ 정답과 해설을 자동으로 추출했어요. 아래에서 확인하고 틀린 곳은 바로 고치면 됩니다.<br>
+  let h=`<div class="help">✅ 정답과 해설을 자동으로 추출했어요. 아래에서 확인하고 틀린 곳은 바로 고치면 됩니다.<br>
     객관식은 <b>번호(예: 3 또는 복수정답 2,5)</b>, 주관식은 <b>정답 단어</b>. 해설은 학생 채점 후 각 문항 아래에 표시됩니다.${imgCnt?`<br>🖼️ 문제지 이미지 ${imgCnt}개 준비됨 — 채점 결과에 문제가 함께 보입니다.`:``}</div>
     <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;${imgCnt?'background:var(--green-l);border-color:var(--green)':'background:#fbfafd;border-color:#d6c7e0'}">
       <div style="font-size:13.5px;${imgCnt?'color:var(--green-d)':'color:#6b21a8'}">
@@ -495,12 +451,10 @@ function renderAnswerEditor(){
       <div id="aktable" style="display:flex;flex-direction:column;gap:10px">`;
   A_ANSWERS.forEach((q,i)=>{
     const val=q.type==="mc"?(q.a.map(x=>x+1).join(",")):q.aText;
-    const empty=(q.type==="mc"?q.a.length===0:!q.aText);
-    const hl=empty?"border:2px solid #fb923c;background:#fff7ed":"";
     h+=`<div class="akcell ${q.type==='sa'?'sa':''}" id="ak${i}" style="flex-direction:column;align-items:stretch;gap:7px">
       <div style="display:flex;align-items:center;gap:8px">
         <span class="n">${q.n}</span>
-        <input value="${esc(val)}" oninput="onAns(${i},this.value)" placeholder="${q.type==='sa'?'정답 단어':'번호 (예: 3 또는 2,5)'}" style="flex:1;${hl}">
+        <input value="${esc(val)}" oninput="onAns(${i},this.value)" placeholder="${q.type==='sa'?'정답 단어':'번호 (예: 3 또는 2,5)'}" style="flex:1">
         <span class="ty ${q.type==='mc'?'mc':''}" onclick="toggleType(${i})" style="cursor:pointer" title="객/주관식 전환">${q.type==='sa'?'주관':'객관'}</span>
       </div>
       <textarea oninput="onExpl(${i},this.value)" placeholder="해설 (선택)" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit;resize:vertical;min-height:42px;color:#374151">${esc(q.expl||"")}</textarea>
@@ -765,6 +719,14 @@ function gradeNow(){
   graded=true;
   clearDraft();
 
+  // 학생의 실제 답을 저장해 두면, 나중에 선생님이 정답을 고치거나
+  // 주관식을 수동 채점할 때 다시 채점할 수 있다.
+  const sel={}, saByN={};
+  A.forEach((q,i)=>{
+    if(q.type==="mc"){ sel[q.n]=(S_SEL[i]||[]).slice().sort((a,b)=>a-b); }
+    else { saByN[q.n]=($("sa"+i)?$("sa"+i).value:"")||""; }
+  });
+
   // 틀린 문제를 맨 위로 정렬 (오답 → 정답 → 채점안함 순, 각 그룹 내 원래 번호 순서 유지)
   const gridEl=$("ansgrid");
   if(gridEl){
@@ -787,14 +749,15 @@ function gradeNow(){
     <button class="btn btn-main" onclick="listStudentExams()">다른 시험</button>`;
   window.scrollTo({top:0,behavior:"smooth"});
 
-  saveResult(score,wrong);
+  saveResult(score,wrong,sel,saByN);
 }
 
-async function saveResult(score,wrong){
+async function saveResult(score,wrong,sel,saByN){
   const st=$("saveState");
   try{
     await fetch(FB+"/results_grader_"+S_SLUG+".json",{method:"POST",body:JSON.stringify({
-      name:S_STUDENT, exam:S_EXAM.title, score, total:100, wrong, ts:new Date().toISOString()})});
+      name:S_STUDENT, exam:S_EXAM.title, score, total:100, wrong,
+      sel:sel||{}, sa:saByN||{}, ts:new Date().toISOString()})});
     if(st){ st.textContent="✓ 기록 저장 완료"; st.style.color="var(--green-d)"; }
   }catch(e){ if(st){ st.textContent="기록 저장 실패 (인터넷 확인)"; st.style.color="var(--bad)"; } }
 }
@@ -933,46 +896,220 @@ async function loadResultGrid(){
 
   const maxN=ex.n;
   const qNums=[]; for(let n=1;n<=maxN;n++) qNums.push(n);
+  // 정답 맵 (문항번호 -> answer 객체)
+  const ansByN={}; (ex.answers||[]).forEach(q=>ansByN[q.n]=q);
+
+  // 각 학생을 저장된 raw 답(sel/sa)으로 다시 채점한다.
+  // (정답 수정·주관식 수동채점 결과를 즉시 반영하기 위함)
+  // 수동 채점 오버라이드: R_DATA.manual[name][n] = true(정답)/false(오답)
+  R_DATA.manual = R_DATA.manual || {};
+  const scored = (ex.answers||[]).filter(q=> q.type==="mc" ? (q.a&&q.a.length) : (q.aText!==undefined));
+  const gradeStudent=(name)=>{
+    const rec=best[name];
+    const man=R_DATA.manual[name]||{};
+    const cell={};       // n -> 'ok'|'bad'|'manual'|'skip'
+    let correct=0, total=0;
+    (ex.answers||[]).forEach(q=>{
+      const n=q.n;
+      const isMC = q.type==="mc";
+      const hasKey = isMC ? (q.a&&q.a.length) : !!(q.aText&&q.aText.trim());
+      // 주관식이거나 정답키가 비면 → 수동 채점 대상
+      const needManual = !isMC || !hasKey;
+      if(needManual){
+        total++; // 채점 대상에 포함 (선생님이 O/X 결정)
+        if(man[n]===true){ cell[n]='ok'; correct++; }
+        else if(man[n]===false){ cell[n]='bad'; }
+        else {
+          // 주관식이고 정답키가 있으면 1차 자동판정으로 미리 채워줌(선생님이 덮어쓸 수 있음)
+          if(!isMC && hasKey){
+            const sv=(rec.sa&&rec.sa[n]!=null)?rec.sa[n]:"";
+            if(sv && gradeSA(sv,q.aText)){ cell[n]='ok'; correct++; }
+            else { cell[n]='manual'; }
+          } else {
+            cell[n]='manual'; // 아직 미채점
+          }
+        }
+        return;
+      }
+      // 객관식 자동 채점
+      total++;
+      const sel = (rec.sel&&rec.sel[n]) ? rec.sel[n] : null;
+      if(sel==null){ // 옛 기록이라 raw 답이 없음 → wrong 배열로 판정
+        const wrongList=(rec.wrong||[]).map(Number);
+        if(wrongList.includes(n)){ cell[n]='bad'; }
+        else { cell[n]='ok'; correct++; }
+        return;
+      }
+      const ok = sel.length===q.a.length && sel.every(x=>q.a.includes(x));
+      if(ok){ cell[n]='ok'; correct++; } else { cell[n]='bad'; }
+    });
+    const score = total? Math.round(correct/total*100) : 0;
+    return {cell, score, correct, total};
+  };
+
+  // 전 학생 채점 → 점수순 정렬
+  const graded={};
+  students.forEach(s=> graded[s]=gradeStudent(s));
+  const ranked=[...students].sort((a,b)=> graded[b].score-graded[a].score || a.localeCompare(b));
+
+  // 오답 합계
   const err={}; qNums.forEach(n=>err[n]=0);
-  students.forEach(s=>(best[s].wrong||[]).forEach(w=>{ if(err[w]!=null)err[w]++; }));
-  R_DATA.cur={ex,best,students,qNums,err};
-  const nStu=students.length, avg=Math.round(students.reduce((s,n)=>s+best[n].score,0)/nStu);
+  ranked.forEach(s=>{ const c=graded[s].cell; qNums.forEach(n=>{ if(c[n]==='bad') err[n]++; }); });
+
+  R_DATA.cur={ex,best,students:ranked,qNums,err,graded,ansByN,gradeStudent};
+
+  const nStu=ranked.length;
+  const avg=Math.round(ranked.reduce((s,n)=>s+graded[n].score,0)/nStu);
   const hardest=qNums.filter(n=>err[n]>0).sort((a,b)=>err[b]-err[a]);
+  // 미채점(주관식 등) 남은 칸 수
+  let pending=0; ranked.forEach(s=>{ const c=graded[s].cell; qNums.forEach(n=>{ if(c[n]==='manual') pending++; }); });
+
   let h=`<div class="card" style="display:flex;gap:18px;flex-wrap:wrap;justify-content:space-around;text-align:center">
     <div><div style="font-size:11.5px;color:var(--soft)">응시</div><div style="font-size:23px;font-weight:700">${nStu}명</div></div>
     <div><div style="font-size:11.5px;color:var(--soft)">문항</div><div style="font-size:23px;font-weight:700">${maxN}</div></div>
     <div><div style="font-size:11.5px;color:var(--soft)">평균</div><div style="font-size:23px;font-weight:700">${avg}점</div></div>
     <div><div style="font-size:11.5px;color:var(--soft)">오답 문항</div><div style="font-size:23px;font-weight:700;color:var(--orange-d)">${hardest.length}</div></div>
   </div>`;
+  if(pending){
+    h+=`<div class="card" style="background:#fff7ed;border-color:#fdba74;color:#9a3412;font-size:13.5px">
+      ✍️ 수동 채점이 필요한 칸이 <b>${pending}개</b> 있어요 (주관식·정답 미입력 문항). 표에서 <b>노란 칸</b>을 눌러 ○/✗를 정하면 점수에 바로 반영됩니다.</div>`;
+  }
   if(hardest.length){
     h+=`<div class="card" style="background:linear-gradient(135deg,var(--orange-l),#fff);border-color:var(--orange)">
       <div style="font-size:14px;font-weight:700;color:var(--orange-d);margin-bottom:8px">🎯 오답 많은 문항</div>
       <div style="display:flex;flex-wrap:wrap;gap:7px">${hardest.slice(0,12).map(n=>`<span style="background:#fff;border:1.5px solid var(--orange);color:var(--orange-d);border-radius:9px;padding:6px 11px;font-size:13px;font-weight:700">${n}번 <span style="opacity:.7;font-size:11.5px">${err[n]}명</span></span>`).join("")}</div></div>`;
   }
-  // 그리드
-  h+=`<div class="card" style="overflow:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-      <b>${esc(ex.title)}</b>
-      <button class="btn btn-line" style="padding:7px 13px;font-size:13px" onclick="showExpl()">📘 정답·해설 보기</button>
+
+  // ===== 성적표 (고정폭 표) =====
+  const CW=34;          // 문항 칸 너비(px) — 모든 칸 동일
+  const NAMEW=92;       // 학생 이름칸 너비
+  const SCW=58;         // 점수칸 너비
+  h+=`<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <b>${esc(ex.title)} <span style="font-size:12px;color:var(--soft);font-weight:600">· 득점순</span></b>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-line" style="padding:7px 13px;font-size:13px" onclick="editKey()">✏️ 정답 수정</button>
+        <button class="btn btn-line" style="padding:7px 13px;font-size:13px" onclick="showExpl()">📘 정답·해설</button>
+      </div>
     </div>
-    <table style="border-collapse:separate;border-spacing:0;font-size:13px"><thead><tr>
-      <th style="position:sticky;left:0;background:#fff;padding:0 10px;height:36px;text-align:left">학생</th>`;
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <table class="rgrid" style="border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px">
+      <colgroup>
+        <col style="width:${NAMEW}px"><col style="width:42px">`;
+  qNums.forEach(()=>{ h+=`<col style="width:${CW}px">`; });
+  h+=`<col style="width:${SCW}px"></colgroup>
+      <thead><tr>
+        <th class="rgrid-name" style="left:0;text-align:left;padding:0 8px">학생</th>
+        <th style="font-size:11px;color:var(--soft)">석차</th>`;
   qNums.forEach(n=>{ const hot=nStu&&err[n]/nStu>=0.5&&err[n]>0;
-    h+=`<th style="min-width:32px;height:36px;color:${hot?'var(--bad)':'#374151'};font-weight:700">${n}</th>`; });
-  h+=`<th style="min-width:54px;border-left:2px solid #eef0ef">점수</th></tr></thead><tbody>`;
-  students.forEach(s=>{
-    const ws={}; (best[s].wrong||[]).forEach(w=>ws[+w]=1);
-    h+=`<tr><td style="position:sticky;left:0;background:#fff;padding:0 10px;height:38px;font-weight:700;white-space:nowrap">
-      <span style="display:inline-flex;align-items:center;gap:7px">${esc(s)}
-      <button title="이 학생 기록 삭제" onclick="deleteStudent('${esc(s).replace(/'/g,"")}')" style="border:none;background:#fff;color:var(--bad);cursor:pointer;font-size:13px;border:1px solid #fecaca;border-radius:6px;width:20px;height:20px;line-height:1;padding:0">✕</button></span></td>`;
-    qNums.forEach(n=>{ const x=ws[n];
-      h+=`<td style="width:32px;height:38px;border-bottom:1px solid #f1f3f2;font-weight:700;background:${x?'var(--badbg)':'var(--okbg)'};color:${x?'var(--bad)':'var(--ok)'}">${x?'✗':'○'}</td>`; });
-    h+=`<td style="border-left:2px solid #eef0ef;font-weight:700;padding:0 8px">${best[s].score}</td></tr>`;
+    h+=`<th style="color:${hot?'var(--bad)':'#374151'};font-weight:700">${n}</th>`; });
+  h+=`<th style="border-left:2px solid #eef0ef">점수</th></tr></thead><tbody>`;
+  ranked.forEach((s,ri)=>{
+    const g=graded[s];
+    h+=`<tr>
+      <td class="rgrid-name" style="left:0;text-align:left;padding:0 8px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+        <span style="display:inline-flex;align-items:center;gap:6px">${esc(s)}
+        <button title="이 학생 기록 삭제" onclick="deleteStudent('${esc(s).replace(/'/g,"")}')" style="border:1px solid #fecaca;background:#fff;color:var(--bad);cursor:pointer;font-size:11px;border-radius:5px;width:18px;height:18px;line-height:1;padding:0">✕</button></span></td>
+      <td style="color:var(--soft);font-weight:700;font-size:12px">${ri+1}</td>`;
+    qNums.forEach(n=>{
+      const st=g.cell[n];
+      let bg='#fff',col='#cbd5e1',txt='·',cur='default',title='';
+      if(st==='ok'){ bg='var(--ok-l)'; col='var(--ok)'; txt='○'; }
+      else if(st==='bad'){ bg='var(--bad-l)'; col='var(--bad)'; txt='✗'; }
+      else if(st==='manual'){ bg='#fff7ed'; col='#d97706'; txt='?'; cur='pointer'; title='눌러서 ○/✗ 채점'; }
+      else { bg='#fafafa'; col='#cbd5e1'; txt='·'; } // skip
+      const clickable = (st==='manual'||st==='ok'||st==='bad') && needsManualCell(ansByN[n]);
+      const handler = clickable?`onclick="cycleManual('${esc(s).replace(/'/g,"")}',${n})"`:'';
+      if(clickable){ cur='pointer'; if(!title) title='눌러서 ○/✗ 전환'; }
+      h+=`<td ${handler} title="${title}" style="height:36px;border-bottom:1px solid #f1f3f2;font-weight:700;background:${bg};color:${col};cursor:${cur};text-align:center">${txt}</td>`;
+    });
+    h+=`<td style="border-left:2px solid #eef0ef;font-weight:800;color:var(--brand-d);text-align:center">${g.score}</td></tr>`;
   });
-  h+=`<tr><td style="position:sticky;left:0;background:#fff;padding:0 10px;color:var(--soft);font-size:11.5px;font-weight:700;border-top:2px solid #eef0ef">오답합계</td>`;
-  qNums.forEach(n=>{ h+=`<td style="height:30px;border-top:2px solid #eef0ef;color:${err[n]?'var(--bad)':'#d1d5db'};font-weight:700;font-size:11.5px">${err[n]||"·"}</td>`; });
-  h+=`<td style="border-top:2px solid #eef0ef"></td></tr></tbody></table></div>`;
+  h+=`<tr><td class="rgrid-name" style="left:0;text-align:left;padding:0 8px;color:var(--soft);font-size:11.5px;font-weight:700;border-top:2px solid #eef0ef">오답합계</td>
+    <td style="border-top:2px solid #eef0ef"></td>`;
+  qNums.forEach(n=>{ h+=`<td style="height:28px;border-top:2px solid #eef0ef;color:${err[n]?'var(--bad)':'#d1d5db'};font-weight:700;font-size:11.5px;text-align:center">${err[n]||'·'}</td>`; });
+  h+=`<td style="border-top:2px solid #eef0ef"></td></tr></tbody></table></div>
+    <div style="font-size:11.5px;color:var(--soft);margin-top:8px">
+      ○ 정답 · ✗ 오답 · <span style="color:#d97706;font-weight:700">?</span> 수동 채점 대기 (주관식/정답 미입력). 노란 칸을 누르면 ○→✗→○ 으로 바뀌고 점수가 즉시 갱신됩니다.</div>
+  </div>`;
   $("gridBox").innerHTML=h;
+}
+
+// 이 문항이 '학생별 수동 채점' 대상인지 (주관식 또는 정답키 비어있음)
+function needsManualCell(q){
+  if(!q) return false;
+  if(q.type!=="mc") return true;
+  return !(q.a && q.a.length);
+}
+// 노란/채점된 칸 클릭 → 정답 ⇄ 오답 토글, 점수 즉시 갱신
+function cycleManual(name,n){
+  const cur=R_DATA.cur; if(!cur) return;
+  if(!needsManualCell(cur.ansByN[n])) return;
+  R_DATA.manual=R_DATA.manual||{};
+  const m=R_DATA.manual[name]=R_DATA.manual[name]||{};
+  const v=m[n];
+  if(v===true){ m[n]=false; }       // 정답 → 오답
+  else if(v===false){ m[n]=true; }  // 오답 → 정답
+  else {
+    // 아직 수동값이 없음: 현재 화면 상태(자동판정 포함)의 반대로 정함
+    const shown = cur.graded[name] && cur.graded[name].cell[n];
+    m[n] = (shown==='ok') ? false : true;
+  }
+  loadResultGrid(); // 다시 그려 점수·정렬 반영
+}
+// 결과 화면에서 정답키 바로 수정
+function editKey(){
+  const ex=R_DATA.cur&&R_DATA.cur.ex; if(!ex) return;
+  const CC=["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩"];
+  const ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;overflow:auto;padding:16px";
+  ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+  let rows=(ex.answers||[]).map(q=>{
+    const val = q.type==="mc" ? (q.a||[]).map(x=>x+1).join(",") : (q.aText||"");
+    return `<div style="display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:10px;padding:8px 10px">
+      <span style="font-weight:800;color:var(--brand-d);min-width:34px">${q.n}번</span>
+      <input data-n="${q.n}" value="${esc(val)}" placeholder="${q.type==='mc'?'번호 (예: 3 또는 2,5)':'정답 단어'}"
+        style="flex:1;border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;font-size:14px">
+      <span style="font-size:11.5px;color:var(--soft);min-width:38px">${q.type==='mc'?'객관':'주관'}</span>
+    </div>`;
+  }).join("");
+  ov.innerHTML=`<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:14px;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <b style="font-size:15px">정답 수정 — ${esc(ex.title)}</b>
+      <button class="btn btn-ghost" style="padding:6px 12px" onclick="this.closest('div[style*=fixed]').remove()">취소 ✕</button></div>
+    <div style="font-size:12.5px;color:var(--soft);margin-bottom:12px">객관식은 번호(복수정답은 2,5), 주관식은 정답 단어. 저장하면 모든 학생이 새 정답으로 다시 채점됩니다.</div>
+    <div style="display:flex;flex-direction:column;gap:7px;max-height:60vh;overflow:auto">${rows}</div>
+    <div style="display:flex;gap:9px;margin-top:14px">
+      <button class="btn btn-ghost" style="flex:1" onclick="this.closest('div[style*=fixed]').remove()">취소</button>
+      <button class="btn btn-main" style="flex:2" onclick="saveKeyEdits(this)">저장하고 다시 채점</button>
+    </div></div>`;
+  document.body.appendChild(ov);
+}
+async function saveKeyEdits(btn){
+  const ex=R_DATA.cur&&R_DATA.cur.ex; if(!ex) return;
+  const ov=btn.closest('div[style*=fixed]');
+  const inputs=ov.querySelectorAll('input[data-n]');
+  const byN={}; (ex.answers||[]).forEach(q=>byN[q.n]=q);
+  inputs.forEach(inp=>{
+    const n=+inp.getAttribute('data-n'); const q=byN[n]; if(!q) return;
+    const v=inp.value.trim();
+    if(q.type==="mc"){
+      const arr=v.split(/[,\s]+/).map(x=>parseInt(x)).filter(x=>x>=1&&x<=10).map(x=>x-1);
+      q.a=[...new Set(arr)].sort((a,b)=>a-b);
+    }else{
+      q.aText=v;
+    }
+  });
+  btn.textContent="저장 중…"; btn.disabled=true;
+  try{
+    // Firebase의 정답 데이터 갱신
+    await fetch(FB+"/grader_exams/"+encodeURIComponent(ex.slug)+"/answers.json",
+      {method:"PUT",body:JSON.stringify(ex.answers)});
+    // R_DATA.exams 안의 사본도 갱신
+    const idx=$("rSel").value; if(R_DATA.exams[idx]) R_DATA.exams[idx].answers=ex.answers;
+    ov.remove();
+    loadResultGrid(); // 새 정답으로 재채점
+  }catch(e){ alert("저장 실패: "+e.message); btn.textContent="저장하고 다시 채점"; btn.disabled=false; }
 }
 function showExpl(){
   const ex=R_DATA.cur.ex; const err=R_DATA.cur.err;
