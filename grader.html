@@ -242,6 +242,16 @@ async function fetchExam(slug){
 async function listExamsRaw(){
   try{ return await (await fetch(FB+"/grader_exams.json")).json(); }catch(e){ return null; }
 }
+// 시험 정렬: 수동 지정 순서(order)가 있으면 그 순서, 없으면 최신 저장순.
+// order는 작을수록 위. order 없는 항목은 뒤로 보내고 savedAt 최신순.
+function examSort(a,b){
+  const ao=(typeof a.order==="number")?a.order:null;
+  const bo=(typeof b.order==="number")?b.order:null;
+  if(ao!=null && bo!=null) return ao-bo;
+  if(ao!=null) return -1;
+  if(bo!=null) return 1;
+  return (b.savedAt||"").localeCompare(a.savedAt||"");
+}
 </script>
 <script>
 /* ===================== 선생님(관리자) ===================== */
@@ -886,7 +896,7 @@ async function listStudentExams(){
   const data=await listExamsRaw();
   const exams=[];
   if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e && (e.answers||e.kind==="passage") && e.visible!==false) exams.push({slug:k,...e}); }
-  exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
+  exams.sort(examSort);
   if(!exams.length){ $("app").innerHTML=`<div class="state"><div class="big">🗒️</div>지금 풀 수 있는 시험이 없습니다.<br><span style="font-size:13px;color:var(--soft)">선생님이 이번 주 시험을 열면 여기에 보여요.</span></div>`; return; }
   let h=`<div class="card" style="background:var(--green-l);border-color:var(--green)"><b>${esc(S_STUDENT)}</b> 학생, 풀 시험을 선택하세요.</div><div class="examlist">`;
   exams.forEach(e=>{
@@ -1091,8 +1101,8 @@ async function renderResults(){
   $("app").innerHTML=`<div class="state"><div class="spin"></div>시험 목록 불러오는 중…</div>`;
   const data=await listExamsRaw();
   const exams=[];
-  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e && (e.answers||e.kind==="passage")) exams.push({slug:k,title:e.title,n:e.kind==="passage"?"본문":(e.n||e.answers.length),kind:e.kind||"mc",savedAt:e.savedAt,answers:e.answers||[],visible:e.visible!==false}); }
-  exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
+  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e && (e.answers||e.kind==="passage")) exams.push({slug:k,title:e.title,n:e.kind==="passage"?"본문":(e.n||e.answers.length),kind:e.kind||"mc",savedAt:e.savedAt,order:e.order,answers:e.answers||[],visible:e.visible!==false}); }
+  exams.sort(examSort);
   if(!exams.length){ $("app").innerHTML=`<div class="state"><div class="big">🗒️</div>등록된 시험이 없습니다.</div>`; return; }
   R_DATA.exams=exams;
   let h=navTabs("results")+`<div class="card"><div class="label">시험 선택</div>
@@ -1102,9 +1112,13 @@ async function renderResults(){
     </select></div><div id="gridBox"></div>
     <div class="card" style="margin-top:14px">
       <div class="label">📅 주간 시험 관리</div>
-      <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.5">‘노출 ON’ 인 시험만 학생 목록에 보입니다. 이번 주 볼 시험만 켜 두세요. 삭제하면 정답·문제·학생 결과가 모두 사라지고 되돌릴 수 없어요.</div>
+      <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.5">↑↓ 버튼으로 순서를 바꿀 수 있어요. 이 순서대로 학생 목록에도 보입니다. ‘노출 ON’ 인 시험만 학생에게 보이고, 삭제하면 정답·문제·학생 결과가 모두 사라져 되돌릴 수 없어요.</div>
       <div style="display:flex;flex-direction:column;gap:8px">
         ${exams.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;border:1.5px solid ${e.visible?'var(--green)':'var(--line)'};background:${e.visible?'var(--green-l)':'#fafafa'};border-radius:10px;padding:9px 12px">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <button class="btn" title="위로" ${i===0?'disabled':''} onclick="moveExam(${i},-1)" style="padding:0;width:24px;height:20px;font-size:12px;line-height:1;background:${i===0?'#f3f4f6':'#fff'};border:1px solid #d1d5db;color:${i===0?'#cbd5e1':'#374151'};border-radius:6px;cursor:${i===0?'default':'pointer'}">▲</button>
+            <button class="btn" title="아래로" ${i===exams.length-1?'disabled':''} onclick="moveExam(${i},1)" style="padding:0;width:24px;height:20px;font-size:12px;line-height:1;background:${i===exams.length-1?'#f3f4f6':'#fff'};border:1px solid #d1d5db;color:${i===exams.length-1?'#cbd5e1':'#374151'};border-radius:6px;cursor:${i===exams.length-1?'default':'pointer'}">▼</button>
+          </div>
           <div style="flex:1;min-width:0;cursor:pointer" onclick="previewExam('${esc(e.slug)}')">
             <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)} <span style="color:var(--brand);font-size:12px">🔍</span></div>
             <div style="font-size:11.5px;color:var(--soft)">${e.kind==="passage"?"본문 채점":e.n+"문항"} · ${(e.savedAt||"").slice(0,10)} · ${e.visible?'<b style="color:var(--green-d)">학생에게 노출 중</b>':'<span>숨김</span>'}</div>
@@ -1172,6 +1186,24 @@ async function toggleVisible(slug,curVisible){
     await fetch(FB+"/grader_exams/"+encodeURIComponent(slug)+"/visible.json",{method:"PUT",body:JSON.stringify(next)});
     renderResults();
   }catch(e){ alert("변경 실패: "+e.message); }
+}
+// 시험 순서 바꾸기: 현재 화면 순서에서 i번째를 dir(-1 위 / +1 아래)로 이동.
+// 이동 후 전체에 order(0,1,2…)를 다시 매겨 Firebase에 저장 → 모든 화면에 반영.
+async function moveExam(i, dir){
+  const list=(R_DATA.exams||[]).slice();
+  const j=i+dir;
+  if(j<0||j>=list.length) return;
+  [list[i],list[j]]=[list[j],list[i]];
+  list.forEach((e,idx)=>{ e.order=idx; });
+  R_DATA.exams=list;
+  try{
+    // 먼저 저장한 뒤 새로 그린다 (저장 전 재읽기로 옛 순서가 보이는 것 방지)
+    await Promise.all(list.map((e,idx)=>
+      fetch(FB+"/grader_exams/"+encodeURIComponent(e.slug)+"/order.json",
+        {method:"PUT",body:JSON.stringify(idx)})
+    ));
+    renderResults();
+  }catch(e){ alert("순서 저장 실패: "+e.message); renderResults(); }
 }
 async function deleteExam(slug,title){
   if(!confirm(`'${title}' 시험을 삭제할까요?\n\n정답·문제·학생 결과가 모두 삭제되며 되돌릴 수 없습니다.`)) return;
@@ -1254,6 +1286,9 @@ async function loadResultGrid(){
       }
       // 객관식 자동 채점
       total++;
+      // 선생님이 직접 수정한 경우(수동 오버라이드) 최우선 적용
+      if(man[n]===true){ cell[n]='ok'; correct++; return; }
+      if(man[n]===false){ cell[n]='bad'; return; }
       const sel = (rec.sel&&rec.sel[n]) ? rec.sel[n] : null;
       if(sel==null){ // 옛 기록이라 raw 답이 없음 → wrong 배열로 판정
         const wrongList=(rec.wrong||[]).map(Number);
@@ -1339,7 +1374,8 @@ async function loadResultGrid(){
       else if(st==='bad'){ bg='var(--bad-l)'; col='var(--bad)'; txt='✗'; }
       else if(st==='manual'){ bg='#fff7ed'; col='#d97706'; txt='?'; cur='pointer'; title='눌러서 ○/✗ 채점'; }
       else { bg='#fafafa'; col='#cbd5e1'; txt='·'; } // skip
-      const clickable = (st==='manual'||st==='ok'||st==='bad') && needsManualCell(ansByN[n]);
+      // 채점된 칸(○/✗/?)은 모두 클릭해 O↔X 수정 가능
+      const clickable = (st==='manual'||st==='ok'||st==='bad');
       const handler = clickable?`onclick="cycleManual('${esc(s).replace(/'/g,"")}',${n})"`:'';
       if(clickable){ cur='pointer'; if(!title) title='눌러서 ○/✗ 전환'; }
       h+=`<td ${handler} title="${title}" style="height:36px;border-bottom:1px solid #f1f3f2;font-weight:700;background:${bg};color:${col};cursor:${cur};text-align:center">${txt}</td>`;
@@ -1362,17 +1398,18 @@ function needsManualCell(q){
   if(q.type!=="mc") return true;
   return !(q.a && q.a.length);
 }
-// 노란/채점된 칸 클릭 → 정답 ⇄ 오답 토글, 점수 즉시 갱신
+// 칸 클릭 → O/X 수동 수정. 객관식·주관식 모두 가능.
+// 객관식: 자동판정 → (반대로 강제) → 다시 누르면 또 반대 → … 토글
+// 길게 눌러 자동복귀가 필요하면 ✕표시 학생삭제와 헷갈리지 않게 그냥 토글만 제공
 function cycleManual(name,n){
   const cur=R_DATA.cur; if(!cur) return;
-  if(!needsManualCell(cur.ansByN[n])) return;
   R_DATA.manual=R_DATA.manual||{};
   const m=R_DATA.manual[name]=R_DATA.manual[name]||{};
   const v=m[n];
-  if(v===true){ m[n]=false; }       // 정답 → 오답
-  else if(v===false){ m[n]=true; }  // 오답 → 정답
+  if(v===true){ m[n]=false; }       // 정답(수동) → 오답(수동)
+  else if(v===false){ m[n]=true; }  // 오답(수동) → 정답(수동)
   else {
-    // 아직 수동값이 없음: 현재 화면 상태(자동판정 포함)의 반대로 정함
+    // 아직 수동값 없음: 현재 화면 상태(자동판정 포함)의 반대로 정함
     const shown = cur.graded[name] && cur.graded[name].cell[n];
     m[n] = (shown==='ok') ? false : true;
   }
