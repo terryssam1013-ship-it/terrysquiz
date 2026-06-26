@@ -615,11 +615,12 @@ async function parseAnswerTable(pdf, onProg){
       const tc=await page.getTextContent();
       const txt=tc.items.map(it=>it.str).join(" ");
       if(!/해설/.test(txt)) continue; // 해설 페이지만
-      const vp=page.getViewport({scale:2});
+      // 해설은 텍스트 가독성만 있으면 되므로 적당한 화질로(용량 절감)
+      const vp=page.getViewport({scale:1.6});
       const cv=document.createElement("canvas");
       cv.width=Math.ceil(vp.width); cv.height=Math.ceil(vp.height);
       await page.render({canvasContext:cv.getContext("2d"), viewport:vp}).promise;
-      explImgs.push(cv.toDataURL("image/jpeg",0.7));
+      explImgs.push(cv.toDataURL("image/jpeg",0.6));
       if(explImgs.length>=8) break; // 안전 상한
     }
   }catch(e){}
@@ -770,7 +771,7 @@ async function cropQuestionsFromPdf(pdf, onProg){
     const cv=document.createElement("canvas");
     cv.width=Math.round((xR-xL)*scale); cv.height=Math.round((yB-yT)*scale);
     cv.getContext("2d").drawImage(full, xL*scale, yT*scale, (xR-xL)*scale, (yB-yT)*scale, 0,0, cv.width, cv.height);
-    A_QIMGS[mk.num]=cv.toDataURL("image/jpeg",0.75);
+    A_QIMGS[mk.num]=cv.toDataURL("image/jpeg",0.6);
     if(onProg) onProg(i+1,seq.length);
   }
   return seq.length;
@@ -874,16 +875,39 @@ async function saveExam(){
   const empty=A_ANSWERS.filter(q=>q.type==="mc"?!q.a.length:!q.aText).map(q=>q.n);
   if(empty.length && !confirm("정답이 비어 있는 문항: "+empty.join(", ")+"번\n(이 문항들은 채점에서 제외됩니다) 그래도 저장할까요?")) return;
   const slug=slugify(A_TITLE);
-  const payload={
-    title:A_TITLE, slug, savedAt:new Date().toISOString(),
-    n:A_ANSWERS.length, visible:true, pdf:A_PDF||"",
-    explImgs:A_EXPL_IMGS||[],
-    answers:A_ANSWERS.map(q=>({n:q.n,type:q.type,a:q.a,aText:q.aText,expl:q.expl||"",img:A_QIMGS[q.n]||""}))
+  // 원본 PDF는 관리자 미리보기용으로 그대로 저장한다.
+  // 대신 해설/문제지 이미지는 용량이 크므로, 총 용량이 한도를 넘으면
+  // 이미지 화질을 단계적으로 낮추거나 떼어내 저장이 실패하지 않게 한다.
+  const buildPayload=(opt={})=>{
+    const p={
+      title:A_TITLE, slug, savedAt:new Date().toISOString(),
+      n:A_ANSWERS.length, visible:true, pdf:A_PDF||"",
+      explImgs: opt.dropExpl ? [] : (A_EXPL_IMGS||[]),
+      answers:A_ANSWERS.map(q=>({n:q.n,type:q.type,a:q.a,aText:q.aText,expl:q.expl||"",
+        img: opt.dropQImg ? "" : (A_QIMGS[q.n]||"")}))
+    };
+    return p;
   };
+  const sizeMB=(o)=>JSON.stringify(o).length/1048576;
+  const LIMIT=8; // Firebase 한 번 쓰기 안전 한도(대략)
+
+  let payload=buildPayload();
+  // 1차: 그대로. 너무 크면 문제지 이미지부터 제거(채점·해설엔 영향 없음)
+  if(sizeMB(payload)>LIMIT){
+    payload=buildPayload({dropQImg:true});
+  }
+  // 그래도 크면 해설 이미지도 제거 (원본 PDF는 유지 → 관리자가 PDF로 해설 확인 가능)
+  let droppedExpl=false;
+  if(sizeMB(payload)>LIMIT){
+    payload=buildPayload({dropQImg:true, dropExpl:true});
+    droppedExpl=true;
+  }
+  const body=JSON.stringify(payload);
   const box=document.createElement("div");
   try{
-    const r=await fetch(FB+"/grader_exams/"+encodeURIComponent(slug)+".json",{method:"PUT",body:JSON.stringify(payload)});
+    const r=await fetch(FB+"/grader_exams/"+encodeURIComponent(slug)+".json",{method:"PUT",body});
     if(!r.ok) throw new Error("HTTP "+r.status);
+    if(droppedExpl){ /* 안내는 저장 후 별도로 */ }
     const sUrl=location.origin+location.pathname+"?set="+encodeURIComponent(slug);
     const rUrl=location.origin+location.pathname+"?mode=results";
     $("app").innerHTML=`<div class="card" style="text-align:center;background:var(--green-l);border-color:var(--green)">
@@ -891,6 +915,7 @@ async function saveExam(){
       <div style="font-size:17px;font-weight:700;margin:8px 0">저장 완료!</div>
       <div style="font-size:14px;color:var(--green-d)">${esc(A_TITLE)} · ${A_ANSWERS.length}문항</div>
     </div>
+    ${droppedExpl?`<div class="card" style="background:#fff7ed;border-color:#fdba74;color:#9a3412;font-size:13px">⚠️ 용량이 커서 해설 이미지는 저장하지 않았어요. 해설은 관리자 화면의 <b>원본 PDF 미리보기</b>(🔍)로 확인할 수 있습니다.</div>`:''}
     <div class="card"><div class="label">학생에게 줄 주소</div>
       <input type="text" readonly value="${sUrl}" onclick="this.select()" style="font-size:13px">
       <div style="font-size:12.5px;color:var(--soft);margin-top:6px">학생은 이 주소로 들어가 이름을 넣고 답만 입력하면 됩니다.</div>
