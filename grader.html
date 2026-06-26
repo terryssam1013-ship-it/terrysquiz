@@ -241,9 +241,7 @@ let A_ANSWERS=[];      // [{n, type:'mc'|'sa', a:[idx]/'' , aText}]
 let A_PAGES=[];        // 해설 PDF 페이지 이미지 (dataURL)
 let A_QIMGS={};        // { 문항번호: dataURL } — 문제지 이미지
 let A_PDF="";          // 원본 정답·해설 PDF (dataURL)
-let A_TITLE="", A_SCHOOL="", A_GRADE="";
-function lastSchool(){ try{return localStorage.getItem("terrys_last_school")||"";}catch(e){return "";} }
-function lastGrade(){ try{return localStorage.getItem("terrys_last_grade")||"";}catch(e){return "";} }
+let A_TITLE="";
 
 function isAdmin(){ try{ return localStorage.getItem("terrys_admin")==="1"; }catch(e){ return false; } }
 function setAdmin(on){ try{ on?localStorage.setItem("terrys_admin","1"):localStorage.removeItem("terrys_admin"); }catch(e){} }
@@ -274,19 +272,11 @@ function renderAdminUpload(){
   $("topTitle").textContent="선생님 — 시험 등록";
   $("app").innerHTML=navTabs("admin")+`
     <div class="card">
-      <div class="label">1. 학교 · 학년</div>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="examSchool" placeholder="학교 (예: 푸른중)" autocomplete="off" style="flex:1" value="${esc(lastSchool())}">
-        <input type="text" id="examGrade" placeholder="학년 (예: 중3)" autocomplete="off" style="flex:1" value="${esc(lastGrade())}">
-      </div>
-      <div style="font-size:12px;color:var(--soft);margin-top:7px">학생이 자기 학교를 고르면 그 학교 시험만 보여요.</div>
+      <div class="label">1. 시험 제목</div>
+      <input type="text" id="examTitle" placeholder="예: 중3 기말 3·4과 기출변형" autocomplete="off">
     </div>
     <div class="card">
-      <div class="label">2. 시험 제목</div>
-      <input type="text" id="examTitle" placeholder="예: 1학기 기말 3·4과 기출변형" autocomplete="off">
-    </div>
-    <div class="card">
-      <div class="label">3. PDF 업로드 (정답·해설 + 문제)</div>
+      <div class="label">2. PDF 업로드 (정답·해설 + 문제)</div>
       <div class="drop" id="drop" onclick="$('file').click()">
         <div class="ic">📄</div>
         <div class="t">PDF를 여기에</div>
@@ -295,7 +285,7 @@ function renderAdminUpload(){
       <input type="file" id="file" accept="application/pdf" style="display:none">
     </div>
     <div class="card">
-      <div class="label">4. 문제지가 따로 있을 때만 (선택)</div>
+      <div class="label">3. 문제지가 따로 있을 때만 (선택)</div>
       <div class="drop" id="qdrop" onclick="$('qfile').click()" style="border-color:#d6c7e0;background:#fbfafd">
         <div class="ic">📝</div>
         <div class="t" id="qdropT">문제지 PDF가 별도 파일일 때만 올리세요</div>
@@ -319,8 +309,6 @@ function renderAdminUpload(){
 
 async function handlePDF(file){
   A_TITLE=($("examTitle").value||"").trim()||file.name.replace(/\.pdf$/i,"");
-  A_SCHOOL=($("examSchool")?$("examSchool").value.trim():"")||"";
-  A_GRADE=($("examGrade")?$("examGrade").value.trim():"")||"";
   $("examTitle").value=A_TITLE;
   $("processBox").innerHTML=`<div class="state"><div class="spin"></div><div>PDF 분석 중…</div><div class="prog" id="prog">파일 읽는 중</div></div>`;
   const buf=await file.arrayBuffer();
@@ -351,27 +339,52 @@ async function handlePDF(file){
   renderAnswerEditor();
 }
 
-// 정답+해설 파싱: "N)[정답] <답> [해설] <해설>" 블록을 다음 "N)[정답]" 전까지
+// 정답+해설 파싱: 두 가지 형식 모두 지원
+//   (구) "N) [정답] <답> [해설] <해설>"
+//   (신) "N) [난이도] <답> [해설] <해설>"   ← 예: "1) [중상] ④"
+// 2단 레이아웃 PDF에서 블록 순서가 뒤섞일 수 있으므로 '실제 번호 N'으로 정렬한다.
 function parseAnswers(text){
   const circ="①②③④⑤⑥⑦⑧⑨⑩";
-  // 'N)[정답]' 블록을 순서대로 수집 (번호는 신뢰하지 않고 등장 순서로 1..N 재부여)
-  const re=/(\d{1,3})\s*\)\s*\[정답\]\s*([\s\S]*?)(?:\[해설\]\s*([\s\S]*?))?(?=\d{1,3}\s*\)\s*\[정답\]|$)/g;
+  // 블록 시작 = "N) [정답]"  또는  "N) [한글난이도]"  (난이도: 상/중상/중/중하/하 등)
+  const blockStart=String.raw`(\d{1,3})\s*\)\s*\[(?:정답|[가-힣]{1,3})\]`;
+  const re=new RegExp(
+    blockStart + String.raw`\s*([\s\S]*?)(?:\[해설\]\s*([\s\S]*?))?(?=` + blockStart + String.raw`|$)`,
+    "g"
+  );
   const items=[]; let m;
   while((m=re.exec(text))){
+    const num=parseInt(m[1],10);
     const ansRaw=(m[2]||"").trim().replace(/\s+/g," ");
     const expl=(m[3]||"").trim().replace(/\s+/g," ");
-    items.push({ansRaw,expl});
+    items.push({num,ansRaw,expl});
   }
   if(!items.length) return [];
-  const out=items.map((it,i)=>{
-    const n=i+1;
-    const picks=[...it.ansRaw].filter(c=>circ.includes(c));
-    const stripped=it.ansRaw.replace(/[①②③④⑤⑥⑦⑧⑨⑩\s,，·]/g,"");
+
+  // 같은 번호가 중복 매칭되면 정답(원문자)이 있는 쪽을 우선 채택
+  const byNum=new Map();
+  for(const it of items){
+    const hasPick=[...it.ansRaw].some(c=>circ.includes(c));
+    const prev=byNum.get(it.num);
+    if(!prev){ byNum.set(it.num,it); continue; }
+    const prevHas=[...prev.ansRaw].some(c=>circ.includes(c));
+    if(hasPick && !prevHas) byNum.set(it.num,it);
+  }
+  // 실제 번호 순서로 정렬
+  const sorted=[...byNum.values()].sort((a,b)=>a.num-b.num);
+
+  const out=sorted.map(it=>{
+    const n=it.num;
+    // 정답: 난이도 표기 직후 맨 앞에 연속으로 오는 원문자만 인정
+    // (해설 본문 속 ①②...는 이미 [해설] 뒤로 분리돼 있음)
+    const headMatch=it.ansRaw.match(/^[\s]*([①②③④⑤⑥⑦⑧⑨⑩][①②③④⑤⑥⑦⑧⑨⑩\s,，·]*)/);
+    const ansHead=headMatch?headMatch[1]:it.ansRaw;
+    const picks=[...ansHead].filter(c=>circ.includes(c));
+    const stripped=ansHead.replace(/[①②③④⑤⑥⑦⑧⑨⑩\s,，·]/g,"");
     if(picks.length && stripped.length===0){
       const idx=[...new Set(picks.map(c=>circ.indexOf(c)))].sort((a,b)=>a-b);
       return {n,type:"mc",a:idx,aText:"",expl:it.expl};
     }
-    return {n,type:"sa",a:[],aText:it.ansRaw,expl:it.expl};
+    return {n,type:"sa",a:[],aText:ansHead.trim()||it.ansRaw,expl:it.expl};
   });
   return out;
 }
@@ -505,14 +518,11 @@ function addRow(){
 async function saveExam(){
   A_TITLE=($("examTitle")?$("examTitle").value.trim():A_TITLE)||A_TITLE;
   if(!A_TITLE){ alert("시험 제목을 입력해 주세요."); return; }
-  A_SCHOOL=($("examSchool")?$("examSchool").value.trim():A_SCHOOL)||A_SCHOOL;
-  A_GRADE=($("examGrade")?$("examGrade").value.trim():A_GRADE)||A_GRADE;
-  try{ if(A_SCHOOL)localStorage.setItem("terrys_last_school",A_SCHOOL); if(A_GRADE)localStorage.setItem("terrys_last_grade",A_GRADE); }catch(e){}
   const empty=A_ANSWERS.filter(q=>q.type==="mc"?!q.a.length:!q.aText).map(q=>q.n);
   if(empty.length && !confirm("정답이 비어 있는 문항: "+empty.join(", ")+"번\n(이 문항들은 채점에서 제외됩니다) 그래도 저장할까요?")) return;
-  const slug=slugify((A_GRADE?A_GRADE+"_":"")+(A_SCHOOL?A_SCHOOL+"_":"")+A_TITLE);
+  const slug=slugify(A_TITLE);
   const payload={
-    title:A_TITLE, slug, school:A_SCHOOL||"", grade:A_GRADE||"", savedAt:new Date().toISOString(),
+    title:A_TITLE, slug, savedAt:new Date().toISOString(),
     n:A_ANSWERS.length, visible:true, pdf:A_PDF||"",
     answers:A_ANSWERS.map(q=>({n:q.n,type:q.type,a:q.a,aText:q.aText,expl:q.expl||"",img:A_QIMGS[q.n]||""}))
   };
@@ -541,7 +551,7 @@ async function saveExam(){
 </script>
 <script>
 /* ===================== 학생 ===================== */
-let S_EXAM=null, S_SLUG="", S_STUDENT="", S_SCHOOL="", S_SEL={}, graded=false;
+let S_EXAM=null, S_SLUG="", S_STUDENT="", S_SEL={}, graded=false;
 
 function getStudentName(){
   try{
@@ -550,61 +560,39 @@ function getStudentName(){
     return sessionStorage.getItem('terrys_grader_student')||'';
   }catch(e){ return ''; }
 }
-function getStudentSchool(){ try{ return localStorage.getItem('terrys_grader_school')||''; }catch(e){ return ''; } }
-async function renderStudentStart(){
+function renderStudentStart(){
   const directSet=new URLSearchParams(location.search).get('set');
   S_STUDENT=getStudentName();
-  S_SCHOOL=getStudentSchool();
-  if(directSet && S_STUDENT){ openStudentExam(directSet); return; }
-  if(S_STUDENT){ listStudentExams(); return; }
+  if(S_STUDENT){ directSet?openStudentExam(directSet):listStudentExams(); return; }
   $("app").innerHTML=`<div class="card">
       <div class="label">이름</div>
-      <input type="text" id="nm" placeholder="이름을 입력하세요" autocomplete="off" value="${esc(S_STUDENT)}">
-    </div>
-    <div class="dock"><button class="btn btn-main" style="flex:1" onclick="setStuStart('${directSet||''}')">시작하기</button></div>`;
+      <input type="text" id="nm" placeholder="이름을 입력하세요" autocomplete="off">
+      <button class="btn btn-main btn-wide" onclick="setStuName('${directSet||''}')">시작하기</button>
+    </div>`;
   $("nm").focus();
-  $("nm").addEventListener("keydown",e=>{if(e.key==="Enter")setStuStart(directSet||'');});
+  $("nm").addEventListener("keydown",e=>{if(e.key==="Enter")setStuName(directSet||'');});
 }
-let PICKED_SCHOOL="";
-function pickSchool(btn,s){
-  PICKED_SCHOOL=s;
-  document.querySelectorAll("#schoolPick .modebtn").forEach(b=>b.classList.toggle("on",b===btn));
-}
-function setStuStart(directSet){
+function setStuName(directSet){
   const v=$("nm").value.trim(); if(!v){alert("이름을 입력해 주세요.");return;}
-  S_STUDENT=v; S_SCHOOL="";
-  try{ sessionStorage.setItem('terrys_grader_student',v); }catch(e){}
+  S_STUDENT=v; try{sessionStorage.setItem('terrys_grader_student',v);}catch(e){}
   directSet?openStudentExam(directSet):listStudentExams();
-}
-function changeName(){
-  try{ sessionStorage.removeItem('terrys_grader_student'); }catch(e){}
-  S_STUDENT=""; renderStudentStart();
 }
 
 async function listStudentExams(){
   $("app").innerHTML=`<div class="state"><div class="spin"></div>시험 목록 불러오는 중…</div>`;
   const data=await listExamsRaw();
   const exams=[];
-  if(data&&typeof data==="object") for(const k in data){ const e=data[k];
-    if(e && (e.answers||e.kind==="passage") && e.visible!==false){
-      // 학교가 정해져 있으면 같은 학교(또는 학교 미지정)만
-      if(S_SCHOOL && e.school && e.school!==S_SCHOOL) continue;
-      exams.push({slug:k,...e});
-    }
-  }
-  exams.sort((a,b)=>{ const oa=(typeof a.order==="number"?a.order:(8e12-new Date(a.savedAt||0).getTime())); const ob=(typeof b.order==="number"?b.order:(8e12-new Date(b.savedAt||0).getTime())); return oa-ob; });
-  const hdr=`<div class="card" style="background:var(--green-l);border-color:var(--green);display:flex;justify-content:space-between;align-items:center;gap:10px">
-    <div><b>${esc(S_STUDENT)}</b> 학생, 풀 시험을 선택하세요.</div>
-    <button class="btn btn-ghost" style="padding:6px 11px;font-size:12.5px" onclick="changeName()">이름 바꾸기</button></div>`;
-  if(!exams.length){ $("app").innerHTML=hdr+`<div class="state"><div class="big">🗒️</div>지금 풀 수 있는 시험이 없습니다.<br><span style="font-size:13px;color:var(--soft)">선생님이 이번 주 시험을 열면 여기에 보여요.</span></div>`; return; }
-  let h=hdr+`<div class="examlist">`;
+  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e && (e.answers||e.kind==="passage") && e.visible!==false) exams.push({slug:k,...e}); }
+  exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
+  if(!exams.length){ $("app").innerHTML=`<div class="state"><div class="big">🗒️</div>지금 풀 수 있는 시험이 없습니다.<br><span style="font-size:13px;color:var(--soft)">선생님이 이번 주 시험을 열면 여기에 보여요.</span></div>`; return; }
+  let h=`<div class="card" style="background:var(--green-l);border-color:var(--green)"><b>${esc(S_STUDENT)}</b> 학생, 풀 시험을 선택하세요.</div><div class="examlist">`;
   exams.forEach(e=>{
     const isP = e.kind==="passage";
-    const meta = (e.grade||e.school?`${e.grade||""} ${e.school||""} · `:"")+(isP ? "본문 채점" : `${e.n||(e.answers?e.answers.length:0)}문항`);
+    const meta = isP ? "본문 채점 · 타이핑 또는 사진" : `${e.n||(e.answers?e.answers.length:0)}문항 · 100점`;
     const icon = isP ? "✍️" : (e.title?e.title.slice(0,1):"E");
     h+=`<div class="exam-item" onclick="openStudentExam('${esc(e.slug)}')">
     <div class="exam-dot">${esc(icon)}</div><div class="exam-info"><div class="exam-title">${esc(e.title)}</div>
-    <div class="exam-meta">${esc(meta)}</div></div><div class="exam-go">›</div></div>`;
+    <div class="exam-meta">${meta}</div></div><div class="exam-go">›</div></div>`;
   });
   h+=`</div>`;
   $("app").innerHTML=h;
@@ -791,41 +779,28 @@ async function renderResults(){
   $("app").innerHTML=`<div class="state"><div class="spin"></div>시험 목록 불러오는 중…</div>`;
   const data=await listExamsRaw();
   const exams=[];
-  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e && (e.answers||e.kind==="passage")) exams.push({slug:k,title:e.title,n:e.kind==="passage"?"본문":(e.n||e.answers.length),kind:e.kind||"mc",school:e.school||"",grade:e.grade||"",order:(typeof e.order==="number"?e.order:null),savedAt:e.savedAt,answers:e.answers||[],visible:e.visible!==false}); }
-  // 그룹 안 정렬: 수동 order 우선(작을수록 위), 없으면 최신 등록 먼저
-  const ordVal=e=> (e.order!=null? e.order : (8e12 - new Date(e.savedAt||0).getTime()));
-  exams.sort((a,b)=> ordVal(a)-ordVal(b));
+  if(data&&typeof data==="object") for(const k in data){ const e=data[k]; if(e && (e.answers||e.kind==="passage")) exams.push({slug:k,title:e.title,n:e.kind==="passage"?"본문":(e.n||e.answers.length),kind:e.kind||"mc",savedAt:e.savedAt,answers:e.answers||[],visible:e.visible!==false}); }
+  exams.sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||""));
   if(!exams.length){ $("app").innerHTML=`<div class="state"><div class="big">🗒️</div>등록된 시험이 없습니다.</div>`; return; }
   R_DATA.exams=exams;
-  // 그룹키: 학년 > 학교
-  const groupKey=e=> (e.grade||"기타")+" · "+(e.school||"기타");
-  const groups={}; exams.forEach((e,i)=>{ (groups[groupKey(e)]=groups[groupKey(e)]||[]).push(i); });
-  // 학년이 먼저 오도록 그룹키 정렬 (중1<중2<중3 자연스럽게)
-  const gKeys=Object.keys(groups).sort((a,b)=>a.localeCompare(b,'ko'));
   let h=navTabs("results")+`<div class="card"><div class="label">시험 선택</div>
     <select id="rSel" onchange="loadResultGrid()" style="width:100%;font-family:inherit;font-size:15px;border:1.5px solid #d1d5db;border-radius:10px;padding:11px 13px;cursor:pointer">
       <option value="">— 시험을 선택하세요 —</option>
-      ${gKeys.map(g=>`<optgroup label="${esc(g)}">`+groups[g].map(i=>`<option value="${i}">${esc(exams[i].title)}</option>`).join("")+`</optgroup>`).join("")}
+      ${exams.map((e,i)=>`<option value="${i}">${esc(e.title)}</option>`).join("")}
     </select></div><div id="gridBox"></div>
     <div class="card" style="margin-top:14px">
       <div class="label">📅 주간 시험 관리</div>
       <div style="font-size:12.5px;color:var(--soft);margin-bottom:10px;line-height:1.5">‘노출 ON’ 인 시험만 학생 목록에 보입니다. 이번 주 볼 시험만 켜 두세요. 삭제하면 정답·문제·학생 결과가 모두 사라지고 되돌릴 수 없어요.</div>
-      ${gKeys.map(g=>`
-        <div style="font-size:12.5px;font-weight:800;color:var(--brand-d);margin:12px 0 7px;padding-left:2px">${esc(g)}</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-        ${groups[g].map((i,pos)=>{const e=exams[i];return `<div style="display:flex;align-items:center;gap:8px;border:1.5px solid ${e.visible?'var(--green)':'var(--line)'};background:${e.visible?'var(--green-l)':'#fafafa'};border-radius:10px;padding:9px 12px">
-          <div style="display:flex;flex-direction:column;gap:2px">
-            <button title="위로" onclick="moveExam('${esc(e.slug)}',-1)" ${pos===0?'disabled':''} style="border:1px solid var(--line);background:#fff;border-radius:6px;width:24px;height:21px;line-height:1;cursor:${pos===0?'default':'pointer'};opacity:${pos===0?'.35':'1'};font-size:11px">▲</button>
-            <button title="아래로" onclick="moveExam('${esc(e.slug)}',1)" ${pos===groups[g].length-1?'disabled':''} style="border:1px solid var(--line);background:#fff;border-radius:6px;width:24px;height:21px;line-height:1;cursor:${pos===groups[g].length-1?'default':'pointer'};opacity:${pos===groups[g].length-1?'.35':'1'};font-size:11px">▼</button>
-          </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${exams.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;border:1.5px solid ${e.visible?'var(--green)':'var(--line)'};background:${e.visible?'var(--green-l)':'#fafafa'};border-radius:10px;padding:9px 12px">
           <div style="flex:1;min-width:0;cursor:pointer" onclick="previewExam('${esc(e.slug)}')">
             <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)} <span style="color:var(--brand);font-size:12px">🔍</span></div>
             <div style="font-size:11.5px;color:var(--soft)">${e.kind==="passage"?"본문 채점":e.n+"문항"} · ${(e.savedAt||"").slice(0,10)} · ${e.visible?'<b style="color:var(--green-d)">학생에게 노출 중</b>':'<span>숨김</span>'}</div>
           </div>
-          <button class="btn" style="padding:7px 11px;font-size:12.5px;${e.visible?'background:var(--green);color:#fff;border:none':'background:#fff;border:1.5px solid #d1d5db;color:#374151'}" onclick="toggleVisible('${esc(e.slug)}',${e.visible?1:0})">${e.visible?'ON':'OFF'}</button>
-          <button class="btn" style="background:#fff;border:1.5px solid #fecaca;color:var(--bad);padding:7px 10px;font-size:12.5px" onclick="deleteExam('${esc(e.slug)}','${esc(e.title).replace(/'/g,"")}')">삭제</button>
-        </div>`;}).join("")}
+          <button class="btn" style="padding:7px 12px;font-size:12.5px;${e.visible?'background:var(--green);color:#fff;border:none':'background:#fff;border:1.5px solid #d1d5db;color:#374151'}" onclick="toggleVisible('${esc(e.slug)}',${e.visible?1:0})">${e.visible?'노출 ON':'노출 OFF'}</button>
+          <button class="btn" style="background:#fff;border:1.5px solid #fecaca;color:var(--bad);padding:7px 11px;font-size:12.5px" onclick="deleteExam('${esc(e.slug)}','${esc(e.title).replace(/'/g,"")}')">삭제</button>
         </div>`).join("")}
+      </div>
     </div>`;
   $("app").innerHTML=h;
 }
@@ -878,25 +853,6 @@ async function deleteStudent(name){
     await Promise.all(dels);
     loadResultGrid();
   }catch(e){ alert("삭제 실패: "+e.message); }
-}
-async function moveExam(slug, dir){
-  const exams=R_DATA.exams||[];
-  const cur=exams.find(e=>e.slug===slug); if(!cur) return;
-  const gk=(cur.grade||"기타")+" · "+(cur.school||"기타");
-  // 같은 그룹의 현재 표시 순서
-  const group=exams.filter(e=> ((e.grade||"기타")+" · "+(e.school||"기타"))===gk );
-  const pos=group.findIndex(e=>e.slug===slug);
-  const tgt=pos+dir;
-  if(tgt<0||tgt>=group.length) return;
-  // 현재 그룹에 연속 order 값 부여(정렬 깨짐 방지) 후 두 개 swap
-  group.forEach((e,idx)=>{ e.order=idx; });
-  const a=group[pos], b=group[tgt];
-  const tmp=a.order; a.order=b.order; b.order=tmp;
-  try{
-    // 그룹 전체 order를 저장(안정적)
-    await Promise.all(group.map(e=> fetch(FB+"/grader_exams/"+encodeURIComponent(e.slug)+"/order.json",{method:"PUT",body:JSON.stringify(e.order)})));
-    renderResults();
-  }catch(err){ alert("순서 변경 실패: "+err.message); }
 }
 async function toggleVisible(slug,curVisible){
   const next = curVisible?false:true;
@@ -1039,18 +995,11 @@ function renderPassageEditor(){
   $("topTitle").textContent="선생님 — 본문 채점 만들기";
   $("app").innerHTML=navTabs("passage")+`
     <div class="card">
-      <div class="label">1. 학교 · 학년</div>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="pSchool" placeholder="학교 (예: 푸른중)" autocomplete="off" style="flex:1" value="${esc(lastSchool())}">
-        <input type="text" id="pGrade" placeholder="학년 (예: 중3)" autocomplete="off" style="flex:1" value="${esc(lastGrade())}">
-      </div>
-    </div>
-    <div class="card">
-      <div class="label">2. 시험 제목</div>
+      <div class="label">1. 시험 제목</div>
       <input type="text" id="pTitle" placeholder="예: 3과 본문 암기 평가" autocomplete="off" value="${esc(P_TITLE)}">
     </div>
     <div class="card">
-      <div class="label">3. 정답 본문</div>
+      <div class="label">2. 정답 본문</div>
       <div style="font-size:12.5px;color:var(--soft);margin-bottom:9px;line-height:1.55">교과서 본문 PDF를 올리면 영어 본문이 자동으로 들어옵니다. 직접 붙여넣어도 돼요. 빈칸 채우기로 낼 거면, 정답 본문 전체를 넣으세요.</div>
       <div class="drop" id="pdrop" onclick="$('pfile').click()" style="margin-bottom:11px">
         <div class="ic">📄</div><div class="t">본문 PDF 올리기</div>
@@ -1084,11 +1033,8 @@ async function savePassage(){
   P_TITLE=$("pTitle").value.trim(); P_TEXT=$("pText").value.trim();
   if(!P_TITLE){ alert("시험 제목을 입력해 주세요."); return; }
   if(P_TEXT.length<10){ alert("정답 본문을 넣어 주세요."); return; }
-  const pSchool=($("pSchool")?$("pSchool").value.trim():"")||"";
-  const pGrade=($("pGrade")?$("pGrade").value.trim():"")||"";
-  try{ if(pSchool)localStorage.setItem("terrys_last_school",pSchool); if(pGrade)localStorage.setItem("terrys_last_grade",pGrade); }catch(e){}
-  const slug=slugify((pGrade?pGrade+"_":"")+(pSchool?pSchool+"_":"")+P_TITLE);
-  const payload={ title:P_TITLE, slug, kind:"passage", school:pSchool, grade:pGrade, savedAt:new Date().toISOString(), visible:true, text:P_TEXT };
+  const slug=slugify(P_TITLE);
+  const payload={ title:P_TITLE, slug, kind:"passage", savedAt:new Date().toISOString(), visible:true, text:P_TEXT };
   try{
     const r=await fetch(FB+"/grader_exams/"+encodeURIComponent(slug)+".json",{method:"PUT",body:JSON.stringify(payload)});
     if(!r.ok) throw new Error("HTTP "+r.status);
