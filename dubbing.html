@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>더빙 스튜디오</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14110F; --surface:#1F1B18; --surface-2:#2A2521;
+    --rec:#FF3B30; --ready:#E8A33D; --text:#F2EDE6; --muted:#8A827A;
+    --line:#3A332E;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+    --body:'Inter',system-ui,sans-serif;
+    --mono:'Space Mono',monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--body);overscroll-behavior:none}
+  body{min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+  .wrap{max-width:480px;margin:0 auto;padding:18px 16px 40px}
+
+  header{display:flex;align-items:center;gap:10px;margin:6px 2px 20px}
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--rec);box-shadow:0 0 0 0 rgba(255,59,48,.5);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,59,48,.45)}70%{box-shadow:0 0 0 9px rgba(255,59,48,0)}100%{box-shadow:0 0 0 0 rgba(255,59,48,0)}}
+  header h1{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.02em;margin:0}
+  header .sub{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;margin:0 0 8px}
+  input[type=text]{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;color:var(--text);
+    font-family:var(--body);font-size:15px;padding:13px 14px;outline:none}
+  input[type=text]:focus{border-color:var(--ready)}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;border-radius:13px;
+    font-family:var(--disp);font-weight:600;font-size:15px;padding:15px;cursor:pointer;transition:transform .06s,opacity .2s}
+  .btn:active{transform:scale(.985)}
+  .btn[disabled]{opacity:.4;pointer-events:none}
+  .btn-primary{background:var(--rec);color:#fff}
+  .btn-amber{background:var(--ready);color:#241c12}
+  .btn-ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--line)}
+  .row{display:flex;gap:10px}
+  .row>*{flex:1}
+
+  .stage{position:relative;width:100%;aspect-ratio:9/16;max-height:74dvh;background:#000;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+  .player-box{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
+  .player-box iframe,.player-box>div{width:100%;height:100%}
+  /* video sits centered; for 16:9 in 9:16 frame we letterbox */
+  #ytPlayer{width:100%;height:100%}
+
+  .cam{position:absolute;right:14px;bottom:84px;width:118px;height:118px;border-radius:50%;overflow:hidden;
+    border:3px solid var(--text);background:#000;z-index:6;box-shadow:0 6px 22px rgba(0,0,0,.5)}
+  .cam.recording{border-color:var(--rec);animation:ring 1.4s infinite}
+  @keyframes ring{0%{box-shadow:0 0 0 0 rgba(255,59,48,.5)}70%{box-shadow:0 0 0 12px rgba(255,59,48,0)}100%{box-shadow:0 0 0 0 rgba(255,59,48,0)}}
+  .cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+  .cam.result video{transform:none}
+
+  .nametag{position:absolute;right:14px;bottom:64px;z-index:7;background:rgba(20,17,15,.85);
+    border:1px solid var(--line);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:600;
+    font-family:var(--disp);max-width:118px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .recbadge{position:absolute;left:14px;top:14px;z-index:7;display:none;align-items:center;gap:7px;
+    background:rgba(20,17,15,.8);border-radius:20px;padding:6px 12px;font-family:var(--mono);font-size:12px;font-weight:700}
+  .recbadge.on{display:flex}
+  .recbadge .d{width:9px;height:9px;border-radius:50%;background:var(--rec);animation:blink 1s infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .timecode{position:absolute;right:14px;top:14px;z-index:7;font-family:var(--mono);font-size:12px;
+    background:rgba(20,17,15,.8);border-radius:20px;padding:6px 11px;color:var(--text)}
+
+  .count{position:absolute;inset:0;z-index:9;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55)}
+  .count.on{display:flex}
+  .count span{font-family:var(--disp);font-weight:700;font-size:110px;color:var(--text);animation:pop .9s ease}
+  @keyframes pop{0%{transform:scale(.4);opacity:0}40%{opacity:1}100%{transform:scale(1.25);opacity:0}}
+
+  .timeset{display:flex;gap:10px;margin-top:6px}
+  .tlabel{font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:0 0 6px 2px}
+  .tinput{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;color:var(--text);
+    font-family:var(--mono);font-size:22px;font-weight:700;text-align:center;padding:11px 8px;outline:none}
+  .tinput:focus{border-color:var(--ready)}
+  .timeset .pill{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .timeset .pill .k{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  .timeset .pill .v{font-family:var(--mono);font-size:20px;font-weight:700;margin-top:3px}
+  .mini{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5}
+  .hidden{display:none!important}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--surface-2);
+    border:1px solid var(--line);color:var(--text);padding:12px 18px;border-radius:30px;font-size:13px;
+    z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
+  .toast.on{opacity:1}
+
+  .status{font-size:12px;font-family:var(--mono);margin-top:12px;padding:10px 12px;border-radius:10px;display:none}
+  .status.on{display:block}
+  .status.ok{background:rgba(232,163,61,.12);color:var(--ready);border:1px solid rgba(232,163,61,.3)}
+  .status.bad{background:rgba(255,59,48,.12);color:#ff7a72;border:1px solid rgba(255,59,48,.3)}
+  .status.info{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+
+  .stepbar{display:flex;gap:6px;margin:0 2px 18px}
+  .titlebar{font-family:var(--disp);font-weight:600;font-size:15px;color:var(--text);margin:0 2px 12px;
+    padding-left:11px;border-left:3px solid var(--ready);line-height:1.3}
+  .stepbar .s{flex:1;height:3px;border-radius:2px;background:var(--line)}
+  .stepbar .s.active{background:var(--ready)}
+
+  footer{margin-top:8px;text-align:center;font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.06em;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="dot"></div>
+    <div>
+      <h1>더빙 스튜디오</h1>
+      <div class="sub">English Dubbing · Mobile</div>
+    </div>
+  </header>
+
+  <div class="stepbar">
+    <div class="s active" id="step1"></div>
+    <div class="s" id="step2"></div>
+    <div class="s" id="step3"></div>
+  </div>
+
+  <!-- ===== SETUP ===== -->
+  <section id="setup">
+    <div class="card">
+      <label>영상 제목</label>
+      <input id="title" type="text" placeholder="예) 겨울왕국 - Let It Go 장면" autocomplete="off">
+      <div style="height:18px"></div>
+      <label>유튜브 링크</label>
+      <input id="url" type="text" inputmode="url" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
+      <div style="height:12px"></div>
+      <button class="btn btn-amber" id="loadBtn">영상 불러오기</button>
+      <div class="status" id="capStatus"></div>
+    </div>
+
+    <div class="card hidden" id="setupRest">
+      <label>학생 이름</label>
+      <input id="name" type="text" placeholder="예) 김로현" value="김로현" autocomplete="off">
+
+      <div style="height:18px"></div>
+      <label>더빙 구간 — 직접 입력하거나, 영상을 재생하며 버튼으로 지정</label>
+      <div class="row" style="margin-bottom:10px">
+        <div>
+          <div class="tlabel">시작 (분:초)</div>
+          <input id="startInput" type="text" class="tinput" inputmode="numeric" placeholder="00:00" value="00:00">
+        </div>
+        <div>
+          <div class="tlabel">종료 (분:초)</div>
+          <input id="endInput" type="text" class="tinput" inputmode="numeric" placeholder="00:00">
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn btn-ghost" id="setStart">⟮ 현재 지점을 시작</button>
+        <button class="btn btn-ghost" id="setEnd">현재 지점을 종료 ⟯</button>
+      </div>
+      <p class="mini">영어 자막은 영상 위에 자동으로 표시됩니다. 녹화하면 유튜브는 무음으로 재생되고, 학생 목소리만 녹음됩니다.</p>
+
+      <div style="height:14px"></div>
+      <button class="btn btn-primary" id="toRecord" disabled>녹화 준비 ›</button>
+    </div>
+  </section>
+
+  <!-- ===== STAGE (record + result share this) ===== -->
+  <section id="studio" class="hidden">
+    <div class="titlebar hidden" id="titlebar"></div>
+    <div class="stage" id="stage">
+      <div class="player-box"><div id="ytPlayer"></div></div>
+
+      <div class="recbadge" id="recBadge"><span class="d"></span><span id="recTime">REC 00:00</span></div>
+      <div class="timecode hidden" id="tcView">00:00</div>
+
+      <div class="nametag hidden" id="nametag">김로현</div>
+      <div class="cam hidden" id="cam"><video id="camVideo" playsinline muted autoplay></video></div>
+
+      <div class="count" id="count"><span id="countNum">3</span></div>
+    </div>
+
+    <!-- record controls -->
+    <div id="recControls" style="margin-top:16px">
+      <button class="btn btn-primary" id="startRec">● 녹화 시작</button>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-ghost" id="backToSetup">‹ 구간 다시</button>
+      </div>
+      <div class="status info on" id="recHint">카메라·마이크 권한을 허용해 주세요.</div>
+    </div>
+
+    <!-- result controls -->
+    <div id="resultControls" class="hidden" style="margin-top:16px">
+      <button class="btn btn-amber" id="playResult">▶ 완성 영상 재생</button>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-primary" id="download">⬇ 영상 저장</button>
+        <button class="btn btn-ghost" id="redo">다시 녹화</button>
+      </div>
+      <p class="mini">저장 파일에는 학생의 더빙 영상(얼굴+목소리)이 담깁니다. 재생하면 유튜브 영상과 함께 우측 하단에 나옵니다.</p>
+    </div>
+  </section>
+
+  <footer>
+    다음 단계 · 캐릭터 3인 · 자동 저장 · 2주 후 삭제 (서버 연결 시)
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+"use strict";
+/* ---------------- state ---------------- */
+const S = { player:null, ready:false, videoId:null, start:0, end:null,
+  camStream:null, recorder:null, chunks:[], blob:null, blobUrl:null,
+  mime:null, pollTimer:null, recTimer:null, recT0:0 };
+
+const $ = id => document.getElementById(id);
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),2200); }
+function fmt(s){ s=Math.max(0,Math.floor(s||0)); const m=Math.floor(s/60); const r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
+function parseId(u){ if(!u) return null; u=u.trim();
+  const pats=[/[?&]v=([\w-]{11})/, /youtu\.be\/([\w-]{11})/, /embed\/([\w-]{11})/, /shorts\/([\w-]{11})/];
+  for(const p of pats){ const m=u.match(p); if(m) return m[1]; }
+  if(/^[\w-]{11}$/.test(u)) return u; return null; }
+function setStep(n){ ['step1','step2','step3'].forEach((id,i)=>$(id).classList.toggle('active', i<n)); }
+
+/* ---------------- YouTube ---------------- */
+window.onYouTubeIframeAPIReady = function(){ /* player created on demand */ };
+
+function buildPlayer(id){
+  return new Promise(res=>{
+    S.player = new YT.Player('ytPlayer',{
+      videoId:id,
+      playerVars:{ controls:1, rel:0, modestbranding:1, playsinline:1, fs:0,
+        cc_load_policy:1, cc_lang_pref:'en', hl:'en' },
+      events:{
+        onReady:()=>{ S.ready=true; try{S.player.mute();}catch(e){} res(true); },
+        onStateChange:onState
+      }
+    });
+  });
+}
+function onState(e){
+  // when video plays during setup we keep it muted? user previews with sound off to avoid double audio later — but for picking times sound helps.
+}
+
+/* check captions exist */
+async function checkCaptions(){
+  const st=$('capStatus');
+  st.className='status on info'; st.textContent='자막 확인 중…';
+  // play briefly muted so caption module loads
+  try{ S.player.mute(); S.player.playVideo(); }catch(e){}
+  let tries=0, found=null;
+  return new Promise(resolve=>{
+    const iv=setInterval(()=>{
+      tries++;
+      let list=null;
+      try{ list = S.player.getOption('captions','tracklist'); }catch(e){}
+      if(Array.isArray(list) && list.length){
+        found=list; clearInterval(iv); try{S.player.pauseVideo(); S.player.seekTo(0,true);}catch(e){}
+        // force english if available
+        try{
+          const en = list.find(t=>/^en/i.test(t.languageCode||t.code||''));
+          S.player.setOption('captions','track', en || list[0]);
+        }catch(e){}
+        st.className='status on ok'; st.textContent='✓ 영어 자막 사용 가능 — 영상 위에 자동 표시됩니다';
+        resolve(true);
+      } else if(tries>18){ // ~5.4s
+        clearInterval(iv); try{S.player.pauseVideo();}catch(e){}
+        st.className='status on bad';
+        st.textContent='✗ 이 영상은 자막을 가져올 수 없어 사용할 수 없습니다. 다른 영상을 넣어주세요.';
+        resolve(false);
+      }
+    },300);
+  });
+}
+
+/* ---------------- setup actions ---------------- */
+$('loadBtn').onclick = async ()=>{
+  const id=parseId($('url').value);
+  if(!id){ toast('유튜브 링크를 확인해 주세요'); return; }
+  $('loadBtn').disabled=true; $('loadBtn').textContent='불러오는 중…';
+  S.videoId=id;
+  $('studio').classList.remove('hidden');           // need stage visible to host player
+  $('recControls').classList.add('hidden');         // but hide record UI during setup
+  $('resultControls').classList.add('hidden');
+  if(!S.player){ await buildPlayer(id); }
+  else { S.ready=false; S.player.loadVideoById(id); await new Promise(r=>{const t=setInterval(()=>{if(S.ready){clearInterval(t);r();}},150);}); }
+  // during setup we let stage show for time-picking
+  $('studio').scrollIntoView({behavior:'smooth',block:'start'});
+  const ok = await checkCaptions();
+  $('loadBtn').disabled=false; $('loadBtn').textContent='영상 불러오기';
+  if(ok){
+    $('setupRest').classList.remove('hidden');
+    try{ S.player.unMute(); }catch(e){}  // sound on for picking times
+    toast('영상을 재생하며 구간을 정하세요');
+  } else {
+    $('studio').classList.add('hidden');
+    $('setupRest').classList.add('hidden');
+  }
+};
+
+$('setStart').onclick=()=>{ if(!S.ready)return; S.start=S.player.getCurrentTime(); $('startInput').value=fmt(S.start); validateTimes(); toast('시작점 '+fmt(S.start)); };
+$('setEnd').onclick=()=>{ if(!S.ready)return; S.end=S.player.getCurrentTime(); $('endInput').value=fmt(S.end); validateTimes(); toast('종료점 '+fmt(S.end)); };
+
+function parseTime(str){
+  if(str==null) return null; str=String(str).trim();
+  if(!str) return null;
+  if(/^\d+$/.test(str)) return parseInt(str,10);            // plain seconds
+  const m=str.match(/^(\d{1,3}):([0-5]?\d)$/);              // mm:ss
+  if(m) return parseInt(m[1],10)*60 + parseInt(m[2],10);
+  return NaN;
+}
+function readInputs(){
+  S.start = parseTime($('startInput').value) || 0;
+  const e = parseTime($('endInput').value);
+  S.end = (e==null||isNaN(e)) ? null : e;
+}
+$('startInput').oninput=()=>{ readInputs(); validateTimes(); };
+$('endInput').oninput=()=>{ readInputs(); validateTimes(); };
+
+function validateTimes(){
+  readInputs();
+  let ok = S.end!=null && !isNaN(S.start) && (S.end - S.start) >= 1;
+  $('toRecord').disabled = !ok;
+}
+
+$('name').oninput=()=>{ $('nametag').textContent = $('name').value || '학생'; };
+
+/* go to record stage */
+$('toRecord').onclick=async ()=>{
+  readInputs();
+  // clamp to video duration
+  let dur=0; try{ dur=S.player.getDuration(); }catch(e){}
+  if(dur && S.end>dur){ S.end=Math.floor(dur); $('endInput').value=fmt(S.end); toast('종료점을 영상 길이로 맞췄습니다'); }
+  if(S.end==null || S.end-S.start<1){ toast('구간을 다시 확인해 주세요'); return; }
+
+  const tt=($('title').value||'').trim();
+  const tb=$('titlebar');
+  if(tt){ tb.textContent=tt; tb.classList.remove('hidden'); } else { tb.classList.add('hidden'); }
+
+  $('nametag').textContent = $('name').value || '학생';
+  try{ S.player.pauseVideo(); S.player.mute(); S.player.seekTo(S.start,true);}catch(e){}
+  $('setup').classList.add('hidden');
+  $('recControls').classList.remove('hidden');
+  $('tcView').classList.remove('hidden');
+  $('nametag').classList.remove('hidden');
+  setStep(2);
+  $('tcView').textContent=fmt(S.start)+' / '+fmt(S.end);
+  await initCamera();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+$('backToSetup').onclick=()=>{
+  stopCamera();
+  $('titlebar').classList.add('hidden');
+  $('setup').classList.remove('hidden');
+  $('recControls').classList.add('hidden');
+  $('cam').classList.add('hidden');
+  $('nametag').classList.add('hidden');
+  $('tcView').classList.add('hidden');
+  setStep(1);
+  try{ S.player.unMute(); }catch(e){}
+};
+
+/* ---------------- camera ---------------- */
+function pickMime(){
+  const c=['video/mp4;codecs=h264,aac','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  for(const m of c){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; }
+  return '';
+}
+async function initCamera(){
+  const hint=$('recHint');
+  try{
+    S.camStream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:'user', width:{ideal:720}, height:{ideal:720} },
+      audio:{ echoCancellation:true, noiseSuppression:true }
+    });
+    $('camVideo').srcObject=S.camStream;
+    $('cam').classList.remove('hidden','result');
+    hint.className='status info on'; hint.textContent='준비 완료 — 녹화 시작을 누르면 3초 뒤 시작됩니다';
+    $('startRec').disabled=false;
+  }catch(err){
+    $('startRec').disabled=true;
+    hint.className='status bad on';
+    hint.textContent='카메라/마이크를 사용할 수 없습니다 ('+(err.name||'error')+'). 폰 브라우저에서 권한을 허용하거나, 파일을 폰에 저장해 직접 열어주세요.';
+  }
+}
+function stopCamera(){ if(S.camStream){ S.camStream.getTracks().forEach(t=>t.stop()); S.camStream=null; } }
+
+/* ---------------- recording ---------------- */
+$('startRec').onclick=async ()=>{
+  if(!S.camStream){ await initCamera(); if(!S.camStream) return; }
+  $('startRec').disabled=true; $('backToSetup').disabled=true;
+  await countdown();
+  beginRecording();
+};
+function countdown(){
+  return new Promise(res=>{
+    const el=$('count'), num=$('countNum'); let n=3; el.classList.add('on'); num.textContent=n;
+    const iv=setInterval(()=>{ n--; if(n<=0){ clearInterval(iv); el.classList.remove('on'); res(); } else { num.textContent=n; } },950);
+  });
+}
+function beginRecording(){
+  S.mime=pickMime(); S.chunks=[];
+  try{
+    S.recorder = S.mime ? new MediaRecorder(S.camStream,{mimeType:S.mime}) : new MediaRecorder(S.camStream);
+  }catch(e){ S.recorder=new MediaRecorder(S.camStream); }
+  S.recorder.ondataavailable=e=>{ if(e.data&&e.data.size) S.chunks.push(e.data); };
+  S.recorder.onstop=finishRecording;
+  S.recorder.start();
+  S.recT0=Date.now();
+  $('recBadge').classList.add('on'); $('cam').classList.add('recording');
+  $('recTime').textContent='REC 00:00';
+  S.recTimer=setInterval(()=>{ const s=(Date.now()-S.recT0)/1000; $('recTime').textContent='REC '+fmt(s); },300);
+
+  try{ S.player.mute(); S.player.seekTo(S.start,true); S.player.playVideo(); }catch(e){}
+  S.pollTimer=setInterval(()=>{
+    let t=0; try{ t=S.player.getCurrentTime(); }catch(e){}
+    $('tcView').textContent=fmt(t)+' / '+fmt(S.end);
+    if(t>=S.end){ stopRecording(); }
+  },200);
+}
+function stopRecording(){
+  clearInterval(S.pollTimer); clearInterval(S.recTimer);
+  try{ S.player.pauseVideo(); }catch(e){}
+  $('recBadge').classList.remove('on'); $('cam').classList.remove('recording');
+  if(S.recorder && S.recorder.state!=='inactive'){ try{S.recorder.stop();}catch(e){} }
+}
+function finishRecording(){
+  S.blob=new Blob(S.chunks,{type:S.mime||'video/webm'});
+  if(S.blobUrl) URL.revokeObjectURL(S.blobUrl);
+  S.blobUrl=URL.createObjectURL(S.blob);
+  stopCamera();
+  // switch to result
+  $('recControls').classList.add('hidden');
+  $('resultControls').classList.remove('hidden');
+  setStep(3);
+  const v=$('camVideo'); v.srcObject=null; v.muted=false; v.loop=false; v.src=S.blobUrl; v.pause();
+  $('cam').classList.add('result'); $('cam').classList.remove('hidden');
+  toast('녹화 완료! 완성 영상을 재생해 보세요');
+}
+
+/* ---------------- result playback ---------------- */
+$('playResult').onclick=()=>{
+  const v=$('camVideo');
+  try{ S.player.mute(); S.player.seekTo(S.start,true); }catch(e){}
+  v.currentTime=0;
+  // start both
+  const p=v.play(); if(p&&p.catch)p.catch(()=>{});
+  try{ S.player.playVideo(); }catch(e){}
+  clearInterval(S.pollTimer);
+  S.pollTimer=setInterval(()=>{
+    let t=0; try{ t=S.player.getCurrentTime(); }catch(e){}
+    if(t>=S.end){ clearInterval(S.pollTimer); try{S.player.pauseVideo();}catch(e){} }
+  },200);
+  v.onended=()=>{ try{S.player.pauseVideo();}catch(e){} };
+};
+
+$('download').onclick=()=>{
+  if(!S.blob){ toast('저장할 영상이 없습니다'); return; }
+  const ext=(S.mime&&S.mime.includes('mp4'))?'mp4':'webm';
+  const safe=s=>(s||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,40);
+  const title=safe($('title').value)||'dub';
+  const name=safe($('name').value)||'student';
+  const a=document.createElement('a');
+  a.href=S.blobUrl; a.download=`${title}_${name}_${Date.now()}.${ext}`;
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('영상을 저장했습니다 ('+ext.toUpperCase()+')');
+};
+
+$('redo').onclick=async ()=>{
+  $('resultControls').classList.add('hidden');
+  $('recControls').classList.remove('hidden');
+  $('startRec').disabled=false; $('backToSetup').disabled=false;
+  $('cam').classList.remove('result');
+  const v=$('camVideo'); v.src=''; v.muted=true;
+  setStep(2);
+  await initCamera();
+};
+</script>
+</body>
+</html>
