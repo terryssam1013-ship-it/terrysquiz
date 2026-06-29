@@ -6,110 +6,136 @@
 <title>더빙 스튜디오</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#14110F; --surface:#1F1B18; --surface-2:#2A2521;
-    --rec:#FF3B30; --ready:#E8A33D; --text:#F2EDE6; --muted:#8A827A;
-    --line:#3A332E;
-    --disp:'Space Grotesk',system-ui,sans-serif;
-    --body:'Inter',system-ui,sans-serif;
-    --mono:'Space Mono',monospace;
+    --ink:#2C2660; --muted:#8E89B8; --cream:#FFFDF8; --card:#FFFFFF;
+    --pink:#FF5C8A; --pinkD:#E23B6E;
+    --yellow:#FFC93C; --yellowD:#EBAE17;
+    --purple:#8163FF; --purpleD:#623FE6;
+    --mint:#23D3B4; --mintD:#15B89B;
+    --sky:#54B7FF; --skyD:#2F98E8;
+    --soft:#F1ECFF; --line:#ECE3FB;
+    --disp:'Jua','Noto Sans KR',system-ui,sans-serif;
+    --body:'Noto Sans KR',system-ui,sans-serif;
+    --num:'Jua','Noto Sans KR',system-ui,sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--body);overscroll-behavior:none}
-  body{min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
-  .wrap{max-width:480px;margin:0 auto;padding:18px 16px 40px}
+  html,body{margin:0;padding:0;color:var(--ink);font-family:var(--body);overscroll-behavior:none}
+  body{min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    background:linear-gradient(165deg,#FFE6F1 0%,#EDF0FF 48%,#E4FBF4 100%) fixed}
+  .wrap{max-width:480px;margin:0 auto;padding:18px 16px 48px}
 
-  header{display:flex;align-items:center;gap:10px;margin:6px 2px 20px}
-  .dot{width:11px;height:11px;border-radius:50%;background:var(--rec);box-shadow:0 0 0 0 rgba(255,59,48,.5);animation:pulse 2s infinite}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,59,48,.45)}70%{box-shadow:0 0 0 9px rgba(255,59,48,0)}100%{box-shadow:0 0 0 0 rgba(255,59,48,0)}}
-  header h1{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.02em;margin:0}
-  header .sub{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+  header{display:flex;align-items:center;gap:12px;margin:8px 2px 20px}
+  .dot{width:46px;height:46px;border-radius:18px;flex:none;display:grid;place-items:center;font-size:24px;
+    background:linear-gradient(150deg,var(--pink),var(--purple));box-shadow:0 6px 0 rgba(98,63,230,.25);animation:bob 2.4s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
+  header h1{font-family:var(--disp);font-weight:400;font-size:26px;letter-spacing:.5px;margin:0;color:var(--ink)}
+  header .sub{font-family:var(--disp);font-size:12px;color:var(--purple);letter-spacing:1px;margin-top:1px}
 
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px}
-  label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;margin:0 0 8px}
-  input[type=text]{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;color:var(--text);
-    font-family:var(--body);font-size:15px;padding:13px 14px;outline:none}
-  input[type=text]:focus{border-color:var(--ready)}
-  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;border-radius:13px;
-    font-family:var(--disp);font-weight:600;font-size:15px;padding:15px;cursor:pointer;transition:transform .06s,opacity .2s}
-  .btn:active{transform:scale(.985)}
-  .btn[disabled]{opacity:.4;pointer-events:none}
-  .btn-primary{background:var(--rec);color:#fff}
-  .btn-amber{background:var(--ready);color:#241c12}
-  .btn-ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--line)}
-  .row{display:flex;gap:10px}
+  .card{background:var(--card);border:3px solid var(--line);border-radius:26px;padding:20px;margin-bottom:18px;
+    box-shadow:0 10px 0 rgba(129,99,255,.10),0 14px 30px rgba(129,99,255,.10)}
+  label{display:block;font-family:var(--disp);font-size:16px;font-weight:400;color:var(--ink);letter-spacing:.3px;margin:0 0 9px}
+  input[type=text]{width:100%;background:var(--cream);border:3px solid var(--line);border-radius:18px;color:var(--ink);
+    font-family:var(--body);font-weight:500;font-size:16px;padding:14px 16px;outline:none;transition:border-color .15s}
+  input[type=text]:focus{border-color:var(--purple)}
+  input[type=text]::placeholder{color:#C3BEDD}
+
+  .btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:none;border-radius:20px;
+    font-family:var(--disp);font-weight:400;font-size:19px;letter-spacing:.5px;padding:16px;cursor:pointer;color:#fff;
+    transition:transform .08s,box-shadow .08s,opacity .2s;position:relative;top:0}
+  .btn:active{transform:translateY(5px)}
+  .btn[disabled]{opacity:.45;pointer-events:none;filter:saturate(.6)}
+  .btn-primary{background:var(--pink);box-shadow:0 6px 0 var(--pinkD)}
+  .btn-primary:active{box-shadow:0 1px 0 var(--pinkD)}
+  .btn-amber{background:var(--yellow);color:#6B4E00;box-shadow:0 6px 0 var(--yellowD)}
+  .btn-amber:active{box-shadow:0 1px 0 var(--yellowD)}
+  .btn-ghost{background:#fff;color:var(--purple);border:3px solid var(--purple);box-shadow:0 6px 0 rgba(129,99,255,.25)}
+  .btn-ghost:active{box-shadow:0 1px 0 rgba(129,99,255,.25)}
+  .row{display:flex;gap:12px}
   .row>*{flex:1}
 
-  .stage{position:relative;width:100%;aspect-ratio:9/16;max-height:74dvh;background:#000;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+  .stage{position:relative;width:100%;aspect-ratio:9/16;max-height:74dvh;background:#1c1830;border-radius:26px;
+    overflow:hidden;border:4px solid #fff;box-shadow:0 10px 0 rgba(129,99,255,.18),0 16px 36px rgba(44,38,96,.22)}
   .player-box{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
   .player-box iframe,.player-box>div{width:100%;height:100%}
-  /* video sits centered; for 16:9 in 9:16 frame we letterbox */
   #ytPlayer{width:100%;height:100%}
 
-  .cam{position:absolute;right:14px;bottom:84px;width:118px;height:118px;border-radius:50%;overflow:hidden;
-    border:3px solid var(--text);background:#000;z-index:6;box-shadow:0 6px 22px rgba(0,0,0,.5)}
-  .cam.recording{border-color:var(--rec);animation:ring 1.4s infinite}
-  @keyframes ring{0%{box-shadow:0 0 0 0 rgba(255,59,48,.5)}70%{box-shadow:0 0 0 12px rgba(255,59,48,0)}100%{box-shadow:0 0 0 0 rgba(255,59,48,0)}}
+  .cam{position:absolute;right:14px;bottom:84px;width:122px;height:122px;border-radius:50%;overflow:hidden;
+    border:5px solid #fff;background:#000;z-index:6;box-shadow:0 8px 22px rgba(0,0,0,.45)}
+  .cam.recording{border-color:var(--pink);animation:ring 1.3s infinite}
+  @keyframes ring{0%{box-shadow:0 0 0 0 rgba(255,92,138,.55)}70%{box-shadow:0 0 0 14px rgba(255,92,138,0)}100%{box-shadow:0 0 0 0 rgba(255,92,138,0)}}
   .cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
   .cam.result video{transform:none}
 
-  .nametag{position:absolute;right:14px;bottom:64px;z-index:7;background:rgba(20,17,15,.85);
-    border:1px solid var(--line);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:600;
-    font-family:var(--disp);max-width:118px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nametag{position:absolute;right:14px;bottom:60px;z-index:7;background:var(--purple);color:#fff;
+    border:3px solid #fff;border-radius:22px;padding:4px 14px;font-size:14px;font-weight:400;
+    font-family:var(--disp);max-width:130px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 10px rgba(0,0,0,.25)}
 
-  .recbadge{position:absolute;left:14px;top:14px;z-index:7;display:none;align-items:center;gap:7px;
-    background:rgba(20,17,15,.8);border-radius:20px;padding:6px 12px;font-family:var(--mono);font-size:12px;font-weight:700}
+  .recbadge{position:absolute;left:14px;top:14px;z-index:7;display:none;align-items:center;gap:8px;
+    background:var(--pink);color:#fff;border:3px solid #fff;border-radius:22px;padding:6px 14px;font-family:var(--disp);font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
   .recbadge.on{display:flex}
-  .recbadge .d{width:9px;height:9px;border-radius:50%;background:var(--rec);animation:blink 1s infinite}
-  @keyframes blink{50%{opacity:.25}}
-  .timecode{position:absolute;right:14px;top:14px;z-index:7;font-family:var(--mono);font-size:12px;
-    background:rgba(20,17,15,.8);border-radius:20px;padding:6px 11px;color:var(--text)}
+  .recbadge .d{width:11px;height:11px;border-radius:50%;background:#fff;animation:blink 1s infinite}
+  @keyframes blink{50%{opacity:.3}}
+  .timecode{position:absolute;right:14px;top:14px;z-index:7;font-family:var(--num);font-size:15px;letter-spacing:.5px;
+    background:rgba(44,38,96,.82);border:3px solid #fff;border-radius:22px;padding:5px 13px;color:#fff}
 
-  .count{position:absolute;inset:0;z-index:9;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55)}
+  .count{position:absolute;inset:0;z-index:9;display:none;align-items:center;justify-content:center;background:rgba(44,38,96,.55)}
   .count.on{display:flex}
-  .count span{font-family:var(--disp);font-weight:700;font-size:110px;color:var(--text);animation:pop .9s ease}
-  @keyframes pop{0%{transform:scale(.4);opacity:0}40%{opacity:1}100%{transform:scale(1.25);opacity:0}}
+  .count span{font-family:var(--disp);font-weight:400;font-size:140px;color:#fff;
+    text-shadow:0 0 30px rgba(255,92,138,.9);animation:pop .9s ease}
+  @keyframes pop{0%{transform:scale(.3) rotate(-15deg);opacity:0}40%{opacity:1}100%{transform:scale(1.4) rotate(10deg);opacity:0}}
 
-  .timeset{display:flex;gap:10px;margin-top:6px}
-  .tlabel{font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:0 0 6px 2px}
-  .tinput{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;color:var(--text);
-    font-family:var(--mono);font-size:22px;font-weight:700;text-align:center;padding:11px 8px;outline:none}
-  .tinput:focus{border-color:var(--ready)}
-  .timeset .pill{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
-  .timeset .pill .k{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
-  .timeset .pill .v{font-family:var(--mono);font-size:20px;font-weight:700;margin-top:3px}
-  .mini{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5}
+  .timeset{display:flex;gap:12px;margin-top:6px}
+  .tlabel{font-family:var(--disp);font-size:14px;color:var(--purple);margin:0 0 7px 3px}
+  .tinput{width:100%;background:var(--cream);border:3px solid var(--line);border-radius:18px;color:var(--ink);
+    font-family:var(--num);font-size:26px;font-weight:400;text-align:center;padding:11px 8px;outline:none;letter-spacing:1px}
+  .tinput:focus{border-color:var(--purple)}
+  .mini{font-size:12.5px;color:var(--muted);margin-top:11px;line-height:1.6;font-weight:500}
   .hidden{display:none!important}
 
-  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--surface-2);
-    border:1px solid var(--line);color:var(--text);padding:12px 18px;border-radius:30px;font-size:13px;
-    z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
-  .toast.on{opacity:1}
+  .divider{display:flex;align-items:center;gap:12px;margin:24px 0 16px;color:var(--purple);
+    font-family:var(--disp);font-size:14px;letter-spacing:.3px}
+  .divider::before,.divider::after{content:"";flex:1;height:3px;border-radius:3px;background:var(--line)}
+  .linkout{margin-top:16px}
+  .linkrow{display:flex;gap:10px}
+  .linkrow input{flex:1;background:var(--soft);border:3px solid var(--line);border-radius:16px;color:var(--purpleD);
+    font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;padding:12px 13px;outline:none}
+  .btn-copy{flex:none;background:var(--mint);border:none;color:#fff;border-radius:16px;padding:0 20px;
+    font-family:var(--disp);font-weight:400;font-size:16px;cursor:pointer;box-shadow:0 5px 0 var(--mintD)}
+  .btn-copy:active{transform:translateY(4px);box-shadow:0 1px 0 var(--mintD)}
+  .qr{display:flex;justify-content:center;margin-top:18px}
+  .qr img,.qr canvas{width:180px;height:180px;border-radius:18px;background:#fff;padding:12px;border:3px solid var(--line);box-shadow:0 8px 0 rgba(129,99,255,.12)}
 
-  .status{font-size:12px;font-family:var(--mono);margin-top:12px;padding:10px 12px;border-radius:10px;display:none}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#fff;
+    border:3px solid var(--purple);color:var(--ink);padding:13px 22px;border-radius:30px;font-size:14px;font-weight:600;
+    z-index:50;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90vw;text-align:center;
+    box-shadow:0 10px 24px rgba(129,99,255,.28)}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+  .status{font-size:13px;font-weight:600;font-family:var(--body);margin-top:14px;padding:13px 15px;border-radius:18px;display:none;line-height:1.5}
   .status.on{display:block}
-  .status.ok{background:rgba(232,163,61,.12);color:var(--ready);border:1px solid rgba(232,163,61,.3)}
-  .status.bad{background:rgba(255,59,48,.12);color:#ff7a72;border:1px solid rgba(255,59,48,.3)}
-  .status.info{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+  .status.ok{background:#E2FBF3;color:#0E9C82;border:3px solid #BDF3E7}
+  .status.bad{background:#FFE6EC;color:#D63460;border:3px solid #FFC6D4}
+  .status.info{background:var(--soft);color:var(--purpleD);border:3px solid var(--line)}
 
-  .stepbar{display:flex;gap:6px;margin:0 2px 18px}
-  .titlebar{font-family:var(--disp);font-weight:600;font-size:15px;color:var(--text);margin:0 2px 12px;
-    padding-left:11px;border-left:3px solid var(--ready);line-height:1.3}
-  .stepbar .s{flex:1;height:3px;border-radius:2px;background:var(--line)}
-  .stepbar .s.active{background:var(--ready)}
+  .stepbar{display:flex;gap:8px;margin:0 2px 20px}
+  .stepbar .s{flex:1;height:10px;border-radius:8px;background:#E6DEFA}
+  .stepbar .s.active{background:linear-gradient(90deg,var(--pink),var(--purple))}
+  .titlebar{font-family:var(--disp);font-weight:400;font-size:19px;color:var(--ink);margin:0 2px 14px;
+    padding:10px 16px;background:#fff;border:3px solid var(--yellow);border-radius:18px;line-height:1.3;
+    box-shadow:0 6px 0 rgba(255,201,60,.3)}
 
-  footer{margin-top:8px;text-align:center;font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.06em;line-height:1.7}
+  footer{margin-top:14px;text-align:center;font-size:11px;color:var(--muted);font-family:var(--disp);letter-spacing:.5px;line-height:1.8}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="dot"></div>
+    <div class="dot">🎬</div>
     <div>
       <h1>더빙 스튜디오</h1>
-      <div class="sub">English Dubbing · Mobile</div>
+      <div class="sub">🎤 영어 더빙 놀이터</div>
     </div>
   </header>
 
@@ -122,22 +148,22 @@
   <!-- ===== SETUP ===== -->
   <section id="setup">
     <div class="card">
-      <label>영상 제목</label>
+      <label>🎬 영상 제목</label>
       <input id="title" type="text" placeholder="예) 겨울왕국 - Let It Go 장면" autocomplete="off">
       <div style="height:18px"></div>
-      <label>유튜브 링크</label>
+      <label>🔗 유튜브 링크</label>
       <input id="url" type="text" inputmode="url" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
       <div style="height:12px"></div>
-      <button class="btn btn-amber" id="loadBtn">영상 불러오기</button>
+      <button class="btn btn-amber" id="loadBtn">▶ 영상 불러오기</button>
       <div class="status" id="capStatus"></div>
     </div>
 
     <div class="card hidden" id="setupRest">
-      <label>학생 이름</label>
-      <input id="name" type="text" placeholder="예) 김로현" value="김로현" autocomplete="off">
+      <label>🙋 내 이름</label>
+      <input id="name" type="text" placeholder="이름 입력" value="" autocomplete="off">
 
       <div style="height:18px"></div>
-      <label>더빙 구간 — 직접 입력하거나, 영상을 재생하며 버튼으로 지정</label>
+      <label>⏱️ 더빙 구간 정하기</label>
       <div class="row" style="margin-bottom:10px">
         <div>
           <div class="tlabel">시작 (분:초)</div>
@@ -155,7 +181,20 @@
       <p class="mini">영어 자막은 영상 위에 자동으로 표시됩니다. 녹화하면 유튜브는 무음으로 재생되고, 학생 목소리만 녹음됩니다.</p>
 
       <div style="height:14px"></div>
-      <button class="btn btn-primary" id="toRecord" disabled>녹화 준비 ›</button>
+      <button class="btn btn-primary" id="toRecord" disabled>🎤 녹화 시작하러 가기 →</button>
+
+      <div class="divider" id="teacherDivider">
+        <span>또는, 친구에게 보낼 링크 만들기</span>
+      </div>
+      <button class="btn btn-amber" id="makeLink" disabled>🎁 학생용 링크 만들기</button>
+      <div class="linkout hidden" id="linkout">
+        <div class="linkrow">
+          <input id="shareUrl" type="text" readonly>
+          <button class="btn-copy" id="copyLink">복사 📋</button>
+        </div>
+        <div class="qr" id="qr"></div>
+        <p class="mini">이 링크를 카톡 등으로 학생에게 보내세요. 학생이 열면 영상·구간이 자동으로 채워져 바로 녹화할 수 있습니다.</p>
+      </div>
     </div>
   </section>
 
@@ -176,26 +215,28 @@
 
     <!-- record controls -->
     <div id="recControls" style="margin-top:16px">
-      <button class="btn btn-primary" id="startRec">● 녹화 시작</button>
+      <button class="btn btn-primary" id="startRec">🔴 녹화 시작!</button>
       <div class="row" style="margin-top:10px">
-        <button class="btn btn-ghost" id="backToSetup">‹ 구간 다시</button>
+        <button class="btn btn-ghost" id="backToSetup">← 구간 다시 정하기</button>
       </div>
-      <div class="status info on" id="recHint">카메라·마이크 권한을 허용해 주세요.</div>
+      <div class="status info on" id="recHint">📷 카메라랑 마이크를 켜도 될까요? "허용"을 눌러줘!</div>
     </div>
 
     <!-- result controls -->
     <div id="resultControls" class="hidden" style="margin-top:16px">
-      <button class="btn btn-amber" id="playResult">▶ 완성 영상 재생</button>
+      <button class="btn btn-amber" id="playResult">🎉 완성 영상 보기!</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-primary" id="share">📤 선생님께 보내기</button>
       <div class="row" style="margin-top:10px">
-        <button class="btn btn-primary" id="download">⬇ 영상 저장</button>
-        <button class="btn btn-ghost" id="redo">다시 녹화</button>
+        <button class="btn btn-ghost" id="download">⬇ 저장</button>
+        <button class="btn btn-ghost" id="redo">🔄 다시 녹화</button>
       </div>
-      <p class="mini">저장 파일에는 학생의 더빙 영상(얼굴+목소리)이 담깁니다. 재생하면 유튜브 영상과 함께 우측 하단에 나옵니다.</p>
+      <p class="mini">"선생님께 공유"를 누르면 카톡·드라이브 등으로 더빙 영상을 바로 보낼 수 있습니다. (얼굴+목소리가 한 파일에 담깁니다)</p>
     </div>
   </section>
 
   <footer>
-    다음 단계 · 캐릭터 3인 · 자동 저장 · 2주 후 삭제 (서버 연결 시)
+    🌟 다음 단계 · 친구 3명 더빙 · 자동 저장 🌟
   </footer>
 </div>
 
@@ -238,61 +279,58 @@ function onState(e){
   // when video plays during setup we keep it muted? user previews with sound off to avoid double audio later — but for picking times sound helps.
 }
 
-/* check captions exist */
+/* check captions exist — informational only, never blocks */
 async function checkCaptions(){
   const st=$('capStatus');
   st.className='status on info'; st.textContent='자막 확인 중…';
-  // play briefly muted so caption module loads
   try{ S.player.mute(); S.player.playVideo(); }catch(e){}
-  let tries=0, found=null;
+  let tries=0;
   return new Promise(resolve=>{
     const iv=setInterval(()=>{
       tries++;
       let list=null;
       try{ list = S.player.getOption('captions','tracklist'); }catch(e){}
       if(Array.isArray(list) && list.length){
-        found=list; clearInterval(iv); try{S.player.pauseVideo(); S.player.seekTo(0,true);}catch(e){}
-        // force english if available
+        clearInterval(iv); try{S.player.pauseVideo(); S.player.seekTo(0,true);}catch(e){}
         try{
           const en = list.find(t=>/^en/i.test(t.languageCode||t.code||''));
           S.player.setOption('captions','track', en || list[0]);
         }catch(e){}
-        st.className='status on ok'; st.textContent='✓ 영어 자막 사용 가능 — 영상 위에 자동 표시됩니다';
+        const isEn = list.some(t=>/^en/i.test(t.languageCode||t.code||''));
+        st.className='status on ok';
+        st.textContent = isEn ? '✓ 영어 자막 사용 가능 — 영상 위에 자동 표시됩니다'
+                              : '✓ 자막 사용 가능 — 영상 위에 자동 표시됩니다 (영어 외 언어일 수 있음)';
         resolve(true);
-      } else if(tries>18){ // ~5.4s
+      } else if(tries>14){ // ~4.2s then stop waiting, but DO NOT block
         clearInterval(iv); try{S.player.pauseVideo();}catch(e){}
-        st.className='status on bad';
-        st.textContent='✗ 이 영상은 자막을 가져올 수 없어 사용할 수 없습니다. 다른 영상을 넣어주세요.';
-        resolve(false);
+        st.className='status on info';
+        st.textContent='ⓘ 자막 정보를 자동 확인하지 못했습니다. 영상에 자막이 있으면 재생 시 표시됩니다. 그대로 진행하세요.';
+        resolve(true);
       }
     },300);
   });
 }
 
 /* ---------------- setup actions ---------------- */
-$('loadBtn').onclick = async ()=>{
+async function loadVideo(){
   const id=parseId($('url').value);
-  if(!id){ toast('유튜브 링크를 확인해 주세요'); return; }
-  $('loadBtn').disabled=true; $('loadBtn').textContent='불러오는 중…';
+  if(!id){ toast('유튜브 링크를 확인해 주세요'); return false; }
+  $('loadBtn').disabled=true; $('loadBtn').textContent='⏳ 불러오는 중…';
   S.videoId=id;
-  $('studio').classList.remove('hidden');           // need stage visible to host player
-  $('recControls').classList.add('hidden');         // but hide record UI during setup
+  $('studio').classList.remove('hidden');
+  $('recControls').classList.add('hidden');
   $('resultControls').classList.add('hidden');
   if(!S.player){ await buildPlayer(id); }
   else { S.ready=false; S.player.loadVideoById(id); await new Promise(r=>{const t=setInterval(()=>{if(S.ready){clearInterval(t);r();}},150);}); }
-  // during setup we let stage show for time-picking
   $('studio').scrollIntoView({behavior:'smooth',block:'start'});
-  const ok = await checkCaptions();
-  $('loadBtn').disabled=false; $('loadBtn').textContent='영상 불러오기';
-  if(ok){
-    $('setupRest').classList.remove('hidden');
-    try{ S.player.unMute(); }catch(e){}  // sound on for picking times
-    toast('영상을 재생하며 구간을 정하세요');
-  } else {
-    $('studio').classList.add('hidden');
-    $('setupRest').classList.add('hidden');
-  }
-};
+  await checkCaptions();
+  $('loadBtn').disabled=false; $('loadBtn').textContent='▶ 영상 불러오기';
+  $('setupRest').classList.remove('hidden');
+  try{ S.player.unMute(); }catch(e){}
+  validateTimes();
+  return true;
+}
+$('loadBtn').onclick = async ()=>{ const ok=await loadVideo(); if(ok) toast('영상을 재생하며 구간을 정하세요'); };
 
 $('setStart').onclick=()=>{ if(!S.ready)return; S.start=S.player.getCurrentTime(); $('startInput').value=fmt(S.start); validateTimes(); toast('시작점 '+fmt(S.start)); };
 $('setEnd').onclick=()=>{ if(!S.ready)return; S.end=S.player.getCurrentTime(); $('endInput').value=fmt(S.end); validateTimes(); toast('종료점 '+fmt(S.end)); };
@@ -317,7 +355,76 @@ function validateTimes(){
   readInputs();
   let ok = S.end!=null && !isNaN(S.start) && (S.end - S.start) >= 1;
   $('toRecord').disabled = !ok;
+  const ml=$('makeLink'); if(ml) ml.disabled = !ok;
 }
+
+/* ---------- teacher: build shareable student link ---------- */
+function buildShareUrl(){
+  readInputs();
+  const base = location.origin + location.pathname;
+  const p = new URLSearchParams();
+  p.set('v', S.videoId || parseId($('url').value) || '');
+  const t=($('title').value||'').trim(); if(t) p.set('t', t);
+  p.set('s', Math.max(0,Math.floor(S.start||0)));
+  p.set('e', Math.floor(S.end||0));
+  return base + '?' + p.toString();
+}
+$('makeLink').onclick=()=>{
+  readInputs();
+  let dur=0; try{ dur=S.player.getDuration(); }catch(e){}
+  if(dur && S.end>dur){ S.end=Math.floor(dur); $('endInput').value=fmt(S.end); }
+  if(!S.videoId){ toast('먼저 영상을 불러오세요'); return; }
+  if(S.end==null || S.end-S.start<1){ toast('구간을 확인해 주세요'); return; }
+  const url=buildShareUrl();
+  $('shareUrl').value=url;
+  $('linkout').classList.remove('hidden');
+  drawQR(url);
+  $('linkout').scrollIntoView({behavior:'smooth',block:'center'});
+  toast('학생용 링크를 만들었습니다');
+};
+$('copyLink').onclick=async ()=>{
+  const v=$('shareUrl').value;
+  try{ await navigator.clipboard.writeText(v); toast('링크를 복사했습니다'); }
+  catch(e){ $('shareUrl').select(); document.execCommand('copy'); toast('링크를 복사했습니다'); }
+};
+function drawQR(text){
+  const box=$('qr'); box.innerHTML='';
+  if(window.QRCode){ try{ new QRCode(box,{text,width:170,height:170,correctLevel:QRCode.CorrectLevel.M}); return; }catch(e){} }
+  // fallback: load lib then retry once
+  if(!window._qrTried){
+    window._qrTried=true;
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    s.onload=()=>drawQR(text);
+    s.onerror=()=>{ box.innerHTML='<p class="mini" style="text-align:center">QR을 만들 수 없습니다. 위 링크를 복사해서 보내세요.</p>'; };
+    document.head.appendChild(s);
+  }
+}
+
+/* ---------- student: auto-fill from link params ---------- */
+async function applyParams(){
+  const q=new URLSearchParams(location.search);
+  const v=q.get('v'); if(!v) return;        // teacher mode, nothing to do
+  // student mode: hide teacher-only tools
+  $('teacherDivider').classList.add('hidden');
+  $('makeLink').classList.add('hidden');
+  $('linkout').classList.add('hidden');
+  // prefill
+  $('title').value = q.get('t') || '';
+  $('url').value = 'https://youtu.be/'+v;
+  const s=parseInt(q.get('s')||'0',10), e=parseInt(q.get('e')||'0',10);
+  // lock the teacher-set fields so students don't change them
+  ['title','url','startInput','endInput'].forEach(id=>{ const el=$(id); if(el){ el.readOnly=true; el.style.opacity='.7'; } });
+  $('setStart').style.display='none'; $('setEnd').style.display='none';
+  await loadVideo();
+  $('startInput').value=fmt(s); $('endInput').value=fmt(e);
+  validateTimes();
+  // friendly nudge
+  $('capStatus').className='status on info';
+  $('capStatus').innerHTML='선생님이 준비한 영상입니다 · '+fmt(s)+' ~ '+fmt(e)+' 구간 · 아래에 이름을 넣고 <b>녹화 준비</b>를 누르세요';
+  setTimeout(()=>{ try{$('name').focus();}catch(e){} }, 300);
+}
+window.addEventListener('load', ()=>{ setTimeout(applyParams, 400); });
 
 $('name').oninput=()=>{ $('nametag').textContent = $('name').value || '학생'; };
 
@@ -451,14 +558,35 @@ $('playResult').onclick=()=>{
   v.onended=()=>{ try{S.player.pauseVideo();}catch(e){} };
 };
 
-$('download').onclick=()=>{
-  if(!S.blob){ toast('저장할 영상이 없습니다'); return; }
+function outName(){
   const ext=(S.mime&&S.mime.includes('mp4'))?'mp4':'webm';
   const safe=s=>(s||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,40);
   const title=safe($('title').value)||'dub';
   const name=safe($('name').value)||'student';
+  return {file:`${title}_${name}_${Date.now()}.${ext}`, ext};
+}
+$('share').onclick=async ()=>{
+  if(!S.blob){ toast('공유할 영상이 없습니다'); return; }
+  const {file,ext}=outName();
+  const f=new File([S.blob],file,{type:S.blob.type||('video/'+ext)});
+  // try native share with file (mobile)
+  if(navigator.canShare && navigator.canShare({files:[f]})){
+    try{
+      await navigator.share({files:[f], title:($('title').value||'더빙 영상'),
+        text:(($('name').value||'학생')+' 더빙 영상')});
+      toast('공유 완료'); return;
+    }catch(e){ if(e && e.name==='AbortError') return; }
+  }
+  // fallback: download so they can attach manually
+  const a=document.createElement('a'); a.href=S.blobUrl; a.download=file;
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('공유가 지원되지 않아 저장했습니다. 저장된 영상을 카톡 등으로 보내세요.');
+};
+$('download').onclick=()=>{
+  if(!S.blob){ toast('저장할 영상이 없습니다'); return; }
+  const {file,ext}=outName();
   const a=document.createElement('a');
-  a.href=S.blobUrl; a.download=`${title}_${name}_${Date.now()}.${ext}`;
+  a.href=S.blobUrl; a.download=file;
   document.body.appendChild(a); a.click(); a.remove();
   toast('영상을 저장했습니다 ('+ext.toUpperCase()+')');
 };
