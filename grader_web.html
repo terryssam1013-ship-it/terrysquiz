@@ -100,6 +100,8 @@
 
   .sync-note { font-size:12px; color:#8a93a6; text-align:center; margin-top:4px; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -117,7 +119,7 @@
     <div class="book-grid" id="bookGrid"></div>
     <div class="empty-note" id="bookEmpty" style="display:none;">등록된 교재가 없습니다.<br>아래 버튼으로 PC에서 교재를 등록하세요.</div>
     <button class="btn btn-ghost btn-sm" id="newBookBtn" style="margin-top:14px;">+ 새 교재 등록</button>
-    <div class="sync-note" id="syncNote">로컬 저장 모드 · 이 기기에만 저장됩니다</div>
+    <div class="sync-note" id="syncNote">클라우드 동기화 · PC에서 등록하면 폰에서도 보입니다</div>
   </div>
 
   <!-- ===== VIEW 2: 새 교재 등록 ===== -->
@@ -203,13 +205,41 @@
 
 <script>
 const $ = id => document.getElementById(id);
-const LS_BOOKS='terrys_grader_books_v2', LS_PROXY='terrys_grader_proxy';
+const LS_PROXY='terrys_grader_proxy';
 let ansImages=[], stuImages=[], gradeResult=[];
 let books=[], currentBook=null;
 
-/* ===== 저장소 (지금은 로컬, 추후 Firebase로 교체) ===== */
-function loadBooks(){ try{books=JSON.parse(localStorage.getItem(LS_BOOKS)||'[]');}catch(e){books=[];} }
-function saveBooks(){ localStorage.setItem(LS_BOOKS, JSON.stringify(books)); }
+/* ===== Firebase 초기화 ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyC3Hv2CQKnUlKqROtr1MHhb2_8aS8yRfNs",
+  authDomain: "terrys-d643a.firebaseapp.com",
+  databaseURL: "https://terrys-d643a-default-rtdb.firebaseio.com",
+  projectId: "terrys-d643a",
+  storageBucket: "terrys-d643a.firebasestorage.app",
+  messagingSenderId: "957782721953",
+  appId: "1:957782721953:web:51db6bcb14c0cd0abd77e0"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const BOOKS_REF = 'grader/books';  // 채점 교재 저장 경로
+
+/* ===== 저장소: Firebase (PC↔폰 공유) ===== */
+function loadBooks(){
+  db.ref(BOOKS_REF).on('value', snap=>{
+    const val = snap.val();
+    books = val ? (Array.isArray(val)? val.filter(Boolean) : Object.values(val)) : [];
+    renderBooks();
+  }, err=>{
+    $('syncNote').textContent='동기화 오류: '+err.message;
+  });
+}
+function saveBooks(){
+  db.ref(BOOKS_REF).set(books).then(()=>{
+    $('syncNote').textContent='클라우드 동기화됨 · PC·폰 어디서나 같은 교재';
+  }).catch(err=>{
+    $('syncNote').textContent='저장 오류: '+err.message;
+  });
+}
 function getProxy(){ return localStorage.getItem(LS_PROXY)||'https://terrys-grader-api.vercel.app/api/grade'; }
 
 /* ===== 화면 전환 ===== */
@@ -282,7 +312,9 @@ $('saveBookBtn').onclick=()=>{
   const name=$('newBookName').value.trim(), ans=$('answerText').value.trim();
   if(!name){ alert('교재명을 입력하세요.'); return; }
   if(!ans){ alert('정답을 먼저 읽어주세요.'); return; }
-  books.push({ name, answers:ans, ansImages:ansImages.map(a=>({url:a.url,isPdf:a.isPdf})) });
+  // 정답 텍스트만 클라우드에 저장 (이미지 base64는 용량이 커서 제외)
+  const hadPdf = ansImages.some(a=>a.isPdf);
+  books.push({ name, answers:ans, hasPdf:hadPdf });
   saveBooks(); renderBooks();
   currentBook=null; showView('listView');
 };
@@ -358,7 +390,6 @@ $('copyBtn').onclick=()=>{
 $('viewAnsBtn').onclick=()=>{
   const book=books[currentBook]; if(!book)return;
   const box=$('modalImgs'); box.innerHTML='';
-  (book.ansImages||[]).forEach(img=>{ if(img.isPdf){ const p=document.createElement('div'); p.style.cssText='padding:14px;background:#f1f3f7;border-radius:9px;margin-bottom:12px;color:#44506a;font-size:13px;text-align:center;'; p.textContent='📄 PDF 정답지 (미리보기는 지원되지 않습니다)'; box.appendChild(p);} else if(img.url){ const el=document.createElement('img'); el.src=img.url; box.appendChild(el);} });
   $('modalText').textContent=book.answers;
   $('modalBg').classList.add('open');
 };
@@ -379,7 +410,7 @@ function hideStatus(id){ $(id).style.display='none'; }
 /* init */
 /* 드롭존 밖에 실수로 떨어뜨려도 브라우저가 파일을 열지 않도록 */
 ['dragover','drop'].forEach(ev=>window.addEventListener(ev,e=>{e.preventDefault();}));
-loadBooks(); renderBooks();
+renderBooks(); loadBooks();
 </script>
 </body>
 </html>
