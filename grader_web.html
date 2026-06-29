@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>테리스 자동 채점</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Malgun Gothic', '맑은 고딕', -apple-system, sans-serif; background: #f5f6f8; color: #1a2238; line-height: 1.6; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 16px; padding-bottom: 60px; }
+  header { background: #1a2a4a; color: #fff; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; display:flex; justify-content:space-between; align-items:center; }
+  header h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.5px; }
+  header p { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+  .icon-btn { background:rgba(255,255,255,0.15); border:none; color:#fff; padding:9px 13px; border-radius:9px; font-size:13px; cursor:pointer; font-family:inherit; }
+  .icon-btn:hover { background:rgba(255,255,255,0.25); }
+
+  .view { display:none; }
+  .view.active { display:block; }
+
+  .card { background: #fff; border-radius: 14px; padding: 18px 18px; margin-bottom: 14px; border: 1px solid #e4e8ee; }
+  .card h2 { font-size: 15px; font-weight: 700; color: #1a2a4a; margin-bottom: 12px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #44506a; }
+  input[type=text], input[type=password], textarea { width: 100%; padding: 12px 13px; border: 1px solid #d3d9e2; border-radius: 10px; font-size: 16px; font-family: inherit; margin-bottom: 14px; }
+  textarea { resize: vertical; min-height: 100px; }
+
+  .section-title { font-size:13px; font-weight:700; color:#8a93a6; text-transform:uppercase; letter-spacing:0.5px; margin:4px 2px 10px; }
+
+  /* 교재 목록 (탭하면 바로 채점) */
+  .book-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+  .book-tile { background:#fff; border:1px solid #e4e8ee; border-radius:13px; padding:16px 18px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:0.12s; }
+  .book-tile:hover { border-color:#1a2a4a; background:#f7f9fc; }
+  .book-tile:active { transform:scale(0.99); }
+  .book-tile .bt-main { display:flex; align-items:center; gap:13px; min-width:0; }
+  .book-tile .bt-ico { flex-shrink:0; width:44px; height:44px; border-radius:11px; background:#eaf0fb; color:#1a2a4a; display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .book-tile .bt-name { font-size:15px; font-weight:700; color:#1a2238; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .book-tile .bt-sub { font-size:12px; color:#8a93a6; }
+  .book-tile .bt-go { flex-shrink:0; color:#b0b8c8; font-size:20px; }
+  .book-del { flex-shrink:0; background:transparent; border:none; color:#c2c8d4; font-size:18px; cursor:pointer; padding:6px; }
+  .book-del:hover { color:#d6453c; }
+
+  .empty-note { font-size:13px; color:#8a93a6; text-align:center; padding:24px 10px; }
+
+  .btn { background: #1a2a4a; color: #fff; border: none; padding: 15px 22px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; width: 100%; transition: 0.15s; }
+  .btn:hover { background: #24386a; }
+  .btn:active { transform:scale(0.99); }
+  .btn:disabled { background: #b6bdca; cursor: not-allowed; }
+  .btn-ghost { background: #fff; color: #1a2a4a; border: 1px solid #c9d0db; }
+  .btn-ghost:hover { background: #f3f6fb; }
+  .btn-row { display:flex; gap:10px; }
+  .btn-sm { padding:11px 16px; font-size:14px; }
+
+  /* 사진 촬영/업로드 */
+  .shoot-zone { border: 2px dashed #b9c2d2; border-radius: 14px; padding: 30px 20px; text-align: center; cursor: pointer; background: #fafbfc; transition:0.15s; }
+  .shoot-zone:hover { border-color:#1a2a4a; background:#f3f6fb; }
+  .shoot-zone .sz-ico { font-size:40px; }
+  .shoot-zone p { font-size: 15px; color: #44506a; font-weight:600; margin-top:6px; }
+  .shoot-zone .sz-sub { font-size:12px; color:#8a93a6; font-weight:400; margin-top:2px; }
+  .thumbs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 13px; }
+  .thumb { position: relative; width: 84px; height: 84px; border-radius: 10px; overflow: hidden; border: 1px solid #d3d9e2; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb button { position: absolute; top: 3px; right: 3px; background: rgba(26,42,74,0.85); color: #fff; border: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 13px; line-height: 1; }
+
+  .back-bar { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .back-btn { background:#fff; border:1px solid #d3d9e2; border-radius:10px; padding:9px 13px; font-size:14px; cursor:pointer; font-family:inherit; color:#1a2a4a; font-weight:600; }
+  .back-btn:hover { background:#f3f6fb; }
+  .grade-title { font-size:16px; font-weight:700; color:#1a2238; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .status { display: none; text-align: center; padding: 16px; font-size: 14px; color: #44506a; }
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2.5px solid #d3d9e2; border-top-color: #1a2a4a; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .score-banner { background: #1a2a4a; color: #fff; border-radius: 13px; padding: 18px; text-align: center; margin-bottom: 14px; }
+  .score-big { font-size: 36px; font-weight: 800; }
+  .score-sub { font-size: 14px; opacity: 0.85; }
+  .qrow { display: flex; align-items: flex-start; gap: 11px; padding: 12px 14px; border-radius: 11px; margin-bottom: 8px; border: 1px solid #e4e8ee; }
+  .qrow.correct { background: #eef7f0; border-color: #c5e4cd; }
+  .qrow.wrong { background: #fdf0ef; border-color: #f3ccc8; }
+  .qrow.review { background: #fff8e9; border-color: #f3e0b0; }
+  .qmark { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; color: #fff; }
+  .correct .qmark { background: #2e9d5b; }
+  .wrong .qmark { background: #d6453c; }
+  .review .qmark { background: #e0a020; }
+  .qbody { flex: 1; font-size: 14px; }
+  .qnum { font-weight: 700; color: #1a2a4a; }
+  .qdetail { color: #5a6478; font-size: 13px; margin-top: 2px; }
+  .qdetail b { color: #1a2a4a; }
+  .override-btns { margin-top: 7px; display: flex; gap: 6px; }
+  .override-btns button { border: 1px solid #d3d9e2; background: #fff; border-radius: 7px; padding: 5px 13px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .override-btns button.active-c { background: #2e9d5b; color: #fff; border-color: #2e9d5b; }
+  .override-btns button.active-w { background: #d6453c; color: #fff; border-color: #d6453c; }
+
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(20,28,48,0.7); z-index: 50; align-items: center; justify-content: center; padding: 20px; }
+  .modal-bg.open { display: flex; }
+  .modal { background: #fff; border-radius: 14px; max-width: 620px; width: 100%; max-height: 88vh; overflow-y: auto; padding: 20px; }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .modal-head h3 { font-size: 16px; color: #1a2a4a; }
+  .modal-close { background: #eef0f4; border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 18px; }
+  .modal img { width: 100%; border-radius: 9px; margin-bottom: 12px; border: 1px solid #e4e8ee; }
+  .modal-text { font-size:13px; color:#44506a; white-space:pre-wrap; border-top:1px solid #e4e8ee; padding-top:12px; margin-top:6px; }
+
+  .sync-note { font-size:12px; color:#8a93a6; text-align:center; margin-top:4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>테리스 자동 채점</h1>
+      <p>교재 탭 → 사진 촬영 → 자동 채점</p>
+    </div>
+    <button class="icon-btn" id="keyBtn">설정</button>
+  </header>
+
+  <!-- ===== VIEW 1: 교재 목록 ===== -->
+  <div class="view active" id="listView">
+    <div class="section-title">채점할 교재를 선택하세요</div>
+    <div class="book-grid" id="bookGrid"></div>
+    <div class="empty-note" id="bookEmpty" style="display:none;">등록된 교재가 없습니다.<br>아래 버튼으로 PC에서 교재를 등록하세요.</div>
+    <button class="btn btn-ghost btn-sm" id="newBookBtn" style="margin-top:14px;">+ 새 교재 등록</button>
+    <div class="sync-note" id="syncNote">로컬 저장 모드 · 이 기기에만 저장됩니다</div>
+  </div>
+
+  <!-- ===== VIEW 2: 새 교재 등록 ===== -->
+  <div class="view" id="registerView">
+    <div class="back-bar">
+      <button class="back-btn" data-back>← 목록</button>
+      <span class="grade-title">새 교재 등록</span>
+    </div>
+    <div class="card">
+      <label>교재명</label>
+      <input type="text" id="newBookName" placeholder="예: 동아윤정미 중2 Lesson 3">
+      <label>정답지 사진</label>
+      <div class="shoot-zone" id="ansZone">
+        <div class="sz-ico">📄</div>
+        <p>정답지 사진 올리기</p>
+        <div class="sz-sub">Claude가 정답을 읽어 자동 등록 · 여러 장 가능</div>
+      </div>
+      <input type="file" id="ansFile" accept="image/*" multiple hidden>
+      <div class="thumbs" id="ansThumbs"></div>
+      <button class="btn btn-sm" id="readAnsBtn" style="margin-top:12px;display:none;">정답지 읽기</button>
+      <div id="ansReadStatus" class="status"></div>
+      <div id="ansPreview" style="display:none;margin-top:12px;">
+        <label>읽힌 정답 (수정 가능)</label>
+        <textarea id="answerText"></textarea>
+        <button class="btn" id="saveBookBtn" style="margin-top:4px;">이 교재 저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW 3: 채점 ===== -->
+  <div class="view" id="gradeView">
+    <div class="back-bar">
+      <button class="back-btn" data-back>← 목록</button>
+      <span class="grade-title" id="gradeBookTitle"></span>
+    </div>
+    <div class="card">
+      <div class="shoot-zone" id="stuZone">
+        <div class="sz-ico">📷</div>
+        <p>학생이 푼 페이지 촬영</p>
+        <div class="sz-sub">카메라로 찍거나 사진 선택 · 여러 장 가능</div>
+      </div>
+      <input type="file" id="stuFile" accept="image/*" capture="environment" multiple hidden>
+      <div class="thumbs" id="stuThumbs"></div>
+      <button class="btn" id="gradeBtn" style="margin-top:14px;" disabled>채점하기</button>
+      <div id="gradeStatus" class="status"></div>
+    </div>
+
+    <!-- 결과 -->
+    <div class="card" id="resultsCard" style="display:none;">
+      <div class="score-banner">
+        <div class="score-big" id="scoreBig">0 / 0</div>
+        <div class="score-sub" id="scoreSub"></div>
+      </div>
+      <div id="resultList"></div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn btn-ghost btn-sm" id="copyBtn">결과 복사</button>
+        <button class="btn btn-ghost btn-sm" id="viewAnsBtn">정답지 보기</button>
+      </div>
+      <button class="btn btn-sm" id="regradeBtn" style="margin-top:10px;background:#44506a;">다음 학생 채점</button>
+    </div>
+  </div>
+</div>
+
+<!-- 정답지 모달 -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-head"><h3>정답지</h3><button class="modal-close" id="modalClose">×</button></div>
+    <div id="modalImgs"></div>
+    <div class="modal-text" id="modalText"></div>
+  </div>
+</div>
+
+<!-- 설정 모달 -->
+<div class="modal-bg" id="keyModalBg">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-head"><h3>설정</h3><button class="modal-close" id="keyModalClose">×</button></div>
+    <p style="font-size:13px;color:#5a6478;margin-bottom:12px;">채점 서버 주소입니다. 이미 연결돼 있어 비워두셔도 됩니다. 서버를 바꾼 경우에만 새 주소를 입력하세요.</p>
+    <label>채점 API 주소</label>
+    <input type="text" id="proxyInput" placeholder="https://내프로젝트.vercel.app/api/grade">
+    <button class="btn" id="saveKeyBtn">저장</button>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const LS_BOOKS='terrys_grader_books_v2', LS_PROXY='terrys_grader_proxy';
+let ansImages=[], stuImages=[], gradeResult=[];
+let books=[], currentBook=null;
+
+/* ===== 저장소 (지금은 로컬, 추후 Firebase로 교체) ===== */
+function loadBooks(){ try{books=JSON.parse(localStorage.getItem(LS_BOOKS)||'[]');}catch(e){books=[];} }
+function saveBooks(){ localStorage.setItem(LS_BOOKS, JSON.stringify(books)); }
+function getProxy(){ return localStorage.getItem(LS_PROXY)||'https://terrys-grader-api.vercel.app/api/grade'; }
+
+/* ===== 화면 전환 ===== */
+function showView(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); $(id).classList.add('active'); window.scrollTo(0,0); }
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{ currentBook=null; renderBooks(); showView('listView'); });
+
+/* ===== 설정 ===== */
+$('keyBtn').onclick=()=>{ $('proxyInput').value=localStorage.getItem(LS_PROXY)||''; $('keyModalBg').classList.add('open'); };
+$('keyModalClose').onclick=()=>$('keyModalBg').classList.remove('open');
+$('saveKeyBtn').onclick=()=>{ const v=$('proxyInput').value.trim(); if(v)localStorage.setItem(LS_PROXY,v); else localStorage.removeItem(LS_PROXY); $('keyModalBg').classList.remove('open'); };
+
+/* ===== 파일 유틸 ===== */
+function fileToData(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('읽기 실패'));r.readAsDataURL(f);});}
+function fileToURL(f){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f);});}
+function renderThumbs(arr,id,onRemove){const c=$(id);c.innerHTML='';arr.forEach((it,i)=>{const d=document.createElement('div');d.className='thumb';d.innerHTML=`<img src="${it.url}"><button>×</button>`;d.querySelector('button').onclick=()=>onRemove(i);c.appendChild(d);});}
+
+/* ===== 교재 목록: 탭하면 바로 채점 화면 ===== */
+function renderBooks(){
+  const grid=$('bookGrid'); grid.innerHTML='';
+  $('bookEmpty').style.display=books.length?'none':'block';
+  books.forEach((b,i)=>{
+    const cnt=b.answers?b.answers.split('\n').filter(x=>x.trim()).length:0;
+    const tile=document.createElement('div'); tile.className='book-tile';
+    tile.innerHTML=`<div class="bt-main"><div class="bt-ico">📚</div><div style="min-width:0;"><div class="bt-name">${esc(b.name)}</div><div class="bt-sub">정답 ${cnt}문항</div></div></div><div style="display:flex;align-items:center;gap:4px;"><button class="book-del" title="삭제">🗑</button><span class="bt-go">›</span></div>`;
+    tile.querySelector('.bt-main').onclick=()=>openGrade(i);
+    tile.querySelector('.bt-go').onclick=()=>openGrade(i);
+    tile.querySelector('.book-del').onclick=(e)=>{e.stopPropagation();if(confirm(`'${b.name}' 교재를 삭제할까요?`)){books.splice(i,1);saveBooks();renderBooks();}};
+    grid.appendChild(tile);
+  });
+}
+
+/* ===== 채점 화면 진입 ===== */
+function openGrade(i){
+  currentBook=i;
+  $('gradeBookTitle').textContent=books[i].name;
+  stuImages=[]; renderThumbs(stuImages,'stuThumbs',()=>{});
+  $('resultsCard').style.display='none';
+  refreshGradeBtn();
+  showView('gradeView');
+}
+
+/* ===== 새 교재 등록 ===== */
+$('newBookBtn').onclick=()=>{
+  ansImages=[]; $('newBookName').value=''; $('answerText').value='';
+  renderThumbs(ansImages,'ansThumbs',()=>{});
+  $('ansPreview').style.display='none'; $('readAnsBtn').style.display='none';
+  showView('registerView');
+};
+$('ansZone').onclick=()=>$('ansFile').click();
+$('ansFile').onchange=async e=>{ for(const f of e.target.files){ansImages.push({data:await fileToData(f),url:await fileToURL(f),media:f.type});} redrawAns(); };
+function redrawAns(){ renderThumbs(ansImages,'ansThumbs',i=>{ansImages.splice(i,1);redrawAns();}); $('readAnsBtn').style.display=ansImages.length?'block':'none'; }
+
+$('readAnsBtn').onclick=async ()=>{
+  showStatus('ansReadStatus','정답지를 읽는 중...');
+  const content=[{type:'text',text:'이 사진은 시험지의 정답지입니다. 문항 번호와 정답을 추출하세요. 객관식은 숫자나 기호로, 주관식/영작은 정답 문장 그대로 적으세요. 반드시 "번호.정답" 형식으로 한 줄에 하나씩만 출력하고, 다른 설명은 절대 넣지 마세요. 예시:\n1.③\n2.is playing\n3.She likes apples'}];
+  for(const img of ansImages){ content.push({type:'image',source:{type:'base64',media_type:img.media,data:img.data}}); }
+  try{ const data=await callClaude([{role:'user',content}]); $('answerText').value=extractText(data).trim(); $('ansPreview').style.display='block'; hideStatus('ansReadStatus'); }
+  catch(err){ showStatus('ansReadStatus','읽기 실패: '+err.message,true); }
+};
+
+$('saveBookBtn').onclick=()=>{
+  const name=$('newBookName').value.trim(), ans=$('answerText').value.trim();
+  if(!name){ alert('교재명을 입력하세요.'); return; }
+  if(!ans){ alert('정답을 먼저 읽어주세요.'); return; }
+  books.push({ name, answers:ans, ansImages:ansImages.map(a=>({url:a.url})) });
+  saveBooks(); renderBooks();
+  currentBook=null; showView('listView');
+};
+
+/* ===== 학생 답안 / 채점 ===== */
+$('stuZone').onclick=()=>$('stuFile').click();
+$('stuFile').onchange=async e=>{ for(const f of e.target.files){stuImages.push({data:await fileToData(f),url:await fileToURL(f),media:f.type});} redrawStu(); refreshGradeBtn(); };
+function redrawStu(){ renderThumbs(stuImages,'stuThumbs',i=>{stuImages.splice(i,1);redrawStu();refreshGradeBtn();}); }
+function refreshGradeBtn(){ $('gradeBtn').disabled=!(currentBook!==null && stuImages.length); }
+
+function parseAnswers(raw){ return raw.split('\n').map(l=>l.trim()).filter(Boolean).map(line=>{const m=line.match(/^(\d+)\s*[.)]\s*(.+)$/);return m?{num:m[1],answer:m[2].trim()}:{num:'?',answer:line};}); }
+
+$('gradeBtn').onclick=async ()=>{
+  const book=books[currentBook];
+  const parsed=parseAnswers(book.answers);
+  $('gradeBtn').disabled=true;
+  showStatus('gradeStatus','학생 답안을 읽고 채점하는 중...');
+  const ansList=parsed.map(a=>`${a.num}번: ${a.answer}`).join('\n');
+  const prompt=`당신은 영어 학원 채점 보조입니다. 아래 정답표와 학생이 푼 답안 사진을 보고 채점하세요.
+
+[정답표]
+${ansList}
+
+[채점 규칙]
+- 사진에서 각 문항의 학생 답을 읽으세요. 손글씨도 최대한 정확히 인식하세요.
+- 객관식(숫자/기호 선택)은 정답과 정확히 일치하면 정답.
+- 주관식/영작은 의미와 핵심 문법이 정답과 일치하면 정답. 사소한 철자 실수는 부분정답(review)으로 표시.
+- 학생 답을 읽기 어렵거나 정답 여부가 애매하면 "review"로 표시해 선생님이 확인하게 하세요.
+
+[출력 형식]
+반드시 아래 JSON 배열만 출력하세요. 다른 텍스트, 마크다운, 설명 금지.
+[
+  {"num":"1","studentAnswer":"학생이 쓴 답","correctAnswer":"정답","verdict":"correct|wrong|review","note":"한 줄 코멘트"}
+]`;
+  const content=[{type:'text',text:prompt}];
+  for(const img of stuImages){ content.push({type:'image',source:{type:'base64',media_type:img.media,data:img.data}}); }
+  try{
+    const data=await callClaude([{role:'user',content}]);
+    let txt=extractText(data).replace(/```json|```/g,'').trim();
+    const s=txt.indexOf('['),e=txt.lastIndexOf(']'); if(s>=0&&e>=0) txt=txt.slice(s,e+1);
+    gradeResult=JSON.parse(txt); renderResults(); hideStatus('gradeStatus');
+  }catch(err){ showStatus('gradeStatus','채점 실패: '+err.message,true); }
+  $('gradeBtn').disabled=false;
+};
+
+function renderResults(){
+  const list=$('resultList'); list.innerHTML='';
+  gradeResult.forEach((r,i)=>{
+    const row=document.createElement('div'); row.className='qrow '+r.verdict;
+    const mark=r.verdict==='correct'?'O':r.verdict==='wrong'?'X':'?';
+    row.innerHTML=`<div class="qmark">${mark}</div><div class="qbody"><span class="qnum">${esc(r.num)}번</span><div class="qdetail">학생: <b>${esc(r.studentAnswer||'(인식 안됨)')}</b> · 정답: <b>${esc(r.correctAnswer||'')}</b></div>${r.note?`<div class="qdetail" style="color:#8a93a6;">${esc(r.note)}</div>`:''}<div class="override-btns" data-i="${i}"><button class="oc ${r.verdict==='correct'?'active-c':''}">정답</button><button class="ow ${r.verdict==='wrong'?'active-w':''}">오답</button></div></div>`;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.override-btns').forEach(box=>{const i=+box.dataset.i;box.querySelector('.oc').onclick=()=>{gradeResult[i].verdict='correct';renderResults();};box.querySelector('.ow').onclick=()=>{gradeResult[i].verdict='wrong';renderResults();};});
+  const correct=gradeResult.filter(r=>r.verdict==='correct').length, total=gradeResult.length, review=gradeResult.filter(r=>r.verdict==='review').length;
+  $('scoreBig').textContent=`${correct} / ${total}`;
+  const pct=total?Math.round(correct/total*100):0;
+  $('scoreSub').textContent=`정답률 ${pct}%`+(review?` · 확인 필요 ${review}문항`:'');
+  $('resultsCard').style.display='block'; $('resultsCard').scrollIntoView({behavior:'smooth'});
+}
+
+$('regradeBtn').onclick=()=>{ stuImages=[]; renderThumbs(stuImages,'stuThumbs',()=>{}); $('resultsCard').style.display='none'; refreshGradeBtn(); $('stuZone').scrollIntoView({behavior:'smooth'}); };
+
+$('copyBtn').onclick=()=>{
+  const book=books[currentBook]?books[currentBook].name:'교재';
+  const correct=gradeResult.filter(r=>r.verdict==='correct').length;
+  let txt=`[${book}]\n점수: ${correct}/${gradeResult.length}\n\n`;
+  gradeResult.forEach(r=>{const m=r.verdict==='correct'?'O':r.verdict==='wrong'?'X':'△';txt+=`${r.num}번 ${m}  학생:${r.studentAnswer||'-'} / 정답:${r.correctAnswer||'-'}\n`;});
+  navigator.clipboard.writeText(txt).then(()=>{$('copyBtn').textContent='복사됨!';setTimeout(()=>$('copyBtn').textContent='결과 복사',1500);});
+};
+
+$('viewAnsBtn').onclick=()=>{
+  const book=books[currentBook]; if(!book)return;
+  const box=$('modalImgs'); box.innerHTML='';
+  (book.ansImages||[]).forEach(img=>{const el=document.createElement('img');el.src=img.url;box.appendChild(el);});
+  $('modalText').textContent=book.answers;
+  $('modalBg').classList.add('open');
+};
+$('modalClose').onclick=()=>$('modalBg').classList.remove('open');
+$('modalBg').onclick=e=>{ if(e.target===$('modalBg')) $('modalBg').classList.remove('open'); };
+
+/* ===== API 호출: Vercel 프록시 경유 ===== */
+async function callClaude(messages){
+  const res=await fetch(getProxy(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,messages})});
+  if(!res.ok){ const t=await res.text(); throw new Error('서버 '+res.status+' '+t.slice(0,100)); }
+  return res.json();
+}
+function extractText(data){ return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n'); }
+function esc(s){ return String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
+function showStatus(id,msg,err){const el=$(id);el.style.display='block';el.innerHTML=err?`<span style="color:#d6453c;">${esc(msg)}</span>`:`<span class="spinner"></span>${esc(msg)}`;}
+function hideStatus(id){ $(id).style.display='none'; }
+
+/* init */
+loadBooks(); renderBooks();
+</script>
+</body>
+</html>
