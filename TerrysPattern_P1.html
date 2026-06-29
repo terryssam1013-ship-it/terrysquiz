@@ -447,6 +447,10 @@ function SENT(){ return SET().sentences; }
 function toast(msg,ms=1700){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastEl._t);toastEl._t=setTimeout(()=>toastEl.classList.remove('show'),ms);}
 function speak(text,rate=0.9){if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=rate;synth.speak(u);}
 window.speak=speak;
+// 새 항목이 화면에 뜰 때 자동 발음 (같은 항목 재렌더 시엔 반복 안 함)
+let _lastAutoKey=null;
+function autoSpeak(key,text){ if(key===_lastAutoKey)return; _lastAutoKey=key; setTimeout(()=>speak(text,0.85),350); }
+function resetAutoSpeak(){ _lastAutoKey=null; }
 function norm(s){return(s||'').toLowerCase().replace(/[.,!?;:"'`]/g,'').replace(/\s+/g,' ').trim();}
 function words(s){return norm(s).split(' ').filter(Boolean);}
 function levenshtein(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;const d=Array.from({length:m+1},(_,i)=>[i,...Array(n).fill(0)]);for(let j=0;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n];}
@@ -456,7 +460,33 @@ function starburst(){const layer=document.createElement('div');layer.className='
 function comboPop(n){const el=document.createElement('div');el.className='combo-pop';el.textContent=n+' COMBO!';document.body.appendChild(el);setTimeout(()=>el.remove(),1000);}
 
 let rec=null,recActive=false;
-function recognizeOnce(lang,{onResult,onEnd,onError}){if(!SR){onError&&onError('nosupport');return;}if(recActive&&rec){try{rec.stop()}catch(e){}}rec=new SR();rec.lang=lang;rec.interimResults=true;rec.maxAlternatives=1;rec.continuous=false;let finalText='';recActive=true;rec.onresult=(e)=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=t;else interim+=t;}onResult&&onResult(finalText||interim,!!finalText);};rec.onerror=(e)=>{recActive=false;onError&&onError(e.error);};rec.onend=()=>{recActive=false;onEnd&&onEnd(finalText.trim());};try{rec.start();}catch(e){recActive=false;onError&&onError('start');}}
+function recognizeOnce(lang,{onResult,onEnd,onError}){
+  if(!SR){onError&&onError('nosupport');return;}
+  // 모바일: TTS가 마이크/오디오 세션을 잡고 있으면 인식이 안 됨 → 먼저 음성 중단
+  try{ if(synth){ synth.cancel(); } }catch(e){}
+  if(recActive&&rec){try{rec.stop()}catch(e){}}
+  const startNow=()=>{
+    rec=new SR();rec.lang=lang;rec.interimResults=true;rec.maxAlternatives=1;rec.continuous=false;
+    let finalText='';recActive=true;
+    rec.onresult=(e)=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=t;else interim+=t;}onResult&&onResult(finalText||interim,!!finalText);};
+    rec.onerror=(e)=>{recActive=false;onError&&onError(e.error);};
+    rec.onend=()=>{recActive=false;onEnd&&onEnd(finalText.trim());};
+    try{ rec.start(); }
+    catch(e){
+      // 이미 시작됨/오디오 사용중 → 잠깐 뒤 한 번 더 시도
+      recActive=false;
+      setTimeout(()=>{ try{ rec=new SR();rec.lang=lang;rec.interimResults=true;rec.maxAlternatives=1;rec.continuous=false;recActive=true;
+        rec.onresult=(ev)=>{let it='';for(let i=ev.resultIndex;i<ev.results.length;i++){const t=ev.results[i][0].transcript;if(ev.results[i].isFinal)finalText+=t;else it+=t;}onResult&&onResult(finalText||it,!!finalText);};
+        rec.onerror=(ev)=>{recActive=false;onError&&onError(ev.error);};
+        rec.onend=()=>{recActive=false;onEnd&&onEnd(finalText.trim());};
+        rec.start();
+      }catch(e2){ recActive=false; onError&&onError('start'); } },250);
+    }
+  };
+  // TTS가 아직 말하는 중이면 살짝 기다렸다 시작 (모바일 충돌 방지)
+  if(synth && synth.speaking){ setTimeout(startNow,180); }
+  else startNow();
+}
 function stopRec(){if(rec&&recActive){try{rec.stop()}catch(e){}}}
 
 const MIC_SVG='<svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>';
@@ -551,6 +581,7 @@ function renderPath(){
 window.goPath=()=>{state.screen='path';render();};
 window.goStep=(n)=>{
   Sound.unlock();
+  resetAutoSpeak();
   if(n===0){state.screen='intro';INTRO.enter();}
   else if(n===1){state.screen='step1';WORD.enter();}
   else if(n>=2&&n<=4){state.screen='step'+n;STEPS[n].reset();}
@@ -597,7 +628,7 @@ const WORD={
     if(!this.queue.length)this.build();
     const total=this.queue.length;
     if(this.idx>=total){
-      if(this.phase==='A'){this.phase='B';this.idx=0;this.attempt=0;this.lastScore=null;this.lastHeard='';toast('이번엔 한글만 보고 말해봐! 💪',2200);}
+      if(this.phase==='A'){this.phase='B';this.idx=0;this.attempt=0;this.lastScore=null;this.lastHeard='';resetAutoSpeak();toast('이번엔 한글만 보고 말해봐! 💪',2200);}
       else{clearStep(1);return;}
     }
     const item=this.queue[this.idx];
@@ -618,6 +649,8 @@ const WORD={
         <div class="controls">${done?'':`<button class="mic" id="mic" onclick="WORD.mic()">${MIC_SVG}</button><div class="mic-label" id="miclabel">${this.attempt>0?`다시 도전! (${this.attempt}/3)`:'마이크를 누르고 말해요'}</div>`}</div>
       </div>
       ${done?actionBar(this,item.eng):''}`;
+    // 1단계 따라 말하기: 새 단어 뜨면 자동 발음 (답 보기 전)
+    if(isA&&!done) autoSpeak('wordA-'+this.idx, item.eng);
   },
   mic(){doMic(this);},
   _afterScore(score){this.attempt++;this.lastScore=score;gradeFx(score,this.attempt);this.render();},
@@ -675,7 +708,7 @@ function makeSentenceStep(stepNo,opts){
       const mood=!done?(opts.showEnglish==='full'?'talk':'idle'):(this.lastScore>=PASS?'cheer':'oops');
       let engBlock='';
       if(opts.showEnglish==='full'){engBlock=`<div class="en-show">${s.eng}</div><button class="listen-btn" onclick="speak('${s.eng.replace(/'/g,"\\'")}')">${SPK_SVG} 발음 듣기</button>`;}
-      else if(opts.showEnglish==='pattern'){engBlock=`<div class="en-fill">${buildFillHtml(s)}</div>`;if(done)engBlock+=`<div class="en-answer">정답: <b>${s.eng}</b></div>`;}
+      else if(opts.showEnglish==='pattern'){engBlock=`<div class="en-fill">${buildFillHtml(s)}</div><button class="listen-btn" onclick="speak('${s.eng.replace(/'/g,"\\'")}')">${SPK_SVG} 전체 문장 듣기</button>`;if(done)engBlock+=`<div class="en-answer">정답: <b>${s.eng}</b></div>`;}
       else{if(done)engBlock=`<div class="en-show">${s.eng}</div>`;}
       const info=STEP_INFO[stepNo];
       const sayText=!done?{full:'테리를 따라 말해봐!',pattern:'빈칸을 영어로 채워봐!',none:'이제 혼자 말해볼까?'}[opts.showEnglish]:(this.lastScore>=PASS?'Excellent! 🎉':(this.attempt>=3?'좋아, 다음!':'한 번 더!'));
@@ -690,6 +723,8 @@ function makeSentenceStep(stepNo,opts){
           <div class="controls">${done?'':`<button class="mic" id="mic" onclick="STEPS[${stepNo}].mic()">${MIC_SVG}</button><div class="mic-label" id="miclabel">${this.attempt>0?`다시 도전! (${this.attempt}/3)`:'마이크를 누르고 말해요'}</div>`}</div>
         </div>
         ${done?actionBar(this,s.eng):''}`;
+      // 문장 따라 말하기(영어 보임): 새 문장 뜨면 자동 발음
+      if(opts.showEnglish==='full'&&!done) autoSpeak('sent'+stepNo+'-'+this.idx, s.eng);
     },
     mic(){doMic(this);},
     _target(){return SENT()[this.idx].eng;},
@@ -725,7 +760,7 @@ const STEP5={
   start(){this.build();this.askQuestion();},
   askQuestion(){const q=this.curQuestion();this.busy=true;this.render();setTimeout(()=>{this.busy=false;this.log.push({type:'ai',text:q});this.phase='answer';this.lastHeard='';this.render();speak(q,0.92);},700);},
   replay(){speak(this.curQuestion(),0.9);},
-  mic(){const micEl=document.getElementById('mic'),lab=document.getElementById('miclabel');if(recActive){stopRec();return;}Sound.beep();micEl.classList.add('listening');lab.textContent='듣고 있어요…';lab.classList.add('live');this.lastHeard='';recognizeOnce('en-US',{onResult:(txt)=>{this.lastHeard=txt;lab.textContent=txt?'“'+txt+'”':'듣고 있어요…';},onEnd:(finalTxt)=>{micEl.classList.remove('listening');lab.classList.remove('live');const heard=finalTxt||this.lastHeard;if(!heard){lab.textContent='못 들었어요. 다시 눌러요';return;}this.handleAnswer(heard);},onError:(err)=>{micEl.classList.remove('listening');lab.classList.remove('live');lab.textContent=err==='not-allowed'?'마이크를 켜주세요':'다시 해봐요';}});},
+  mic(){const micEl=document.getElementById('mic'),lab=document.getElementById('miclabel');if(recActive){stopRec();return;}Sound.beep();if(micEl)micEl.classList.add('listening');if(lab){lab.textContent='듣고 있어요…';lab.classList.add('live');}this.lastHeard='';recognizeOnce('en-US',{onResult:(txt)=>{this.lastHeard=txt;const l=document.getElementById('miclabel');if(l)l.textContent=txt?'“'+txt+'”':'듣고 있어요…';},onEnd:(finalTxt)=>{const m=document.getElementById('mic'),l=document.getElementById('miclabel');if(m)m.classList.remove('listening');if(l)l.classList.remove('live');const heard=finalTxt||this.lastHeard;if(!heard){if(l)l.textContent='못 들었어요. 다시 눌러요';return;}this.handleAnswer(heard);},onError:(err)=>{const m=document.getElementById('mic'),l=document.getElementById('miclabel');if(m)m.classList.remove('listening');if(l)l.classList.remove('live');if(l)l.textContent=err==='not-allowed'?'마이크를 켜주세요':'다시 해봐요';}});},
   handleAnswer(text){this.phase='processing';this.log.push({type:'me',text});this.render();setTimeout(()=>{
     if(!this.usesPattern(text)){this.fails++;Sound.fail();loseHeart();this.log.push({type:'model',text:this.makeModelAnswer()});this.render();if(this.fails>=this.MAX_FAILS){setTimeout(()=>this.endTalk(false),900);return;}setTimeout(()=>{this.phase='answer';this.lastHeard='';this.render();toast('"I want to"를 넣어서 답해봐!');},1100);return;}
     const g=this.grade(text);this.log.push({type:'react',val:g});this.turns++;state.combo++;state.bestCombo=Math.max(state.bestCombo,state.combo);if(g!=='Bad'){Sound.success();starburst();if(state.combo>=3&&state.combo%2===1)comboPop(state.combo);}else{Sound.fail();}this.render();if(this.turns>=this.MAX_TURNS){setTimeout(()=>this.endTalk(true),900);return;}this.qIdx++;setTimeout(()=>this.askQuestion(),1000);
