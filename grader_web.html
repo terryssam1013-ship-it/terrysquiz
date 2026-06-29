@@ -132,10 +132,10 @@
       <label>정답지 사진</label>
       <div class="shoot-zone" id="ansZone">
         <div class="sz-ico">📄</div>
-        <p>정답지 사진 올리기</p>
-        <div class="sz-sub">Claude가 정답을 읽어 자동 등록 · 여러 장 가능</div>
+        <p>정답지 올리기 (사진 또는 PDF)</p>
+        <div class="sz-sub">클릭 또는 끌어다 놓기 · 사진/PDF · 여러 장 가능</div>
       </div>
-      <input type="file" id="ansFile" accept="image/*" multiple hidden>
+      <input type="file" id="ansFile" accept="image/*,application/pdf" multiple hidden>
       <div class="thumbs" id="ansThumbs"></div>
       <button class="btn btn-sm" id="readAnsBtn" style="margin-top:12px;display:none;">정답지 읽기</button>
       <div id="ansReadStatus" class="status"></div>
@@ -157,9 +157,9 @@
       <div class="shoot-zone" id="stuZone">
         <div class="sz-ico">📷</div>
         <p>학생이 푼 페이지 촬영</p>
-        <div class="sz-sub">카메라로 찍거나 사진 선택 · 여러 장 가능</div>
+        <div class="sz-sub">촬영·사진 선택·끌어다 놓기 · 사진/PDF · 여러 장</div>
       </div>
-      <input type="file" id="stuFile" accept="image/*" capture="environment" multiple hidden>
+      <input type="file" id="stuFile" accept="image/*,application/pdf" multiple hidden>
       <div class="thumbs" id="stuThumbs"></div>
       <button class="btn" id="gradeBtn" style="margin-top:14px;" disabled>채점하기</button>
       <div id="gradeStatus" class="status"></div>
@@ -224,7 +224,8 @@ $('saveKeyBtn').onclick=()=>{ const v=$('proxyInput').value.trim(); if(v)localSt
 /* ===== 파일 유틸 ===== */
 function fileToData(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('읽기 실패'));r.readAsDataURL(f);});}
 function fileToURL(f){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f);});}
-function renderThumbs(arr,id,onRemove){const c=$(id);c.innerHTML='';arr.forEach((it,i)=>{const d=document.createElement('div');d.className='thumb';d.innerHTML=`<img src="${it.url}"><button>×</button>`;d.querySelector('button').onclick=()=>onRemove(i);c.appendChild(d);});}
+function toContentBlock(item){ if(item.isPdf){ return {type:'document',source:{type:'base64',media_type:'application/pdf',data:item.data}}; } return {type:'image',source:{type:'base64',media_type:item.media,data:item.data}}; }
+function renderThumbs(arr,id,onRemove){const c=$(id);c.innerHTML='';arr.forEach((it,i)=>{const d=document.createElement('div');d.className='thumb';const inner=it.isPdf?`<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f1f3f7;color:#44506a;font-size:11px;font-weight:700;"><div style="font-size:26px;">📄</div>PDF</div>`:`<img src="${it.url}">`;d.innerHTML=`${inner}<button>×</button>`;d.querySelector('button').onclick=()=>onRemove(i);c.appendChild(d);});}
 
 /* ===== 교재 목록: 탭하면 바로 채점 화면 ===== */
 function renderBooks(){
@@ -258,14 +259,21 @@ $('newBookBtn').onclick=()=>{
   $('ansPreview').style.display='none'; $('readAnsBtn').style.display='none';
   showView('registerView');
 };
+async function addFiles(fileList, arr, after){ for(const f of fileList){ if(!(f.type.startsWith('image/')||f.type==='application/pdf')) continue; const isPdf=f.type==='application/pdf'; arr.push({data:await fileToData(f),url:isPdf?'':await fileToURL(f),media:f.type,isPdf}); } after(); }
+function enableDrop(zone, onFiles){
+  ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();zone.style.borderColor='#1a2a4a';zone.style.background='#eef3fb';}));
+  ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();zone.style.borderColor='';zone.style.background='';}));
+  zone.addEventListener('drop',e=>{ const files=e.dataTransfer&&e.dataTransfer.files; if(files&&files.length) onFiles(files); });
+}
 $('ansZone').onclick=()=>$('ansFile').click();
-$('ansFile').onchange=async e=>{ for(const f of e.target.files){ansImages.push({data:await fileToData(f),url:await fileToURL(f),media:f.type});} redrawAns(); };
+$('ansFile').onchange=e=>addFiles(e.target.files, ansImages, redrawAns);
+enableDrop($('ansZone'), files=>addFiles(files, ansImages, redrawAns));
 function redrawAns(){ renderThumbs(ansImages,'ansThumbs',i=>{ansImages.splice(i,1);redrawAns();}); $('readAnsBtn').style.display=ansImages.length?'block':'none'; }
 
 $('readAnsBtn').onclick=async ()=>{
   showStatus('ansReadStatus','정답지를 읽는 중...');
   const content=[{type:'text',text:'이 사진은 시험지의 정답지입니다. 문항 번호와 정답을 추출하세요. 객관식은 숫자나 기호로, 주관식/영작은 정답 문장 그대로 적으세요. 반드시 "번호.정답" 형식으로 한 줄에 하나씩만 출력하고, 다른 설명은 절대 넣지 마세요. 예시:\n1.③\n2.is playing\n3.She likes apples'}];
-  for(const img of ansImages){ content.push({type:'image',source:{type:'base64',media_type:img.media,data:img.data}}); }
+  for(const img of ansImages){ content.push(toContentBlock(img)); }
   try{ const data=await callClaude([{role:'user',content}]); $('answerText').value=extractText(data).trim(); $('ansPreview').style.display='block'; hideStatus('ansReadStatus'); }
   catch(err){ showStatus('ansReadStatus','읽기 실패: '+err.message,true); }
 };
@@ -274,14 +282,15 @@ $('saveBookBtn').onclick=()=>{
   const name=$('newBookName').value.trim(), ans=$('answerText').value.trim();
   if(!name){ alert('교재명을 입력하세요.'); return; }
   if(!ans){ alert('정답을 먼저 읽어주세요.'); return; }
-  books.push({ name, answers:ans, ansImages:ansImages.map(a=>({url:a.url})) });
+  books.push({ name, answers:ans, ansImages:ansImages.map(a=>({url:a.url,isPdf:a.isPdf})) });
   saveBooks(); renderBooks();
   currentBook=null; showView('listView');
 };
 
 /* ===== 학생 답안 / 채점 ===== */
 $('stuZone').onclick=()=>$('stuFile').click();
-$('stuFile').onchange=async e=>{ for(const f of e.target.files){stuImages.push({data:await fileToData(f),url:await fileToURL(f),media:f.type});} redrawStu(); refreshGradeBtn(); };
+$('stuFile').onchange=e=>addFiles(e.target.files, stuImages, ()=>{redrawStu();refreshGradeBtn();});
+enableDrop($('stuZone'), files=>addFiles(files, stuImages, ()=>{redrawStu();refreshGradeBtn();}));
 function redrawStu(){ renderThumbs(stuImages,'stuThumbs',i=>{stuImages.splice(i,1);redrawStu();refreshGradeBtn();}); }
 function refreshGradeBtn(){ $('gradeBtn').disabled=!(currentBook!==null && stuImages.length); }
 
@@ -310,7 +319,7 @@ ${ansList}
   {"num":"1","studentAnswer":"학생이 쓴 답","correctAnswer":"정답","verdict":"correct|wrong|review","note":"한 줄 코멘트"}
 ]`;
   const content=[{type:'text',text:prompt}];
-  for(const img of stuImages){ content.push({type:'image',source:{type:'base64',media_type:img.media,data:img.data}}); }
+  for(const img of stuImages){ content.push(toContentBlock(img)); }
   try{
     const data=await callClaude([{role:'user',content}]);
     let txt=extractText(data).replace(/```json|```/g,'').trim();
@@ -349,7 +358,7 @@ $('copyBtn').onclick=()=>{
 $('viewAnsBtn').onclick=()=>{
   const book=books[currentBook]; if(!book)return;
   const box=$('modalImgs'); box.innerHTML='';
-  (book.ansImages||[]).forEach(img=>{const el=document.createElement('img');el.src=img.url;box.appendChild(el);});
+  (book.ansImages||[]).forEach(img=>{ if(img.isPdf){ const p=document.createElement('div'); p.style.cssText='padding:14px;background:#f1f3f7;border-radius:9px;margin-bottom:12px;color:#44506a;font-size:13px;text-align:center;'; p.textContent='📄 PDF 정답지 (미리보기는 지원되지 않습니다)'; box.appendChild(p);} else if(img.url){ const el=document.createElement('img'); el.src=img.url; box.appendChild(el);} });
   $('modalText').textContent=book.answers;
   $('modalBg').classList.add('open');
 };
@@ -368,6 +377,8 @@ function showStatus(id,msg,err){const el=$(id);el.style.display='block';el.inner
 function hideStatus(id){ $(id).style.display='none'; }
 
 /* init */
+/* 드롭존 밖에 실수로 떨어뜨려도 브라우저가 파일을 열지 않도록 */
+['dragover','drop'].forEach(ev=>window.addEventListener(ev,e=>{e.preventDefault();}));
 loadBooks(); renderBooks();
 </script>
 </body>
