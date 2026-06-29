@@ -12,25 +12,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --green:#58cc02; --green-d:#46a302; --green-l:#89e219;
-    --blue:#1cb0f6; --blue-d:#1899d6;
-    --yellow:#ffc800; --yellow-d:#e6a600;
-    --red:#ff4b4b; --red-d:#e63939;
-    --purple:#ce82ff; --purple-d:#a568cc;
-    --ink:#3c3c3c; --sub:#777; --line:#e5e5e5; --line2:#d4d4d4;
-    --bg:#ffffff; --bg2:#f7f9fc; --card:#ffffff;
-    --safe-top:env(safe-area-inset-top,0px);
-    --safe-bot:env(safe-area-inset-bottom,0px);
+    --green:#58cc02;--green-d:#46a302;--green-l:#89e219;--blue:#1cb0f6;--blue-d:#1899d6;
+    --yellow:#ffc800;--yellow-d:#e6a600;--red:#ff4b4b;--red-d:#e63939;--purple:#ce82ff;--purple-d:#a568cc;
+    --ink:#3c3c3c;--sub:#777;--line:#e5e5e5;--line2:#d4d4d4;--bg:#ffffff;--bg2:#f7f9fc;--card:#ffffff;
+    --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
     --font:"Baloo 2","Jua",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
     --font-display:"Jua","Baloo 2",sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
-  body{font-family:var(--font);background:var(--bg2);color:var(--ink);overflow:hidden;
-    -webkit-font-smoothing:antialiased;user-select:none;font-weight:600}
+  body{font-family:var(--font);background:var(--bg2);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased;user-select:none;font-weight:600}
   #app{height:100dvh;width:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;position:relative;background:var(--bg)}
-
-  /* TOP BAR */
   .topbar{padding:calc(var(--safe-top) + 14px) 16px 14px;display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--bg);z-index:5}
   .xbtn{width:34px;height:34px;border:none;background:none;color:var(--line2);font-size:30px;line-height:1;cursor:pointer;font-weight:700;flex-shrink:0}
   .xbtn:active{color:var(--sub);transform:scale(.9)}
@@ -39,18 +31,12 @@
   .pbar .fill::after{content:"";position:absolute;top:3px;left:6px;right:6px;height:4px;background:rgba(255,255,255,.35);border-radius:4px}
   .hearts{display:flex;align-items:center;gap:3px;flex-shrink:0}
   .hearts svg{width:26px;height:26px}
-
-  /* phase chips inside word step */
   .phasebar{display:flex;gap:8px;padding:0 20px;margin-bottom:4px;flex-shrink:0}
   .phasechip{flex:1;text-align:center;font-family:var(--font-display);font-size:12px;padding:7px;border-radius:12px;background:var(--bg2);color:var(--sub);border:2px solid transparent}
   .phasechip.active{background:#eafce0;color:var(--green-d);border-color:var(--green)}
   .phasechip.done{background:#fff7e0;color:var(--yellow-d)}
-
-  /* BODY */
   .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 20px 20px;display:flex;flex-direction:column}
   .body::-webkit-scrollbar{display:none}
-
-  /* MASCOT */
   .terry{display:block}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
   @keyframes bounceIn{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
@@ -67,26 +53,50 @@
   .speech::before{content:"";position:absolute;left:-10px;top:50%;transform:translateY(-50%);width:0;height:0;border:8px solid transparent;border-right-color:var(--line)}
   .speech::after{content:"";position:absolute;left:-7px;top:50%;transform:translateY(-50%);width:0;height:0;border:7px solid transparent;border-right-color:var(--bg)}
 
-  /* HOME */
+  /* COURSE SELECT */
   .home-top{text-align:center;padding:14px 0 4px}
   .home-badge{display:inline-block;font-family:var(--font-display);font-size:13px;letter-spacing:1px;color:#fff;background:var(--green);padding:7px 18px;border-radius:30px;box-shadow:0 3px 0 var(--green-d)}
   .home-pattern{font-family:var(--font);font-weight:800;font-size:26px;color:var(--green);margin-top:14px}
-  .home-sub{font-size:14px;color:var(--sub);margin-top:8px;font-weight:600}
-  .path{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:18px;padding-bottom:10px}
+  .home-mean{font-size:15px;color:var(--sub);margin-top:4px;font-weight:600}
+  .courses{display:flex;flex-direction:column;gap:14px;margin-top:26px}
+  .course{display:flex;align-items:center;gap:16px;background:var(--bg);border:2px solid var(--line);border-radius:20px;padding:18px;cursor:pointer;transition:transform .12s}
+  .course:active{transform:scale(.98)}
+  .course.locked{opacity:.55;pointer-events:none}
+  .course.done{border-color:var(--green)}
+  .course-ic{width:56px;height:56px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;color:#fff;background:var(--green);box-shadow:0 4px 0 var(--green-d)}
+  .course.done .course-ic{background:var(--yellow);box-shadow:0 4px 0 var(--yellow-d)}
+  .course.locked .course-ic{background:#c8c8c8;box-shadow:0 4px 0 #b0b0b0}
+  .course-meta{flex:1;min-width:0}
+  .course-meta h3{font-family:var(--font-display);font-size:18px;color:var(--ink)}
+  .course-meta p{font-size:13px;color:var(--sub);margin-top:3px;font-weight:600}
+  .course-arrow{font-size:24px;color:var(--line2);flex-shrink:0}
+  .course.done .course-arrow{color:var(--green)}
+
+  /* PATH */
+  .path{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:14px;padding-bottom:10px}
   .node-wrap{display:flex;flex-direction:column;align-items:center;position:relative}
-  .node-offset-0{margin-left:0}.node-offset-1{margin-left:84px}.node-offset-2{margin-left:130px}
-  .node{width:74px;height:66px;border-radius:50%;border:none;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:26px;color:#fff;transition:transform .12s}
+  .node-offset-0{margin-left:0}.node-offset-1{margin-left:70px}.node-offset-2{margin-left:108px}
+  .node{width:70px;height:62px;border-radius:50%;border:none;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:24px;color:#fff;transition:transform .12s}
   .node:active{transform:translateY(3px)}
   .node.locked{background:#e5e5e5;box-shadow:0 5px 0 #cfcfcf;color:#b0b0b0;pointer-events:none}
   .node.current{background:var(--green);box-shadow:0 6px 0 var(--green-d)}
   .node.done{background:var(--yellow);box-shadow:0 6px 0 var(--yellow-d)}
   .node.locked:active{transform:none}
-  .node-label{font-size:12px;font-weight:700;color:var(--sub);margin-top:8px;text-align:center;max-width:90px;line-height:1.2}
+  .node-label{font-size:11px;font-weight:700;color:var(--sub);margin-top:7px;text-align:center;max-width:86px;line-height:1.2}
   .node.current + .node-label{color:var(--green-d)}
-  .start-tag{position:absolute;top:-34px;left:50%;transform:translateX(-50%);background:var(--bg);border:2px solid var(--line);color:var(--green);font-family:var(--font-display);font-size:12px;letter-spacing:.5px;padding:5px 12px;border-radius:12px;white-space:nowrap;animation:bob 1.6s ease-in-out infinite}
+  .start-tag{position:absolute;top:-32px;left:50%;transform:translateX(-50%);background:var(--bg);border:2px solid var(--line);color:var(--green);font-family:var(--font-display);font-size:12px;letter-spacing:.5px;padding:5px 12px;border-radius:12px;white-space:nowrap;animation:bob 1.6s ease-in-out infinite}
   .start-tag::after{content:"";position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border:7px solid transparent;border-top-color:var(--line)}
 
-  /* PRACTICE */
+  /* INTRO step */
+  .intro-card{background:var(--bg);border:2px solid var(--line);border-radius:20px;padding:22px 18px;margin-bottom:14px}
+  .intro-pat{font-family:var(--font-display);font-size:30px;color:var(--green);text-align:center}
+  .intro-mean{text-align:center;font-size:17px;color:var(--ink);font-weight:700;margin-top:4px}
+  .intro-ex{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  .intro-ex .ex-item{background:var(--bg2);border-radius:14px;padding:13px 15px}
+  .intro-ex .ex-e{font-size:18px;font-weight:800;color:var(--green)}
+  .intro-ex .ex-k{font-size:13px;color:var(--sub);margin-top:3px;font-weight:600}
+  .intro-tip{margin-top:16px;background:#fff7e0;border:2px solid #ffe9a8;border-radius:14px;padding:13px 15px;font-size:14px;color:#8a6d00;font-weight:700;line-height:1.5}
+
   .lesson-head{display:flex;flex-direction:column;gap:4px;margin:4px 0 16px}
   .lesson-tag{font-family:var(--font-display);font-size:13px;color:var(--sub);letter-spacing:.5px}
   .card{background:var(--bg);border:2px solid var(--line);border-radius:20px;padding:22px 18px;margin-bottom:16px}
@@ -104,17 +114,13 @@
   .heard{background:var(--bg2);border-radius:16px;padding:14px 16px;margin-bottom:14px;min-height:52px;display:flex;flex-direction:column;justify-content:center}
   .heard .lab{font-size:11px;color:var(--sub);font-family:var(--font-display);letter-spacing:.5px;margin-bottom:5px}
   .heard .txt{font-size:17px;font-weight:700}
-  .heard .txt .ok{color:var(--green)} .heard .txt .no{color:var(--red);opacity:.7}
+  .heard .txt .ok{color:var(--green)}.heard .txt .no{color:var(--red);opacity:.7}
   .heard.empty .txt{color:#bbb;font-weight:600}
-
-  /* nav (prev/next item) */
   .navrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
   .navbtn{display:flex;align-items:center;gap:5px;background:var(--bg);border:2px solid var(--line);color:var(--sub);font-family:var(--font-display);font-size:13px;padding:8px 14px;border-radius:12px;cursor:pointer}
   .navbtn:active{transform:scale(.95)}
   .navbtn:disabled{opacity:.35;pointer-events:none}
   .navbtn svg{width:14px;height:14px;fill:currentColor}
-
-  /* MIC */
   .controls{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0}
   .mic{width:86px;height:86px;border-radius:50%;border:none;cursor:pointer;position:relative;background:var(--green);box-shadow:0 6px 0 var(--green-d);display:flex;align-items:center;justify-content:center;transition:transform .1s,box-shadow .1s}
   .mic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--green-d)}
@@ -123,10 +129,10 @@
   .mic.listening::before,.mic.listening::after{content:"";position:absolute;inset:0;border-radius:50%;border:4px solid var(--red);animation:ring 1.4s ease-out infinite}
   .mic.listening::after{animation-delay:.7s}
   @keyframes ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
+  .mic.sm{width:64px;height:64px;box-shadow:0 5px 0 var(--green-d)}.mic.sm svg{width:28px;height:28px}
+  .mic.sm:active{box-shadow:0 1px 0 var(--green-d)}
   .mic-label{font-size:14px;color:var(--sub);font-weight:700;height:20px;text-align:center}
   .mic-label.live{color:var(--red)}
-
-  /* 3D BUTTONS */
   .btn3d{width:100%;border:none;border-radius:16px;padding:15px;cursor:pointer;font-family:var(--font-display);font-size:17px;letter-spacing:.5px;color:#fff;transition:transform .08s,box-shadow .08s}
   .btn3d:active{transform:translateY(3px)}
   .b-green{background:var(--green);box-shadow:0 4px 0 var(--green-d)}.b-green:active{box-shadow:0 1px 0 var(--green-d)}
@@ -135,11 +141,10 @@
   .b-gray{background:var(--bg);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);color:var(--sub)}.b-gray:active{box-shadow:0 1px 0 var(--line)}
   .btnrow{display:flex;gap:12px;width:100%}
   .ghost-link{background:none;border:none;color:var(--sub);font-family:var(--font-display);font-size:14px;cursor:pointer;padding:8px;text-decoration:underline}
-
-  /* RESULT BAR */
-  .resultbar{position:absolute;left:0;right:0;bottom:0;padding:18px 20px calc(var(--safe-bot) + 16px);border-radius:24px 24px 0 0;animation:slideUp .3s cubic-bezier(.3,1.3,.5,1);z-index:20}
+  /* RESULT BAR (now holds the action button to avoid overlap bug) */
+  .resultbar{position:absolute;left:0;right:0;bottom:0;padding:16px 20px calc(var(--safe-bot) + 14px);border-radius:24px 24px 0 0;animation:slideUp .3s cubic-bezier(.3,1.3,.5,1);z-index:20;box-shadow:0 -8px 24px rgba(0,0,0,.08)}
   @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-  .resultbar.good{background:#d7ffb8}.resultbar.bad{background:#ffdfe0}
+  .resultbar.good{background:#d7ffb8}.resultbar.bad{background:#ffe0e0}
   .rb-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
   .rb-icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
   .resultbar.good .rb-icon{background:var(--green);color:#fff}.resultbar.bad .rb-icon{background:var(--red);color:#fff}
@@ -150,22 +155,27 @@
   .resultbar.good .rb-sub{color:#5a8a2a}.resultbar.bad .rb-sub{color:#b85555}
   .rb-score{font-family:var(--font-display);font-size:28px}
   .resultbar.good .rb-score{color:var(--green-d)}.resultbar.bad .rb-score{color:var(--red-d)}
-
-  /* STARS / COMBO */
+  .rb-action{display:flex;align-items:center;justify-content:center;gap:14px}
+  .rb-retry-btn{display:flex;align-items:center;gap:10px;background:var(--red);box-shadow:0 4px 0 var(--red-d);color:#fff;border:none;border-radius:16px;padding:13px 22px;font-family:var(--font-display);font-size:16px;cursor:pointer;transition:transform .08s,box-shadow .08s}
+  .rb-retry-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--red-d)}
+  .rb-retry-btn svg{width:22px;height:22px;fill:#fff}
+  .rb-retry-btn.listening{animation:pulseRed .9s infinite}
+  @keyframes pulseRed{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  .rb-next-btn{flex:1;background:var(--green);box-shadow:0 4px 0 var(--green-d);color:#fff;border:none;border-radius:16px;padding:15px;font-family:var(--font-display);font-size:17px;cursor:pointer}
+  .rb-next-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--green-d)}
+  .rb-skip{background:none;border:none;color:#b85555;font-family:var(--font-display);font-size:13px;text-decoration:underline;cursor:pointer;padding:6px}
   .starburst{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
   .star-p{position:absolute;font-size:28px;animation:fly 1s ease-out forwards}
   @keyframes fly{0%{transform:translate(0,0) scale(.3);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.2) rotate(var(--rot));opacity:0}}
   .combo-pop{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);z-index:55;pointer-events:none;font-family:var(--font-display);font-size:44px;color:var(--yellow);text-shadow:0 3px 0 var(--yellow-d),0 0 20px rgba(255,200,0,.5);animation:comboAnim 1s ease-out forwards}
   @keyframes comboAnim{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}30%{transform:translate(-50%,-50%) scale(1.2);opacity:1}70%{transform:translate(-50%,-60%) scale(1);opacity:1}100%{transform:translate(-50%,-90%) scale(.9);opacity:0}}
-
-  /* FREE TALK */
   .chat{display:flex;flex-direction:column;gap:14px;padding-bottom:8px}
   .msg-ai{display:flex;align-items:flex-end;gap:9px;animation:bounceIn .35s ease}
   .msg-ai .mini-terry{flex-shrink:0}
   .bubble-ai{background:var(--bg);border:2px solid var(--line);border-radius:18px 18px 18px 5px;padding:13px 16px;font-size:16px;font-weight:700;max-width:78%;line-height:1.4;color:var(--ink)}
   .bubble-me{align-self:flex-end;background:var(--blue);color:#fff;border-radius:18px 18px 5px 18px;padding:13px 16px;font-size:16px;font-weight:700;max-width:80%;line-height:1.4;animation:bounceIn .3s ease}
   .react-chip{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:30px;font-family:var(--font-display);font-size:15px;animation:bounceIn .35s ease}
-  .react-chip.Excellent{background:#d7ffb8;color:var(--green-d)}.react-chip.Good{background:#fff0c2;color:var(--yellow-d)}.react-chip.Bad{background:#ffdfe0;color:var(--red-d)}
+  .react-chip.Excellent{background:#d7ffb8;color:var(--green-d)}.react-chip.Good{background:#fff0c2;color:var(--yellow-d)}.react-chip.Bad{background:#ffe0e0;color:var(--red-d)}
   .model-chip{align-self:flex-start;background:#e8f6ff;border:2px solid #bfe7ff;border-radius:16px;padding:12px 15px;max-width:86%;animation:bounceIn .35s ease}
   .model-chip .lab{font-family:var(--font-display);font-size:12px;color:var(--blue-d);margin-bottom:5px}
   .model-chip .ex{font-size:15px;color:var(--ink);font-weight:800}
@@ -175,8 +185,6 @@
   @keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
   .talk-stars{display:flex;justify-content:center;gap:4px;flex-wrap:wrap;margin-bottom:14px;font-size:18px}
   .talk-stars .ts{opacity:.25}.talk-stars .ts.on{opacity:1;animation:bounceIn .4s ease}
-
-  /* DONE */
   .done{text-align:center;padding:24px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;margin:auto 0}
   .done h2{font-family:var(--font-display);font-size:28px;color:var(--ink);margin-top:6px}
   .done p{font-size:15px;color:var(--sub);line-height:1.6;max-width:300px;font-weight:600}
@@ -185,7 +193,6 @@
   .stat .v{font-family:var(--font-display);font-size:26px}
   .stat.s-xp .v{color:var(--yellow-d)}.stat.s-acc .v{color:var(--green)}.stat.s-combo .v{color:var(--blue)}
   .stat .l{font-size:11px;color:var(--sub);margin-top:4px;font-weight:700}
-
   .nosupport{margin:auto;padding:30px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
   .nosupport h2{font-family:var(--font-display);font-size:22px;margin-top:10px}
   .nosupport p{font-size:15px;color:var(--sub);line-height:1.7;font-weight:600}
@@ -200,175 +207,32 @@
 
 <script>
 // Terry's Pattern — Pattern 1: I want to ~
-// 각 문장: 영어/한글 + 단어연습용 chunks(한글-영어 쌍)
-// chunks는 자동 생성됨. "I want to / wants to" 패턴 부분은 제외하고 의미 단위로 분해.
+// A/B 세트로 분리. 각 세트 8문장. 단어 chunk는 세트당 20개 이하.
 
-const PATTERN = {
+const PATTERN_META = {
   no: 1,
   pattern: "I want to ~",
-  patternKeywords: ["i want to", "want to", "wants to", "don't want to", "doesn't want to"],
-  // 프리토킹에서 패턴 사용 판정용 핵심구
-  patternCore: ["want to", "wants to"],
-  sentences: [
-    {
-      no: "001", gugan: "1구간",
-      eng: "I want to read a comic book in my room.",
-      kor: "나는 내 방에서 만화책을 읽고 싶다.",
-      chunks: [
-        { kor: "만화책", eng: "a comic book" },
-        { kor: "읽다", eng: "read" },
-        { kor: "내 방에서", eng: "in my room" }
-      ]
-    },
-    {
-      no: "002", gugan: "1구간",
-      eng: "I want to play games with my friends.",
-      kor: "나는 친구들과 게임을 하고 싶다.",
-      chunks: [
-        { kor: "게임을 하다", eng: "play games" },
-        { kor: "친구들과", eng: "with my friends" }
-      ]
-    },
-    {
-      no: "003", gugan: "1구간",
-      eng: "I want to drink milk in the morning.",
-      kor: "나는 아침에 우유를 마시고 싶다.",
-      chunks: [
-        { kor: "우유", eng: "milk" },
-        { kor: "마시다", eng: "drink" },
-        { kor: "아침에", eng: "in the morning" }
-      ]
-    },
-    {
-      no: "004", gugan: "1구간",
-      eng: "I want to visit Japan this winter.",
-      kor: "나는 이번 겨울에 일본에 가고 싶다.",
-      chunks: [
-        { kor: "일본", eng: "Japan" },
-        { kor: "방문하다", eng: "visit" },
-        { kor: "이번 겨울에", eng: "this winter" }
-      ]
-    },
-    {
-      no: "005", gugan: "1구간",
-      eng: "I want to run fast in the big park.",
-      kor: "나는 큰 공원에서 빠르게 달리고 싶다.",
-      chunks: [
-        { kor: "빠르게 달리다", eng: "run fast" },
-        { kor: "큰 공원에서", eng: "in the big park" }
-      ]
-    },
-    {
-      no: "006", gugan: "1구간",
-      eng: "I want to watch TV with my family at night.",
-      kor: "나는 밤에 가족과 함께 TV를 보고 싶다.",
-      chunks: [
-        { kor: "TV를 보다", eng: "watch TV" },
-        { kor: "가족과 함께", eng: "with my family" },
-        { kor: "밤에", eng: "at night" }
-      ]
-    },
-    {
-      no: "007", gugan: "1구간",
-      eng: "I want to study English with Terry today.",
-      kor: "나는 오늘 테리와 함께 영어를 공부하고 싶다.",
-      chunks: [
-        { kor: "영어", eng: "English" },
-        { kor: "공부하다", eng: "study" },
-        { kor: "테리와 함께", eng: "with Terry" },
-        { kor: "오늘", eng: "today" }
-      ]
-    },
-    {
-      no: "008", gugan: "1구간",
-      eng: "I want to draw a cute cat on the paper.",
-      kor: "나는 종이에 귀여운 고양이를 그리고 싶다.",
-      chunks: [
-        { kor: "귀여운 고양이", eng: "a cute cat" },
-        { kor: "그리다", eng: "draw" },
-        { kor: "종이에", eng: "on the paper" }
-      ]
-    },
-    {
-      no: "009", gugan: "2구간",
-      eng: "She wants to sing a song in the classroom.",
-      kor: "그녀는 교실에서 노래를 부르고 싶어 한다.",
-      chunks: [
-        { kor: "노래를 부르다", eng: "sing a song" },
-        { kor: "교실에서", eng: "in the classroom" }
-      ]
-    },
-    {
-      no: "010", gugan: "2구간",
-      eng: "He wants to ride a bike under the tree.",
-      kor: "그는 나무 아래에서 자전거를 타고 싶어 한다.",
-      chunks: [
-        { kor: "자전거를 타다", eng: "ride a bike" },
-        { kor: "나무 아래에서", eng: "under the tree" }
-      ]
-    },
-    {
-      no: "011", gugan: "2구간",
-      eng: "They want to play baseball after school.",
-      kor: "그들은 방과 후에 야구를 하고 싶어 한다.",
-      chunks: [
-        { kor: "야구를 하다", eng: "play baseball" },
-        { kor: "방과 후에", eng: "after school" }
-      ]
-    },
-    {
-      no: "012", gugan: "2구간",
-      eng: "She wants to buy a new toy at the store.",
-      kor: "그녀는 가게에서 새 장난감을 사고 싶어 한다.",
-      chunks: [
-        { kor: "새 장난감", eng: "a new toy" },
-        { kor: "사다", eng: "buy" },
-        { kor: "가게에서", eng: "at the store" }
-      ]
-    },
-    {
-      no: "013", gugan: "2구간",
-      eng: "I don't want to go to bed early tonight.",
-      kor: "나는 오늘 밤 일찍 자고 싶지 않다.",
-      chunks: [
-        { kor: "자러 가다", eng: "go to bed" },
-        { kor: "일찍", eng: "early" },
-        { kor: "오늘 밤", eng: "tonight" }
-      ]
-    },
-    {
-      no: "014", gugan: "2구간",
-      eng: "I don't want to clean my room right now.",
-      kor: "나는 지금 당장 내 방을 청소하고 싶지 않다.",
-      chunks: [
-        { kor: "내 방", eng: "my room" },
-        { kor: "청소하다", eng: "clean" },
-        { kor: "지금 당장", eng: "right now" }
-      ]
-    },
-    {
-      no: "015", gugan: "2구간",
-      eng: "He doesn't want to drink hot water today.",
-      kor: "그는 오늘 뜨거운 물을 마시고 싶어 하지 않는다.",
-      chunks: [
-        { kor: "뜨거운 물", eng: "hot water" },
-        { kor: "마시다", eng: "drink" },
-        { kor: "오늘", eng: "today" }
-      ]
-    },
-    {
-      no: "016", gugan: "2구간",
-      eng: "She doesn't want to stay in the hotel.",
-      kor: "그녀는 호텔에 머물고 싶어 하지 않는다.",
-      chunks: [
-        { kor: "머물다", eng: "stay" },
-        { kor: "호텔에", eng: "in the hotel" }
-      ]
-    }
-  ]
+  patternKeywords: ["i want to","want to","wants to","don't want to","doesn't want to"],
+  patternCore: ["want to","wants to"],
+  // 패턴 소개 (테리샘 설명) — 짧고 쉽게
+  intro: {
+    title: "I want to ~",
+    meaning: "~하고 싶다",
+    lines: [
+      "오늘 배울 패턴은 \"I want to ~\" 예요!",
+      "\"나는 ~하고 싶다\" 라고 말할 때 써요.",
+      "want to 뒤에 하고 싶은 일을 넣으면 끝!",
+    ],
+    examples: [
+      { eng: "I want to sleep.", kor: "나는 자고 싶어." },
+      { eng: "I want to eat pizza.", kor: "나는 피자가 먹고 싶어." },
+      { eng: "I want to play.", kor: "나는 놀고 싶어." },
+    ],
+    tip: "친구(She/He)는 want 대신 wants 를 써요!"
+  }
 };
 
-// 프리토킹용 질문 (I want to 패턴으로 답하게 유도)
+// 프리토킹 질문 (공통)
 const FREE_TALK_QUESTIONS = [
   "What do you want to do this weekend?",
   "What do you want to eat for dinner?",
@@ -384,8 +248,55 @@ const FREE_TALK_QUESTIONS = [
   "Where do you want to travel next summer?"
 ];
 
-// expose for testing / debugging (harmless)
-if(typeof window!=='undefined'){ window.PATTERN=PATTERN; window.FREE_TALK_QUESTIONS=FREE_TALK_QUESTIONS; }
+// ===== SET A : 1구간 001~008 (단어 18개) =====
+const SET_A = {
+  id: "A", label: "PATTERN 01 (A)",
+  sentences: [
+    { no:"001", eng:"I want to read a comic book in my room.", kor:"나는 내 방에서 만화책을 읽고 싶다.",
+      chunks:[{kor:"만화책을 읽다",eng:"read a comic book"},{kor:"내 방에서",eng:"in my room"}] },
+    { no:"002", eng:"I want to play games with my friends.", kor:"나는 친구들과 게임을 하고 싶다.",
+      chunks:[{kor:"게임을 하다",eng:"play games"},{kor:"친구들과",eng:"with my friends"}] },
+    { no:"003", eng:"I want to drink milk in the morning.", kor:"나는 아침에 우유를 마시고 싶다.",
+      chunks:[{kor:"우유를 마시다",eng:"drink milk"},{kor:"아침에",eng:"in the morning"}] },
+    { no:"004", eng:"I want to visit Japan this winter.", kor:"나는 이번 겨울에 일본에 가고 싶다.",
+      chunks:[{kor:"일본을 방문하다",eng:"visit Japan"},{kor:"이번 겨울에",eng:"this winter"}] },
+    { no:"005", eng:"I want to run fast in the big park.", kor:"나는 큰 공원에서 빠르게 달리고 싶다.",
+      chunks:[{kor:"빠르게 달리다",eng:"run fast"},{kor:"큰 공원에서",eng:"in the big park"}] },
+    { no:"006", eng:"I want to watch TV with my family at night.", kor:"나는 밤에 가족과 함께 TV를 보고 싶다.",
+      chunks:[{kor:"TV를 보다",eng:"watch TV"},{kor:"가족과 함께",eng:"with my family"},{kor:"밤에",eng:"at night"}] },
+    { no:"007", eng:"I want to study English with Terry today.", kor:"나는 오늘 테리와 함께 영어를 공부하고 싶다.",
+      chunks:[{kor:"영어를 공부하다",eng:"study English"},{kor:"테리와 함께",eng:"with Terry"},{kor:"오늘",eng:"today"}] },
+    { no:"008", eng:"I want to draw a cute cat on the paper.", kor:"나는 종이에 귀여운 고양이를 그리고 싶다.",
+      chunks:[{kor:"고양이를 그리다",eng:"draw a cute cat"},{kor:"종이에",eng:"on the paper"}] },
+  ]
+};
+
+// ===== SET B : 2구간 009~016 (단어 20개) =====
+const SET_B = {
+  id: "B", label: "PATTERN 01 (B)",
+  sentences: [
+    { no:"009", eng:"She wants to sing a song in the classroom.", kor:"그녀는 교실에서 노래를 부르고 싶어 한다.",
+      chunks:[{kor:"노래를 부르다",eng:"sing a song"},{kor:"교실에서",eng:"in the classroom"}] },
+    { no:"010", eng:"He wants to ride a bike under the tree.", kor:"그는 나무 아래에서 자전거를 타고 싶어 한다.",
+      chunks:[{kor:"자전거를 타다",eng:"ride a bike"},{kor:"나무 아래에서",eng:"under the tree"}] },
+    { no:"011", eng:"They want to play baseball after school.", kor:"그들은 방과 후에 야구를 하고 싶어 한다.",
+      chunks:[{kor:"야구를 하다",eng:"play baseball"},{kor:"방과 후에",eng:"after school"}] },
+    { no:"012", eng:"She wants to buy a new toy at the store.", kor:"그녀는 가게에서 새 장난감을 사고 싶어 한다.",
+      chunks:[{kor:"새 장난감을 사다",eng:"buy a new toy"},{kor:"가게에서",eng:"at the store"}] },
+    { no:"013", eng:"I don't want to go to bed early tonight.", kor:"나는 오늘 밤 일찍 자고 싶지 않다.",
+      chunks:[{kor:"자러 가다",eng:"go to bed"},{kor:"일찍",eng:"early"},{kor:"오늘 밤",eng:"tonight"}] },
+    { no:"014", eng:"I don't want to clean my room right now.", kor:"나는 지금 당장 내 방을 청소하고 싶지 않다.",
+      chunks:[{kor:"내 방을 청소하다",eng:"clean my room"},{kor:"지금 당장",eng:"right now"}] },
+    { no:"015", eng:"He doesn't want to drink hot water today.", kor:"그는 오늘 뜨거운 물을 마시고 싶어 하지 않는다.",
+      chunks:[{kor:"뜨거운 물",eng:"hot water"},{kor:"마시다",eng:"drink"},{kor:"오늘",eng:"today"}] },
+    { no:"016", eng:"She doesn't want to stay in the hotel.", kor:"그녀는 호텔에 머물고 싶어 하지 않는다.",
+      chunks:[{kor:"머물다",eng:"stay"},{kor:"호텔에",eng:"in the hotel"}] },
+  ]
+};
+
+const SETS = { A: SET_A, B: SET_B };
+
+if(typeof window!=='undefined'){ window.PATTERN_META=PATTERN_META; window.SETS=SETS; window.FREE_TALK_QUESTIONS=FREE_TALK_QUESTIONS; }
 
 </script>
 <script>
@@ -512,11 +423,9 @@ const Sound = (()=>{
 </script>
 <script>
 /* ============================================================
-   Terry's Pattern — Pattern 1 (kids conversation app)
-   - 5 nodes: 단어배우기(내부 2단계) / 따라말하기 / 빈칸채우기 / 혼자말하기 / 테리와대화
-   - 사운드: 마이크 삐 / 90+ 성공음 / 89- 실패음 / 단계완료 팡파레
-   - 이전·다음 문항 네비
-   - 음성인식: Web Speech API (무료)
+   Terry's Pattern — Pattern 1 (A/B courses)
+   화면: 코스선택(A/B) → 각 코스 6단계
+   단계: 0.패턴소개 / 1.단어배우기(2phase) / 2.따라말하기 / 3.빈칸채우기 / 4.혼자말하기 / 5.테리와대화
    ============================================================ */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 const synth=window.speechSynthesis;
@@ -524,14 +433,17 @@ const app=document.getElementById('app');
 const toastEl=document.getElementById('toast');
 
 const MAX_HEARTS=5;
-const PASS=90; // 통과 기준점 (90점 이상 Excellent)
+const PASS=90;
 const state={
-  screen:'home',
-  stepCleared:{1:false,2:false,3:false,4:false,5:false},
-  hearts:MAX_HEARTS, combo:0, bestCombo:0, totalCorrect:0, totalTries:0,
+  screen:'select', course:null,           // 'A' | 'B'
+  courseDone:{A:false,B:false},
+  stepCleared:{0:false,1:false,2:false,3:false,4:false,5:false},
+  hearts:MAX_HEARTS,combo:0,bestCombo:0,totalCorrect:0,totalTries:0,
 };
+// active set helpers
+function SET(){ return SETS[state.course]; }
+function SENT(){ return SET().sentences; }
 
-/* helpers */
 function toast(msg,ms=1700){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastEl._t);toastEl._t=setTimeout(()=>toastEl.classList.remove('show'),ms);}
 function speak(text,rate=0.9){if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=rate;synth.speak(u);}
 window.speak=speak;
@@ -540,173 +452,226 @@ function words(s){return norm(s).split(' ').filter(Boolean);}
 function levenshtein(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;const d=Array.from({length:m+1},(_,i)=>[i,...Array(n).fill(0)]);for(let j=0;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n];}
 function scoreWords(target,heard){const tgt=words(target),hrd=words(heard),pool=[...hrd];let matched=0;tgt.forEach(w=>{const i=pool.indexOf(w);if(i>=0){pool.splice(i,1);matched++;return;}const alt=pool.findIndex(h=>h===w+'s'||w===h+'s'||(levenshtein(h,w)<=1&&w.length>3));if(alt>=0){pool.splice(alt,1);matched++;}});return{score:tgt.length?Math.round(matched/tgt.length*100):0,heardWords:hrd};}
 function renderHeard(target,heard){if(!heard)return'<span>듣고 있어요…</span>';const tgtPool=[...words(target)];return scoreWords(target,heard).heardWords.map(w=>{const i=tgtPool.indexOf(w);if(i>=0){tgtPool.splice(i,1);return`<span class="ok">${w}</span>`;}return`<span class="no">${w}</span>`;}).join(' ');}
-
-/* effects */
 function starburst(){const layer=document.createElement('div');layer.className='starburst';const st=['⭐','🌟','✨','💫'];for(let i=0;i<14;i++){const s=document.createElement('div');s.className='star-p';s.textContent=st[i%st.length];s.style.left=(40+Math.random()*20)+'%';s.style.top=(45+Math.random()*10)+'%';const a=Math.random()*Math.PI*2,d=120+Math.random()*120;s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',(Math.sin(a)*d-60)+'px');s.style.setProperty('--rot',(Math.random()*360)+'deg');layer.appendChild(s);}document.body.appendChild(layer);setTimeout(()=>layer.remove(),1100);}
 function comboPop(n){const el=document.createElement('div');el.className='combo-pop';el.textContent=n+' COMBO!';document.body.appendChild(el);setTimeout(()=>el.remove(),1000);}
 
-/* speech recognition */
 let rec=null,recActive=false;
 function recognizeOnce(lang,{onResult,onEnd,onError}){if(!SR){onError&&onError('nosupport');return;}if(recActive&&rec){try{rec.stop()}catch(e){}}rec=new SR();rec.lang=lang;rec.interimResults=true;rec.maxAlternatives=1;rec.continuous=false;let finalText='';recActive=true;rec.onresult=(e)=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=t;else interim+=t;}onResult&&onResult(finalText||interim,!!finalText);};rec.onerror=(e)=>{recActive=false;onError&&onError(e.error);};rec.onend=()=>{recActive=false;onEnd&&onEnd(finalText.trim());};try{rec.start();}catch(e){recActive=false;onError&&onError('start');}}
 function stopRec(){if(rec&&recActive){try{rec.stop()}catch(e){}}}
 
 const MIC_SVG='<svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>';
 const SPK_SVG='<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2A4.5 4.5 0 0 0 14 7.97v8.05A4.5 4.5 0 0 0 16.5 12z"/></svg>';
-const PREV_SVG='<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>'.replace('<path','<path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"');
+const PREV_SVG='<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/></svg>';
 const NEXT_SVG='<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>';
 
 function heartsHtml(){let h='';for(let i=0;i<MAX_HEARTS;i++)h+=`<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-5-10-9.5C.5 8 2.5 4.5 6 4.5c2 0 3.3 1 4 2 0.7-1 2-2 4-2 3.5 0 5.5 3.5 4 7-2.5 4.5-10 9.5-10 9.5z" fill="${i<state.hearts?'#ff4b4b':'#e0e0e0'}"/></svg>`;return`<div class="hearts">${h}</div>`;}
 function loseHeart(){if(state.hearts>0)state.hearts--;}
-function topbar(pct,opts={}){return`<div class="topbar"><button class="xbtn" onclick="goHome()">✕</button><div class="pbar"><div class="fill" style="width:${Math.max(4,pct)}%"></div></div>${opts.hideHearts?'':heartsHtml()}</div>`;}
+function topbarHome(){return`<div class="topbar"><button class="xbtn" onclick="goSelect()">✕</button><div style="flex:1"></div>${heartsHtml()}</div>`;}
+function topbar(pct){return`<div class="topbar"><button class="xbtn" onclick="goPath()">✕</button><div class="pbar"><div class="fill" style="width:${Math.max(4,pct)}%"></div></div>${heartsHtml()}</div>`;}
 
 /* ROUTER */
 function render(){
   stopRec();synth&&synth.cancel();
   if(!SR){renderNoSupport();return;}
   switch(state.screen){
-    case 'home':renderHome();break;
-    case 'step1':WORD.render();break;       // 단어배우기 (내부 2단계)
-    case 'step2':STEP2.render();break;       // 따라말하기(문장)
-    case 'step3':STEP3.render();break;       // 빈칸채우기
-    case 'step4':STEP4.render();break;       // 혼자말하기(문장)
+    case 'select':renderSelect();break;
+    case 'path':renderPath();break;
+    case 'intro':INTRO.render();break;
+    case 'step1':WORD.render();break;
+    case 'step2':STEP2.render();break;
+    case 'step3':STEP3.render();break;
+    case 'step4':STEP4.render();break;
     case 'step5':if(STEP5.phase==='idle'||!STEP5.log.length)STEP5.start();else STEP5.render();break;
     case 'stepdone':renderStepDone();break;
   }
 }
 window.render=render;
-
 function renderNoSupport(){app.innerHTML=`<div class="nosupport">${terrySVG('oops',120)}<h2>앗! 마이크를 쓸 수 없어요</h2><p>이 브라우저는 말하기 인식이 안 돼요.<br><br>📱 <b>아이폰</b>은 <b>사파리</b>로,<br>📱 <b>안드로이드</b>는 <b>크롬</b>으로 열어주세요!</p></div>`;}
 
-const STEP_INFO={1:{t:'단어 배우기',emoji:'🎯'},2:{t:'따라 말하기',emoji:'🗣️'},3:{t:'빈칸 채우기',emoji:'✏️'},4:{t:'혼자 말하기',emoji:'💪'},5:{t:'테리와 대화',emoji:'💬'}};
+const STEP_INFO={0:{t:'패턴 소개',emoji:'📖'},1:{t:'단어 배우기',emoji:'🎯'},2:{t:'따라 말하기',emoji:'🗣️'},3:{t:'빈칸 채우기',emoji:'✏️'},4:{t:'혼자 말하기',emoji:'💪'},5:{t:'테리와 대화',emoji:'💬'}};
 
-/* HOME */
-function renderHome(){
-  const allClear=Object.values(state.stepCleared).every(v=>v);
-  const current=[1,2,3,4,5].find(n=>!state.stepCleared[n]);
-  const offsets=[0,1,2,1,0];
-  const nodes=[1,2,3,4,5].map((n,i)=>{
+/* ============ COURSE SELECT ============ */
+function renderSelect(){
+  const m=PATTERN_META;
+  const aDone=state.courseDone.A, bDone=state.courseDone.B;
+  const bLocked=!aDone;
+  app.innerHTML=`
+    ${topbarHome().replace('onclick="goSelect()"','')}
+    <div class="body">
+      <div class="home-top">
+        ${terrySVG('idle',96)}
+        <div class="home-badge">PATTERN ${String(m.no).padStart(2,'0')}</div>
+        <div class="home-pattern">${m.pattern}</div>
+        <div class="home-mean">${m.intro.meaning}</div>
+      </div>
+      <div class="courses">
+        <div class="course ${aDone?'done':''}" onclick="startCourse('A')">
+          <div class="course-ic">${aDone?'★':'A'}</div>
+          <div class="course-meta"><h3>PATTERN 01 (A)</h3><p>${aDone?'완료했어요! 다시 할 수 있어요':'1구간 · 8문장 · 단어 18개'}</p></div>
+          <div class="course-arrow">›</div>
+        </div>
+        <div class="course ${bLocked?'locked':''} ${bDone?'done':''}" onclick="startCourse('B')">
+          <div class="course-ic">${bDone?'★':(bLocked?'🔒':'B')}</div>
+          <div class="course-meta"><h3>PATTERN 01 (B)</h3><p>${bLocked?'(A)를 먼저 완료하면 열려요':(bDone?'완료했어요! 다시 할 수 있어요':'2구간 · 8문장 · 단어 18개')}</p></div>
+          <div class="course-arrow">›</div>
+        </div>
+      </div>
+      ${aDone&&bDone?`<div style="text-align:center;margin-top:20px"><div style="font-family:var(--font-display);font-size:22px;color:var(--green)">🏆 패턴 1 완성!</div></div>`:''}
+    </div>`;
+}
+window.goSelect=()=>{state.screen='select';render();};
+window.startCourse=(c)=>{
+  state.course=c;
+  state.stepCleared={0:false,1:false,2:false,3:false,4:false,5:false};
+  state.hearts=MAX_HEARTS;state.combo=0;state.bestCombo=0;state.totalCorrect=0;state.totalTries=0;
+  Sound.unlock();
+  state.screen='path';render();
+};
+
+/* ============ PATH (6 nodes) ============ */
+function renderPath(){
+  const steps=[0,1,2,3,4,5];
+  const current=steps.find(n=>!state.stepCleared[n]);
+  const offsets=[0,1,2,2,1,0];
+  const nodes=steps.map((n,i)=>{
     const done=state.stepCleared[n],isCurrent=n===current,locked=!done&&!isCurrent;
     const cls=locked?'locked':(done?'done':'current');
     const inner=done?'★':STEP_INFO[n].emoji;
-    return`<div class="node-wrap node-offset-${offsets[i]}">${isCurrent?`<div class="start-tag">시작!</div>`:''}<button class="node ${cls}" onclick="goStep(${n})">${inner}</button><div class="node-label">${STEP_INFO[n].t}</div></div>`;
+    return`<div class="node-wrap node-offset-${offsets[i]}">${isCurrent?`<div class="start-tag">${n===0?'시작!':'여기!'}</div>`:''}<button class="node ${cls}" onclick="goStep(${n})">${inner}</button><div class="node-label">${STEP_INFO[n].t}</div></div>`;
   }).join('');
-  app.innerHTML=`<div class="topbar"><div style="flex:1"></div>${heartsHtml()}</div><div class="body"><div class="home-top">${terrySVG('idle',96)}<div class="home-badge">PATTERN ${String(PATTERN.no).padStart(2,'0')}</div><div class="home-pattern">${PATTERN.pattern}</div><div class="home-sub">테리랑 5단계로 패턴을 완성하자!</div></div><div class="path">${nodes}</div>${allClear?`<div style="text-align:center;margin-top:10px"><div style="font-family:var(--font-display);font-size:22px;color:var(--green)">🏆 패턴 1 완성!</div></div>`:''}</div>`;
+  const allDone=steps.every(n=>state.stepCleared[n]);
+  app.innerHTML=`
+    <div class="topbar"><button class="xbtn" onclick="goSelect()">✕</button><div style="flex:1;text-align:center"><span style="font-family:var(--font-display);color:var(--green-d)">${SET().label}</span></div>${heartsHtml()}</div>
+    <div class="body">
+      <div class="home-top" style="padding:8px 0 0">${terrySVG('idle',80)}<div class="home-mean" style="margin-top:8px">${SET().label} · ${PATTERN_META.pattern}</div></div>
+      <div class="path">${nodes}</div>
+      ${allDone?`<div style="text-align:center;margin-top:6px"><div style="font-family:var(--font-display);font-size:20px;color:var(--green)">🎉 ${SET().label} 완료!</div></div>`:''}
+    </div>`;
 }
-window.goStep=(n)=>{state.screen='step'+n;
-  if(n===1)WORD.enter(); if(n>=2&&n<=4)STEPS[n].reset(); if(n===5)STEP5.phase='idle';
-  Sound.unlock(); render();};
-window.goHome=()=>{state.screen='home';render();};
+window.goPath=()=>{state.screen='path';render();};
+window.goStep=(n)=>{
+  Sound.unlock();
+  if(n===0){state.screen='intro';INTRO.enter();}
+  else if(n===1){state.screen='step1';WORD.enter();}
+  else if(n>=2&&n<=4){state.screen='step'+n;STEPS[n].reset();}
+  else if(n===5){state.screen='step5';STEP5.phase='idle';}
+  render();
+};
 function pct(idx,total){return Math.round(idx/total*100);}
 
-/* ============================================================
-   단어 배우기 (Step 1) — 내부 2단계
-   phaseA: 따라 말하기 (한글+영어 보여주고 발음 듣고 따라)
-   phaseB: 혼자 말하기 (한글만)
-   ============================================================ */
+/* ============ STEP 0 : 패턴 소개 ============ */
+const INTRO={
+  step:0,
+  enter(){ this.step=0; },
+  render(){
+    const intro=PATTERN_META.intro;
+    app.innerHTML=`
+      ${topbar(0)}
+      <div class="body">
+        <div class="terry-row">${terrySVG('talk',76)}<div class="speech">${intro.lines[Math.min(this.step,intro.lines.length-1)]}</div></div>
+        <div class="lesson-head" style="margin-top:14px"><div class="lesson-tag">📖 패턴 소개</div></div>
+        <div class="intro-card">
+          <div class="intro-pat">${intro.title}</div>
+          <div class="intro-mean">${intro.meaning}</div>
+          <div class="intro-ex">
+            ${intro.examples.map(e=>`<div class="ex-item"><div class="ex-e">${e.eng}</div><div class="ex-k">${e.kor}</div></div>`).join('')}
+          </div>
+          <div class="intro-tip">💡 ${intro.tip}</div>
+        </div>
+        <div class="controls">
+          <button class="btn3d b-green" onclick="INTRO.done()">단어 배우러 가기 →</button>
+        </div>
+      </div>`;
+  },
+  done(){ clearStep(0); }
+};
+window.INTRO=INTRO;
+
+/* ============ STEP 1 : 단어배우기 (2 phase) ============ */
 const WORD={
-  queue:[], idx:0, phase:'A', attempt:0, lastScore:null, lastHeard:'',
-  enter(){ this.build(); this.phase='A'; this.idx=0; this.attempt=0; this.lastScore=null; this.lastHeard=''; },
-  build(){ this.queue=[]; PATTERN.sentences.forEach(s=>s.chunks.forEach(c=>this.queue.push({...c,from:s.no}))); },
-  _target(){ return this.queue[this.idx].eng; },
+  queue:[],idx:0,phase:'A',attempt:0,lastScore:null,lastHeard:'',
+  enter(){this.build();this.phase='A';this.idx=0;this.attempt=0;this.lastScore=null;this.lastHeard='';},
+  build(){this.queue=[];SENT().forEach(s=>s.chunks.forEach(c=>this.queue.push({...c,from:s.no})));},
+  _target(){return this.queue[this.idx].eng;},
   render(){
     if(!this.queue.length)this.build();
     const total=this.queue.length;
     if(this.idx>=total){
-      if(this.phase==='A'){ this.phase='B'; this.idx=0; this.attempt=0; this.lastScore=null; this.lastHeard='';
-        toast('이번엔 한글만 보고 말해봐! 💪',2200); }
-      else { clearStep(1); return; }
+      if(this.phase==='A'){this.phase='B';this.idx=0;this.attempt=0;this.lastScore=null;this.lastHeard='';toast('이번엔 한글만 보고 말해봐! 💪',2200);}
+      else{clearStep(1);return;}
     }
     const item=this.queue[this.idx];
     const done=this.lastScore!==null;
-    const passed=done&&(this.lastScore>=PASS||this.attempt>=3);
     const isA=this.phase==='A';
     const mood=!done?(isA?'talk':'idle'):(this.lastScore>=PASS?'cheer':'oops');
-    const sayText=!done
-      ? (isA?'테리를 따라 말해봐!':'이번엔 영어로 말해볼까?')
-      : (this.lastScore>=PASS?'완벽해! 🎉':(this.attempt>=3?'좋아, 다음으로!':'다시 한 번!'));
-
-    // overall progress across both phases
+    const sayText=!done?(isA?'테리를 따라 말해봐!':'이번엔 영어로 말해볼까?'):(this.lastScore>=PASS?'완벽해! 🎉':(this.attempt>=3?'좋아, 다음으로!':'다시 한 번!'));
     const overall=Math.round(((isA?0:total)+this.idx)/(total*2)*100);
-
     app.innerHTML=`
       ${topbar(overall)}
-      <div class="phasebar">
-        <div class="phasechip ${isA?'active':'done'}">1단계 · 따라 말하기</div>
-        <div class="phasechip ${isA?'':'active'}">2단계 · 혼자 말하기</div>
-      </div>
+      <div class="phasebar"><div class="phasechip ${isA?'active':'done'}">1단계 · 따라 말하기</div><div class="phasechip ${isA?'':'active'}">2단계 · 혼자 말하기</div></div>
       <div class="body">
         <div class="terry-row">${terrySVG(mood,72)}<div class="speech">${sayText}</div></div>
         <div class="lesson-head" style="margin-top:14px"><div class="lesson-tag">🎯 단어 배우기 · ${this.idx+1}/${total}</div></div>
-        <div class="navrow">
-          <button class="navbtn" onclick="WORD.prev()" ${this.idx===0?'disabled':''}>${PREV_SVG} 이전</button>
-          <button class="navbtn" onclick="WORD.skip()">다음 ${NEXT_SVG}</button>
-        </div>
-        <div class="card">
-          <div class="ko-big">${item.kor}</div>
-          ${(isA||done)?`<div class="en-show">${item.eng}</div>`:''}
-          ${isA?`<button class="listen-btn" onclick="speak('${item.eng.replace(/'/g,"\\'")}')">${SPK_SVG} 발음 듣기</button>`:''}
-        </div>
+        <div class="navrow"><button class="navbtn" onclick="WORD.prev()" ${this.idx===0?'disabled':''}>${PREV_SVG} 이전</button><button class="navbtn" onclick="WORD.skip()">다음 ${NEXT_SVG}</button></div>
+        <div class="card"><div class="ko-big">${item.kor}</div>${(isA||done)?`<div class="en-show">${item.eng}</div>`:''}${isA?`<button class="listen-btn" onclick="speak('${item.eng.replace(/'/g,"\\'")}')">${SPK_SVG} 발음 듣기</button>`:''}</div>
         <div class="heard ${this.lastHeard?'':'empty'}"><div class="lab">내가 말한 것</div><div class="txt">${renderHeard(item.eng,this.lastHeard)}</div></div>
-        <div class="controls">
-          ${passed
-            ? `<button class="btn3d b-green" onclick="WORD.next()">다음 →</button>`
-            : `<button class="mic" id="mic" onclick="WORD.mic()">${MIC_SVG}</button>
-               <div class="mic-label" id="miclabel">${this.attempt>0?`다시 도전! (${this.attempt}/3)`:'마이크를 누르고 말해요'}</div>`}
-        </div>
+        <div class="controls">${done?'':`<button class="mic" id="mic" onclick="WORD.mic()">${MIC_SVG}</button><div class="mic-label" id="miclabel">${this.attempt>0?`다시 도전! (${this.attempt}/3)`:'마이크를 누르고 말해요'}</div>`}</div>
       </div>
-      ${done?resultBar(this.lastScore,item.eng):''}`;
+      ${done?actionBar(this,item.eng):''}`;
   },
-  mic(){ doMic(this); },
-  _afterScore(score){ this.attempt++; this.lastScore=score; gradeFx(score,this.attempt); this.render(); },
-  next(){ this.idx++; this.attempt=0; this.lastScore=null; this.lastHeard=''; this.render(); },
-  prev(){ if(this.idx>0){ this.idx--; this.attempt=0; this.lastScore=null; this.lastHeard=''; this.render(); } },
-  skip(){ this.idx++; this.attempt=0; this.lastScore=null; this.lastHeard=''; this.render(); }
+  mic(){doMic(this);},
+  _afterScore(score){this.attempt++;this.lastScore=score;gradeFx(score,this.attempt);this.render();},
+  retry(){this.lastScore=null;this.lastHeard='';this.render();setTimeout(()=>{const m=document.getElementById('mic');if(m)doMic(this);},60);},
+  next(){this.idx++;this.attempt=0;this.lastScore=null;this.lastHeard='';this.render();},
+  forceNext(){this.next();},
+  prev(){if(this.idx>0){this.idx--;this.attempt=0;this.lastScore=null;this.lastHeard='';this.render();}},
+  skip(){this.idx++;this.attempt=0;this.lastScore=null;this.lastHeard='';this.render();}
 };
+window.WORD=WORD;
 
-/* shared mic handler */
+/* shared mic */
 function doMic(ctx){
-  const micEl=document.getElementById('mic'),lab=document.getElementById('miclabel');
+  let micEl=document.getElementById('mic')||document.getElementById('retrymic');
+  const lab=document.getElementById('miclabel');
   if(recActive){stopRec();return;}
-  Sound.beep();                              // 마이크 누를 때 삐
-  micEl.classList.add('listening');lab.textContent='듣고 있어요…';lab.classList.add('live');
+  Sound.beep();
+  if(micEl)micEl.classList.add('listening');
+  if(lab){lab.textContent='듣고 있어요…';lab.classList.add('live');}
   ctx.lastHeard='';
   const target=ctx._target();
   recognizeOnce('en-US',{
     onResult:(txt)=>{ctx.lastHeard=txt;const h=document.querySelector('.heard');if(h){h.classList.remove('empty');h.querySelector('.txt').innerHTML=renderHeard(target,txt);}},
-    onEnd:(finalTxt)=>{micEl.classList.remove('listening');const heard=finalTxt||ctx.lastHeard;if(!heard){lab.textContent='못 들었어요. 다시 눌러요';lab.classList.remove('live');return;}ctx.lastHeard=heard;ctx._afterScore(scoreWords(target,heard).score);},
-    onError:(err)=>{micEl.classList.remove('listening');lab.classList.remove('live');lab.textContent=err==='not-allowed'?'마이크를 켜주세요':'다시 해봐요';}
+    onEnd:(finalTxt)=>{if(micEl)micEl.classList.remove('listening');const heard=finalTxt||ctx.lastHeard;if(!heard){if(lab){lab.textContent='못 들었어요. 다시 눌러요';lab.classList.remove('live');}return;}ctx.lastHeard=heard;ctx._afterScore(scoreWords(target,heard).score);},
+    onError:(err)=>{if(micEl)micEl.classList.remove('listening');if(lab)lab.classList.remove('live');if(lab)lab.textContent=err==='not-allowed'?'마이크를 켜주세요':'다시 해봐요';}
   });
 }
-
-/* grade fx: sound + stars + hearts */
 function gradeFx(score,attempt){
   state.totalTries++;
-  if(score>=PASS){
-    state.totalCorrect++;state.combo++;state.bestCombo=Math.max(state.bestCombo,state.combo);
-    Sound.success();                         // 90+ 성공음
-    starburst();
-    if(state.combo>=3&&state.combo%2===1)comboPop(state.combo);
-  }else{
-    state.combo=0;
-    Sound.fail();                            // 89- 실패음
-    if(attempt<3)loseHeart();
-  }
+  if(score>=PASS){state.totalCorrect++;state.combo++;state.bestCombo=Math.max(state.bestCombo,state.combo);Sound.success();starburst();if(state.combo>=3&&state.combo%2===1)comboPop(state.combo);}
+  else{state.combo=0;Sound.fail();if(attempt<3)loseHeart();}
 }
 
-function resultBar(score,answer){const good=score>=PASS;return`<div class="resultbar ${good?'good':'bad'}"><div class="rb-head"><div class="rb-icon">${good?'✓':'↻'}</div><div class="rb-text"><div class="rb-title">${good?'Excellent! 🎉':'다시 해볼까?'}</div><div class="rb-sub">${good?'발음이 아주 좋아요':'정답: '+answer}</div></div><div class="rb-score">${score}</div></div></div>`;}
+/* ACTION BAR — holds retry mic (fail) or next (pass). fixes overlap bug */
+function actionBar(ctx,answer){
+  const score=ctx.lastScore, good=score>=PASS, maxed=ctx.attempt>=3;
+  if(good||maxed){
+    // pass (or forced after 3) → green next
+    return`<div class="resultbar good"><div class="rb-head"><div class="rb-icon">${good?'✓':'→'}</div><div class="rb-text"><div class="rb-title">${good?'Excellent! 🎉':'좋아, 다음으로!'}</div><div class="rb-sub">${good?'발음이 아주 좋아요':'3번 했으니 통과! 정답: '+answer}</div></div><div class="rb-score">${score}</div></div><div class="rb-action"><button class="rb-next-btn" onclick="${ctxName(ctx)}.next()">다음 →</button></div></div>`;
+  }
+  // fail & attempt<3 → retry mic IN the bar (tappable, no overlap)
+  return`<div class="resultbar bad"><div class="rb-head"><div class="rb-icon">↻</div><div class="rb-text"><div class="rb-title">다시 말해볼까?</div><div class="rb-sub">정답: ${answer} · (${ctx.attempt}/3)</div></div><div class="rb-score">${score}</div></div><div class="rb-action"><button class="rb-retry-btn" id="retrymic" onclick="${ctxName(ctx)}.retry()">${MIC_SVG} 다시 말하기</button><button class="rb-skip" onclick="${ctxName(ctx)}.forceNext()">건너뛰기</button></div></div>`;
+}
+function ctxName(ctx){ if(ctx===WORD)return'WORD'; if(ctx===STEP2)return'STEPS[2]'; if(ctx===STEP3)return'STEPS[3]'; if(ctx===STEP4)return'STEPS[4]'; return'WORD'; }
 
-/* ============================================================
-   문장 단계 (Step 2/3/4)
-   ============================================================ */
+/* ============ STEP 2/3/4 ============ */
 function makeSentenceStep(stepNo,opts){
   return {
     idx:0,attempt:0,lastScore:null,lastHeard:'',
     render(){
-      const list=PATTERN.sentences;
+      const list=SENT();
       if(this.idx>=list.length){clearStep(stepNo);return;}
       const s=list[this.idx],total=list.length;
       const done=this.lastScore!==null;
-      const passed=done&&(this.lastScore>=PASS||this.attempt>=3);
       const mood=!done?(opts.showEnglish==='full'?'talk':'idle'):(this.lastScore>=PASS?'cheer':'oops');
       let engBlock='';
       if(opts.showEnglish==='full'){engBlock=`<div class="en-show">${s.eng}</div><button class="listen-btn" onclick="speak('${s.eng.replace(/'/g,"\\'")}')">${SPK_SVG} 발음 듣기</button>`;}
@@ -719,42 +684,36 @@ function makeSentenceStep(stepNo,opts){
         <div class="body">
           <div class="terry-row">${terrySVG(mood,72)}<div class="speech">${sayText}</div></div>
           <div class="lesson-head" style="margin-top:14px"><div class="lesson-tag">${info.emoji} ${info.t} · ${this.idx+1}/${total}</div></div>
-          <div class="navrow">
-            <button class="navbtn" onclick="STEPS[${stepNo}].prev()" ${this.idx===0?'disabled':''}>${PREV_SVG} 이전</button>
-            <button class="navbtn" onclick="STEPS[${stepNo}].skip()">다음 ${NEXT_SVG}</button>
-          </div>
+          <div class="navrow"><button class="navbtn" onclick="STEPS[${stepNo}].prev()" ${this.idx===0?'disabled':''}>${PREV_SVG} 이전</button><button class="navbtn" onclick="STEPS[${stepNo}].skip()">다음 ${NEXT_SVG}</button></div>
           <div class="card"><div class="ko-mid">${s.kor}</div>${engBlock}</div>
           <div class="heard ${this.lastHeard?'':'empty'}"><div class="lab">내가 말한 것</div><div class="txt">${renderHeard(s.eng,this.lastHeard)}</div></div>
-          <div class="controls">
-            ${passed?`<button class="btn3d b-green" onclick="STEPS[${stepNo}].next()">다음 →</button>`:`<button class="mic" id="mic" onclick="STEPS[${stepNo}].mic()">${MIC_SVG}</button><div class="mic-label" id="miclabel">${this.attempt>0?`다시 도전! (${this.attempt}/3)`:'마이크를 누르고 말해요'}</div>`}
-          </div>
+          <div class="controls">${done?'':`<button class="mic" id="mic" onclick="STEPS[${stepNo}].mic()">${MIC_SVG}</button><div class="mic-label" id="miclabel">${this.attempt>0?`다시 도전! (${this.attempt}/3)`:'마이크를 누르고 말해요'}</div>`}</div>
         </div>
-        ${done?resultBar(this.lastScore,s.eng):''}`;
+        ${done?actionBar(this,s.eng):''}`;
     },
     mic(){doMic(this);},
-    _target(){return PATTERN.sentences[this.idx].eng;},
+    _target(){return SENT()[this.idx].eng;},
     _afterScore(score){this.attempt++;this.lastScore=score;gradeFx(score,this.attempt);this.render();},
-    next(){this.idx++;this.attempt=0;this.lastScore=null;this.lastHeard='';if(this.idx>=PATTERN.sentences.length){clearStep(stepNo);return;}this.render();},
+    retry(){this.lastScore=null;this.lastHeard='';this.render();setTimeout(()=>{const m=document.getElementById('mic');if(m)doMic(this);},60);},
+    next(){this.idx++;this.attempt=0;this.lastScore=null;this.lastHeard='';if(this.idx>=SENT().length){clearStep(stepNo);return;}this.render();},
+    forceNext(){this.next();},
     prev(){if(this.idx>0){this.idx--;this.attempt=0;this.lastScore=null;this.lastHeard='';this.render();}},
-    skip(){this.idx++;this.attempt=0;this.lastScore=null;this.lastHeard='';if(this.idx>=PATTERN.sentences.length){clearStep(stepNo);return;}this.render();},
+    skip(){this.idx++;this.attempt=0;this.lastScore=null;this.lastHeard='';if(this.idx>=SENT().length){clearStep(stepNo);return;}this.render();},
     reset(){this.idx=0;this.attempt=0;this.lastScore=null;this.lastHeard='';}
   };
 }
-function buildFillHtml(s){const engWords=s.eng.split(' ');let revealCount=0;const phrases=[...PATTERN.patternKeywords].sort((a,b)=>b.length-a.length);for(const p of phrases){const pw=p.split(' ');if(norm(engWords.slice(0,pw.length).join(' '))===p){revealCount=pw.length;break;}}if(revealCount===0){const lw=engWords.map(w=>norm(w));const toIdx=lw.indexOf('to');if((lw.includes('want')||lw.includes('wants'))&&toIdx>=0)revealCount=toIdx+1;}if(revealCount===0)revealCount=Math.min(3,engWords.length);return engWords.map((w,i)=>i<revealCount?`<span class="reveal">${w}</span>`:`<span class="blank"></span>`).join(' ');}
+function buildFillHtml(s){const engWords=s.eng.split(' ');let revealCount=0;const phrases=[...PATTERN_META.patternKeywords].sort((a,b)=>b.length-a.length);for(const p of phrases){const pw=p.split(' ');if(norm(engWords.slice(0,pw.length).join(' '))===p){revealCount=pw.length;break;}}if(revealCount===0){const lw=engWords.map(w=>norm(w));const toIdx=lw.indexOf('to');if((lw.includes('want')||lw.includes('wants'))&&toIdx>=0)revealCount=toIdx+1;}if(revealCount===0)revealCount=Math.min(3,engWords.length);return engWords.map((w,i)=>i<revealCount?`<span class="reveal">${w}</span>`:`<span class="blank"></span>`).join(' ');}
 
 const STEP2=makeSentenceStep(2,{showEnglish:'full'});
 const STEP3=makeSentenceStep(3,{showEnglish:'pattern'});
 const STEP4=makeSentenceStep(4,{showEnglish:'none'});
 
-/* ============================================================
-   STEP 5 — AI 프리토킹
-   ============================================================ */
+/* ============ STEP 5 : 프리토킹 ============ */
 const STEP5={
-  qOrder:[],qIdx:0,turns:0,fails:0,log:[],busy:false,lastHeard:'',phase:'idle',
-  MAX_TURNS:10,MAX_FAILS:3,
+  qOrder:[],qIdx:0,turns:0,fails:0,log:[],busy:false,lastHeard:'',phase:'idle',MAX_TURNS:10,MAX_FAILS:3,
   build(){this.qOrder=[...Array(FREE_TALK_QUESTIONS.length).keys()].sort(()=>Math.random()-.5);this.qIdx=0;this.turns=0;this.fails=0;this.log=[];this.lastHeard='';this.phase='asking';this.busy=false;},
   curQuestion(){return FREE_TALK_QUESTIONS[this.qOrder[this.qIdx%this.qOrder.length]];},
-  usesPattern(text){const n=norm(text);return PATTERN.patternCore.some(p=>n.includes(p));},
+  usesPattern(text){const n=norm(text);return PATTERN_META.patternCore.some(p=>n.includes(p));},
   grade(text){const w=words(text),n=norm(text),hasTo=/\bto\b/.test(n),len=w.length;if(len>=6&&hasTo)return'Excellent';if(len>=4&&hasTo)return'Good';return'Bad';},
   render(){
     const total=this.MAX_TURNS;
@@ -777,19 +736,32 @@ const STEP5={
 function reactIcon(v){return v==='Excellent'?'🌟':v==='Good'?'👍':'💪';}
 
 const STEPS={2:STEP2,3:STEP3,4:STEP4};
-window.STEPS=STEPS;window.WORD=WORD;window.STEP5=STEP5;
+window.STEPS=STEPS;window.STEP5=STEP5;
 
-/* DONE / FAIL */
-function clearStep(n){state.stepCleared[n]=true;state.justCleared=n;state.combo=0;Sound.fanfare();state.screen='stepdone';render();}
+/* ============ DONE / FAIL ============ */
+function clearStep(n){
+  state.stepCleared[n]=true;state.justCleared=n;state.combo=0;
+  if(n>0)Sound.fanfare();
+  // course complete?
+  if(n===5){ state.courseDone[state.course]=true; }
+  state.screen='stepdone';render();
+}
 function renderStepDone(){
   const failed=state.failedStep===5&&!state.stepCleared[5];
-  if(failed){const ft=state.lastFreeTalk||{};app.innerHTML=`<div class="topbar"><button class="xbtn" onclick="goHome()">✕</button><div class="pbar"><div class="fill" style="width:100%"></div></div></div><div class="body"><div class="done">${terrySVG('oops',120)}<h2>다시 도전!</h2><p>"I want to" 패턴으로 ${ft.fails||3}번 답하지 못했어요.<br>조금만 더 연습하면 잘할 수 있어!</p><div class="statrow"><div class="stat s-acc"><div class="v">${ft.turns||0}</div><div class="l">성공 문장</div></div><div class="stat s-combo"><div class="v">${state.bestCombo}</div><div class="l">최고 콤보</div></div></div><div class="btnrow"><button class="btn3d b-gray" onclick="goHome()">메뉴로</button><button class="btn3d b-green" onclick="restartStep5()">다시 하기</button></div></div></div>`;state.failedStep=null;return;}
-  const n=state.justCleared;const isLast=n===5;const nextN=[1,2,3,4,5].find(x=>!state.stepCleared[x]);const acc=state.totalTries?Math.round(state.totalCorrect/state.totalTries*100):100;
-  const lines={1:['단어를 다 배웠어!','이제 문장으로 가볼까?'],2:['따라 말하기 완료!','다음은 빈칸 채우기!'],3:['빈칸 채우기 완료!','이제 혼자 말해보자!'],4:['혼자 말하기 완료!','마지막은 테리와 대화!'],5:['테리와 대화 성공! 🏆','패턴 1을 모두 끝냈어!']};
-  app.innerHTML=`<div class="topbar"><button class="xbtn" onclick="goHome()">✕</button><div class="pbar"><div class="fill" style="width:100%"></div></div></div><div class="body"><div class="done">${terrySVG('win',130)}<h2>${lines[n][0]}</h2><p>${lines[n][1]}</p><div class="statrow"><div class="stat s-xp"><div class="v">+${isLast?50:20}</div><div class="l">XP</div></div><div class="stat s-acc"><div class="v">${acc}%</div><div class="l">정확도</div></div><div class="stat s-combo"><div class="v">${state.bestCombo}</div><div class="l">최고 콤보</div></div></div><div class="btnrow"><button class="btn3d b-gray" onclick="goHome()">메뉴로</button>${nextN?`<button class="btn3d b-green" onclick="startNext(${nextN})">계속하기 →</button>`:`<button class="btn3d b-yellow" onclick="goHome()">완료! 🎉</button>`}</div></div></div>`;
-  state.justCleared=null;if(isLast)setTimeout(starburst,200);
+  if(failed){const ft=state.lastFreeTalk||{};app.innerHTML=`<div class="topbar"><button class="xbtn" onclick="goPath()">✕</button><div class="pbar"><div class="fill" style="width:100%"></div></div></div><div class="body"><div class="done">${terrySVG('oops',120)}<h2>다시 도전!</h2><p>"I want to" 패턴으로 ${ft.fails||3}번 답하지 못했어요.<br>조금만 더 연습하면 잘할 수 있어!</p><div class="statrow"><div class="stat s-acc"><div class="v">${ft.turns||0}</div><div class="l">성공 문장</div></div><div class="stat s-combo"><div class="v">${state.bestCombo}</div><div class="l">최고 콤보</div></div></div><div class="btnrow"><button class="btn3d b-gray" onclick="goPath()">단계로</button><button class="btn3d b-green" onclick="restartStep5()">다시 하기</button></div></div></div>`;state.failedStep=null;return;}
+  const n=state.justCleared;const isCourseEnd=n===5;const nextN=[0,1,2,3,4,5].find(x=>!state.stepCleared[x]);const acc=state.totalTries?Math.round(state.totalCorrect/state.totalTries*100):100;
+  const lines={0:['패턴을 배웠어!','이제 단어를 익혀보자!'],1:['단어를 다 배웠어!','이제 문장으로 가볼까?'],2:['따라 말하기 완료!','다음은 빈칸 채우기!'],3:['빈칸 채우기 완료!','이제 혼자 말해보자!'],4:['혼자 말하기 완료!','마지막은 테리와 대화!'],5:[`${SET().label} 완료! 🏆`,nextCourseMsg()]};
+  app.innerHTML=`<div class="topbar"><button class="xbtn" onclick="goPath()">✕</button><div class="pbar"><div class="fill" style="width:100%"></div></div></div><div class="body"><div class="done">${terrySVG('win',130)}<h2>${lines[n][0]}</h2><p>${lines[n][1]}</p>${n>0?`<div class="statrow"><div class="stat s-xp"><div class="v">+${isCourseEnd?50:20}</div><div class="l">XP</div></div><div class="stat s-acc"><div class="v">${acc}%</div><div class="l">정확도</div></div><div class="stat s-combo"><div class="v">${state.bestCombo}</div><div class="l">최고 콤보</div></div></div>`:''}<div class="btnrow">${isCourseEnd?courseEndButtons():`<button class="btn3d b-gray" onclick="goPath()">단계로</button><button class="btn3d b-green" onclick="startNext(${nextN})">계속하기 →</button>`}</div></div></div>`;
+  state.justCleared=null;if(isCourseEnd)setTimeout(starburst,200);
 }
-window.startNext=(n)=>{Sound.unlock();if(n===1)WORD.enter();if(n>=2&&n<=4)STEPS[n].reset();if(n===5)STEP5.phase='idle';state.screen='step'+n;render();};
+function nextCourseMsg(){ if(state.course==='A')return state.courseDone.B?'A·B 모두 완료!':'이제 (B)에 도전해봐!'; return state.courseDone.A?'패턴 1을 모두 끝냈어!':'(A)도 해보자!'; }
+function courseEndButtons(){
+  if(state.course==='A'&&!state.courseDone.B){
+    return `<button class="btn3d b-gray" onclick="goSelect()">코스 선택</button><button class="btn3d b-green" onclick="startCourse('B')">(B) 시작 →</button>`;
+  }
+  return `<button class="btn3d b-yellow" onclick="goSelect()">코스 선택 →</button>`;
+}
+window.startNext=(n)=>{Sound.unlock();goStep(n);};
 window.restartStep5=()=>{Sound.unlock();STEP5.phase='idle';STEP5.log=[];state.hearts=MAX_HEARTS;state.screen='step5';render();};
 
 /* BOOT */
